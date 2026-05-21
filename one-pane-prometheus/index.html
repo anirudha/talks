@@ -133,18 +133,20 @@
   .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2.5em;
+    gap: 2em;
     text-align: left;
     align-items: start;
-    margin-top: 0.4em;
+    margin-top: 0.3em;
   }
   .two-col > div { min-width: 0; }
   .two-col h3 {
     color: var(--os-blue-deep);
     border-bottom: 1px solid rgba(10, 31, 68, 0.18);
-    padding-bottom: 0.25em;
-    margin-bottom: 0.6em;
+    padding-bottom: 0.2em;
+    margin-bottom: 0.4em;
+    font-size: 1em;
   }
+  .two-col li { font-size: 0.7em; line-height: 1.4; margin: 0.25em 0; }
 
   .three-col {
     display: grid;
@@ -397,14 +399,21 @@
   .shot {
     margin: 0.4em auto 0 auto;
     max-width: 88%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .shot img {
-    width: 100%;
+    max-width: 100%;
+    width: auto;
+    max-height: 380px;
     height: auto;
     border-radius: 8px;
     box-shadow: 0 10px 32px rgba(10, 31, 68, 0.18);
     border: 1px solid var(--os-card-line);
+    object-fit: contain;
   }
+  .shot.compact img { max-height: 320px; }
   .shot .caption {
     color: var(--os-blue-deep);
     font-family: "JetBrains Mono", monospace;
@@ -575,15 +584,15 @@
   .cta-slide { text-align: left; }
   .cta-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2.4em;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 2em;
     align-items: center;
     text-align: left;
   }
   .cta-cards {
     display: flex;
     flex-direction: column;
-    gap: 0.7em;
+    gap: 0.4em;
   }
   .cta-qr {
     text-align: center;
@@ -594,13 +603,13 @@
   }
   .cta-qr img {
     width: 100%;
-    max-width: 360px;
+    max-width: 280px;
     background: #fff;
-    padding: 18px;
-    border-radius: 14px;
-    box-shadow: 0 12px 40px rgba(10, 31, 68, 0.22);
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(10, 31, 68, 0.2);
     display: block;
-    margin: 0 auto 0.7em auto;
+    margin: 0 auto 0.5em auto;
   }
   .qr-caption {
     color: var(--os-blue-deep);
@@ -624,11 +633,11 @@
     border: 1px solid var(--os-card-line);
     border-left: 4px solid var(--os-blue);
     border-radius: 8px;
-    padding: 0.7em 1em;
+    padding: 0.55em 0.9em;
     box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
     display: grid;
     grid-template-columns: auto 1fr;
-    column-gap: 0.9em;
+    column-gap: 0.8em;
     align-items: center;
   }
   .cta-eyebrow {
@@ -651,10 +660,10 @@
   }
   .cta-title {
     color: var(--os-navy);
-    font-size: 0.78em;
+    font-size: 0.7em;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 0.15em;
+    margin-bottom: 0.1em;
   }
   .cta-url {
     color: var(--os-amber);
@@ -915,7 +924,7 @@
       <span class="demo-badge">Live demo · ~5 min</span>
       <h2>Finding metrics shouldn't feel like archaeology</h2>
       <div class="key">Grid view · histogram + counter badges · search by name or label.</div>
-      <div class="shot">
+      <div class="shot compact">
         <img src="assets/shot-discover-metrics.png" alt="Discover Metrics grid view">
         <div class="caption">Discover · Metrics · A–Z</div>
       </div>
@@ -973,7 +982,7 @@
       <span class="demo-badge">Live demo · ~6 min</span>
       <h2>Every alert. Every datasource. One list.</h2>
       <div class="key">Unified view of <strong>OpenSearch text/log alerts</strong> and <strong>Prometheus metrics alerts</strong> in one list. Filter by severity, state, label, source.</div>
-      <div class="shot">
+      <div class="shot compact">
         <img src="assets/shot-alerts-list.png" alt="Alerts list filtered by datasource">
         <div class="caption">Alerts · OpenSearch text alerts + Prometheus metrics alerts · severity / state / label filters</div>
       </div>
@@ -1001,8 +1010,8 @@
 
     <!-- ============ CTA ============ -->
     <section class="cta-slide">
-      <h2 style="text-align: center; margin-bottom: 0.3em;">Get involved</h2>
-      <div class="key" style="margin: 0 auto 0.9em auto; display: block; text-align: center; max-width: 80%;">
+      <h2 style="text-align: center; margin-bottom: 0.2em;">Get involved</h2>
+      <div class="key" style="margin: 0 auto 0.5em auto; display: block; text-align: center; max-width: 80%; font-size: 0.85em;">
         Open source, vendor-neutral, foundation-governed: <strong>build it with us</strong>.
       </div>
       <div class="cta-grid">
@@ -1070,8 +1079,8 @@
     transitionSpeed: 'default',
     backgroundTransition: 'fade',
     width: 1280,
-    height: 800,
-    margin: 0.06,
+    height: 860,
+    margin: 0.05,
     minScale: 0.5,
     maxScale: 2.5,
   });
