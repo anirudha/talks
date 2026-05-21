@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Talks · Anirudha Jadhav</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --navy: #0a1f44;
+    --blue: #1e6dc6;
+    --amber: #f5a623;
+    --bg: #f7f9fc;
+    --card: #ffffff;
+    --line: #e0e6ee;
+    --muted: #5b6b85;
+    --text: #1c2b4a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 4em 1.6em 6em 1.6em; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 1.2em; margin-bottom: 2em; }
+  h1 { font-size: 2.4em; font-weight: 800; letter-spacing: -0.02em; color: var(--navy); margin: 0 0 0.2em 0; }
+  .sub { color: var(--muted); font-size: 1.05em; }
+  h2 { font-size: 1.3em; color: var(--navy); margin-top: 2.4em; border-left: 4px solid var(--blue); padding-left: 0.5em; }
+  .talk {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--amber);
+    border-radius: 10px;
+    padding: 1.4em 1.6em;
+    margin-bottom: 1em;
+    box-shadow: 0 2px 12px rgba(10, 31, 68, 0.05);
+  }
+  .talk .event {
+    font-family: "JetBrains Mono", "Menlo", monospace;
+    font-size: 0.78em;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--blue);
+    font-weight: 700;
+    margin-bottom: 0.4em;
+  }
+  .talk h3 { margin: 0 0 0.5em 0; font-size: 1.25em; color: var(--navy); }
+  .talk p { color: var(--muted); margin: 0 0 0.9em 0; font-size: 0.96em; }
+  .talk .links a {
+    display: inline-block;
+    background: var(--blue);
+    color: #fff;
+    padding: 0.5em 1em;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9em;
+    margin-right: 0.5em;
+  }
+  .talk .links a:hover { background: var(--navy); }
+  .talk .links a.ghost { background: transparent; color: var(--blue); border: 1px solid var(--blue); }
+  .talk .links a.ghost:hover { background: var(--blue); color: #fff; }
+  footer { margin-top: 4em; padding-top: 1.5em; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9em; }
+  footer a { color: var(--blue); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Talks</h1>
+    <div class="sub">Public presentations by <strong>Anirudha Jadhav</strong>.</div>
+  </header>
+
+  <h2>2026</h2>
+
+  <div class="talk">
+    <div class="event">Observability Summit NA · 2026</div>
+    <h3>One Pane to Rule Them All</h3>
+    <p>Uniting the Prometheus community: bringing Prometheus metrics into OpenSearch Dashboards alongside logs &amp; traces. Co-presented with Kevin Fallis.</p>
+    <div class="links">
+      <a href="./one-pane-prometheus/">Open deck →</a>
+      <a class="ghost" href="./one-pane-prometheus/AGENDA.md">Agenda</a>
+      <a class="ghost" href="https://github.com/anirudha/talks/tree/main/one-pane-prometheus">Source</a>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://github.com/anirudha/talks">github.com/anirudha/talks</a>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Pane to Rule Them All · OpenSearch + Prometheus</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css">
+
+<style>
+  :root {
+    --os-navy: #0a1f44;
+    --os-navy-soft: #2a3d6b;
+    --os-blue: #2f7ec5;
+    --os-blue-deep: #1b5a96;
+    --os-blue-soft: #6fa8d6;
+    --os-amber: #e8a838;
+    --os-amber-soft: #f0c878;
+    --os-bg-top: #b9d2e8;
+    --os-bg-mid: #e6dccf;
+    --os-bg-bottom: #f1d2a8;
+    --os-card: rgba(255, 255, 255, 0.85);
+    --os-card-line: rgba(10, 31, 68, 0.12);
+    --os-text: #1f2d4d;
+    --os-muted: #5a6885;
+    --prom-orange: #e6522c;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    color: var(--os-text);
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 50%, var(--os-bg-bottom) 100%);
+  }
+  .reveal-viewport {
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 50%, var(--os-bg-bottom) 100%) !important;
+  }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    color: var(--os-navy);
+    margin-bottom: 0.6em;
+  }
+  .reveal h1 { font-size: 2.3em; line-height: 1.1; }
+  .reveal h2 { font-size: 1.6em; line-height: 1.15; }
+  .reveal h3 { font-size: 1.15em; color: var(--os-blue-deep); font-weight: 700; }
+  .reveal h4 { font-size: 0.95em; color: var(--os-blue); font-weight: 700; margin-bottom: 0.4em; }
+
+  .reveal p, .reveal li { font-size: 0.78em; line-height: 1.5; color: var(--os-text); }
+  .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+  .reveal li { margin: 0.35em 0; }
+  .reveal li::marker { color: var(--os-blue); }
+
+  .reveal strong { color: var(--os-navy); font-weight: 700; }
+  .reveal em { color: var(--os-amber); font-style: italic; font-weight: 600; }
+
+  .key {
+    display: inline-block;
+    background: rgba(232, 168, 56, 0.18);
+    border-left: 4px solid var(--os-amber);
+    color: var(--os-navy);
+    font-style: italic;
+    font-size: 0.9em;
+    line-height: 1.4;
+    padding: 0.5em 1em;
+    margin: -0.2em 0 0.9em 0;
+    border-radius: 0 6px 6px 0;
+    max-width: 90%;
+  }
+  .key strong { color: var(--os-blue-deep); font-weight: 700; font-style: normal; }
+
+  .reveal blockquote {
+    background: transparent;
+    border: none;
+    border-left: 6px solid var(--os-amber);
+    color: var(--os-navy);
+    font-style: normal;
+    font-size: 1.4em;
+    line-height: 1.35;
+    font-weight: 600;
+    width: 80%;
+    margin: 0 auto;
+    padding: 0.4em 0.9em;
+    box-shadow: none;
+  }
+
+  .reveal code {
+    font-family: "JetBrains Mono", monospace;
+    background: rgba(10, 31, 68, 0.08);
+    color: var(--os-blue-deep);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 600;
+  }
+  .reveal pre {
+    box-shadow: 0 4px 14px rgba(10, 31, 68, 0.1);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--os-card-line);
+    border-radius: 8px;
+    padding: 0.8em 1em;
+    font-size: 0.6em;
+    width: 70%;
+    margin: 0 auto;
+    color: var(--os-navy);
+  }
+
+  .reveal section.eyebrow-slide,
+  .reveal section.center-slide {
+    text-align: center;
+  }
+  .reveal section.center-slide ul {
+    display: inline-block;
+    text-align: left;
+  }
+
+  .eyebrow {
+    color: var(--os-blue-deep);
+    font-size: 0.7em;
+    font-weight: 800;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 0.8em;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5em;
+    text-align: left;
+    align-items: start;
+    margin-top: 0.4em;
+  }
+  .two-col > div { min-width: 0; }
+  .two-col h3 {
+    color: var(--os-blue-deep);
+    border-bottom: 1px solid rgba(10, 31, 68, 0.18);
+    padding-bottom: 0.25em;
+    margin-bottom: 0.6em;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.6em;
+    text-align: left;
+    align-items: start;
+    margin-top: 0.4em;
+  }
+  .three-col > div { min-width: 0; }
+  .three-col h3 {
+    color: var(--os-blue-deep);
+    border-bottom: 1px solid rgba(10, 31, 68, 0.18);
+    padding-bottom: 0.25em;
+    margin-bottom: 0.6em;
+    font-size: 0.95em;
+  }
+
+  .cover {
+    text-align: center;
+  }
+  .cover .kicker {
+    color: var(--os-blue-deep);
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-size: 0.55em;
+    margin-bottom: 1.2em;
+  }
+  .cover h1 {
+    font-size: 2.5em;
+    line-height: 1.05;
+    color: var(--os-navy);
+    margin-bottom: 0.4em;
+  }
+  .cover .subtitle {
+    color: var(--os-blue-deep);
+    font-size: 1em;
+    margin-bottom: 1.6em;
+    font-weight: 500;
+  }
+  .cover .speakers {
+    color: var(--os-navy-soft);
+    font-size: 0.65em;
+    letter-spacing: 0.05em;
+  }
+  .cover .speakers strong { color: var(--os-navy); }
+  .li-link {
+    display: inline-block;
+    width: 1.4em;
+    height: 1.4em;
+    line-height: 1.4em;
+    background: #0a66c2;
+    color: #fff !important;
+    border-radius: 4px;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    font-size: 0.7em;
+    text-decoration: none;
+    margin: 0 0.15em;
+    vertical-align: 0.1em;
+    transition: background 0.2s;
+  }
+  .li-link:hover { background: #0850a3; }
+  .cover-logo {
+    width: 260px;
+    margin: 0 auto 1.4em auto;
+    display: block;
+    opacity: 1;
+  }
+  .pf-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    display: block;
+    margin: 0 0 0.6em 0;
+  }
+  .use-img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    margin: 0 auto 0.4em auto;
+    display: block;
+  }
+
+  .pull-quote {
+    text-align: center;
+  }
+
+  .big-stat {
+    text-align: center;
+  }
+  .big-stat .stat {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 4.5em;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--os-navy);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.2em;
+  }
+  .big-stat .stat-flow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.1em;
+    color: var(--os-blue-deep);
+    letter-spacing: 0.05em;
+    margin-top: 0.4em;
+    margin-bottom: 1em;
+    font-weight: 700;
+  }
+  .big-stat p { font-size: 0.95em; color: var(--os-navy-soft); }
+
+  .footer {
+    position: fixed;
+    bottom: 14px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--os-navy-soft);
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    opacity: 0.7;
+    z-index: 30;
+  }
+
+  .watermark {
+    position: fixed;
+    top: 22px;
+    right: 28px;
+    width: 130px;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  .watermark img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  body.hide-watermark .watermark { display: none; }
+
+  .reveal .progress { color: var(--os-blue-deep); }
+  .reveal .controls { color: var(--os-blue-deep) !important; }
+
+  .takeaways ol {
+    list-style: none;
+    counter-reset: takeaway;
+    margin-left: 0;
+  }
+  .takeaways ol li {
+    counter-increment: takeaway;
+    position: relative;
+    padding-left: 2.2em;
+    margin: 0.6em 0;
+  }
+  .takeaways ol li::before {
+    content: counter(takeaway);
+    position: absolute;
+    left: 0;
+    top: -0.05em;
+    color: var(--os-blue-deep);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 800;
+    font-size: 1.4em;
+  }
+
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2em;
+    margin-top: 0.6em;
+  }
+  .platform-card {
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-top: 3px solid var(--os-blue);
+    border-radius: 8px;
+    padding: 1em 1em;
+    text-align: left;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
+  }
+  .platform-card .pf-name {
+    color: var(--os-navy);
+    font-size: 0.85em;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 0.4em;
+  }
+  .platform-card .pf-desc {
+    color: var(--os-text);
+    font-size: 0.55em;
+    line-height: 1.5;
+  }
+
+  .use-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1em;
+    margin-top: 0.6em;
+  }
+  .use-card {
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-radius: 8px;
+    padding: 1em 0.8em;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
+  }
+  .use-card.highlight {
+    background: rgba(232, 168, 56, 0.18);
+    border-color: rgba(232, 168, 56, 0.55);
+    box-shadow: 0 2px 14px rgba(232, 168, 56, 0.25);
+  }
+  .use-card .use-name {
+    color: var(--os-navy);
+    font-size: 0.7em;
+    font-weight: 800;
+    margin-bottom: 0.3em;
+  }
+  .use-card .use-desc {
+    color: var(--os-text);
+    font-size: 0.5em;
+    line-height: 1.4;
+  }
+  .use-card.highlight .use-desc { color: var(--os-navy); }
+
+  .image-slide {
+    text-align: center;
+    padding: 0 !important;
+    height: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-slide img {
+    max-width: 100%;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(10, 31, 68, 0.18);
+    object-fit: contain;
+  }
+
+  /* Demo placeholders & screenshot frames */
+  .shot {
+    margin: 0.4em auto 0 auto;
+    max-width: 88%;
+  }
+  .shot img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 10px 32px rgba(10, 31, 68, 0.18);
+    border: 1px solid var(--os-card-line);
+  }
+  .shot .caption {
+    color: var(--os-blue-deep);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.5em;
+    text-align: center;
+  }
+
+  /* DEMO badge for live demo slides */
+  .demo-badge {
+    display: inline-block;
+    background: var(--prom-orange);
+    color: #fff;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    padding: 0.25em 0.7em;
+    border-radius: 4px;
+    margin-bottom: 0.6em;
+    text-transform: uppercase;
+  }
+
+  /* Datasource picker mock for the "one pane" thesis slide */
+  .ds-picker {
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-radius: 8px;
+    padding: 0.5em 0.8em;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.08);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7em;
+    color: var(--os-navy);
+    margin: 0.5em 0;
+  }
+  .ds-picker .ds-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    background: rgba(47, 126, 197, 0.14);
+    border: 1px solid rgba(47, 126, 197, 0.3);
+    border-radius: 4px;
+    padding: 0.15em 0.5em;
+    font-size: 0.85em;
+    font-weight: 700;
+    color: var(--os-blue-deep);
+  }
+  .ds-picker .ds-tag.prom {
+    background: rgba(230, 82, 44, 0.14);
+    border-color: rgba(230, 82, 44, 0.3);
+    color: var(--prom-orange);
+  }
+
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2em;
+    margin-top: 0.4em;
+  }
+  .principle {
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-left: 4px solid var(--os-amber);
+    border-radius: 0 8px 8px 0;
+    padding: 0.9em 1em;
+    text-align: left;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
+  }
+  .principle .pn-eyebrow {
+    color: var(--prom-orange);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.3em;
+  }
+  .principle .pn-title {
+    color: var(--os-navy);
+    font-size: 0.85em;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.35em;
+  }
+  .principle .pn-desc {
+    color: var(--os-text);
+    font-size: 0.55em;
+    line-height: 1.5;
+  }
+
+  /* Architecture diagram flow */
+  .arch {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 0.6em;
+    margin-top: 0.8em;
+    text-align: center;
+  }
+  .arch-node {
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-top: 3px solid var(--os-blue);
+    border-radius: 8px;
+    padding: 0.8em 0.7em;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
+  }
+  .arch-node.prom { border-top-color: var(--prom-orange); }
+  .arch-node.amber { border-top-color: var(--os-amber); }
+  .arch-node .an-name {
+    color: var(--os-navy);
+    font-size: 0.75em;
+    font-weight: 800;
+    margin-bottom: 0.3em;
+  }
+  .arch-node .an-desc {
+    color: var(--os-text);
+    font-size: 0.5em;
+    line-height: 1.4;
+  }
+  .arch-arrow {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-blue-deep);
+    font-size: 1.4em;
+    font-weight: 800;
+  }
+
+  /* Feature matrix */
+  .matrix {
+    width: 90%;
+    margin: 0.4em auto 0 auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.6em;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
+  }
+  .matrix th, .matrix td {
+    padding: 0.65em 0.9em;
+    text-align: left;
+    border-bottom: 1px solid var(--os-card-line);
+  }
+  .matrix th {
+    background: rgba(47, 126, 197, 0.12);
+    color: var(--os-navy);
+    font-weight: 800;
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.85em;
+  }
+  .matrix td.feat { color: var(--os-navy); font-weight: 700; }
+  .matrix td.gathered { color: var(--os-blue-deep); font-weight: 700; }
+  .matrix td.now { color: #2e8b57; font-weight: 800; }
+  .matrix td.next { color: var(--os-amber); font-weight: 800; }
+  .matrix tr:last-child td { border-bottom: none; }
+
+  /* CTA / Get involved slide */
+  .cta-slide { text-align: left; }
+  .cta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4em;
+    align-items: center;
+    text-align: left;
+  }
+  .cta-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+  }
+  .cta-qr {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .cta-qr img {
+    width: 100%;
+    max-width: 360px;
+    background: #fff;
+    padding: 18px;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(10, 31, 68, 0.22);
+    display: block;
+    margin: 0 auto 0.7em auto;
+  }
+  .qr-caption {
+    color: var(--os-blue-deep);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .qr-url {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em;
+    font-weight: 700;
+    margin-top: 0.35em;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  .cta-card {
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-left: 4px solid var(--os-blue);
+    border-radius: 8px;
+    padding: 0.7em 1em;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.9em;
+    align-items: center;
+  }
+  .cta-eyebrow {
+    color: var(--os-blue-deep);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+    white-space: nowrap;
+    padding-right: 0.7em;
+    border-right: 1px solid var(--os-card-line);
+  }
+  .cta-body {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .cta-title {
+    color: var(--os-navy);
+    font-size: 0.78em;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.15em;
+  }
+  .cta-url {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+</style>
+</head>
+
+<body>
+<div class="watermark" id="watermark">
+  <img src="assets/opensearch-logo-official.svg" alt="OpenSearch">
+</div>
+<div class="footer">
+  <span>One Pane to Rule Them All · Observability Summit NA 2026</span>
+  <span>Anirudha Jadhav (AWS) · Kevin Fallis (AWS)</span>
+</div>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ COVER ============ -->
+    <section class="cover">
+      <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
+      <div class="kicker">Observability Summit NA · 2026</div>
+      <h1>One Pane to Rule Them All</h1>
+      <div class="subtitle">Uniting the Prometheus community: bringing <strong>Prometheus metrics</strong> into OpenSearch Dashboards alongside logs &amp; traces</div>
+      <div class="speakers">
+        <strong>Anirudha Jadhav</strong> · AWS, OpenSearch Observability
+        <a href="https://www.linkedin.com/in/ianirudha/" class="li-link" target="_blank" rel="noopener">in</a>
+        &nbsp;·&nbsp;
+        <strong>Kevin Fallis</strong> · AWS
+      </div>
+    </section>
+
+    <!-- ============ INTRO: PLATFORM ============ -->
+    <section>
+      <h2>The OpenSearch platform</h2>
+      <div class="key">One open platform: <strong>engine + UI + ingestion</strong>, all Apache 2.0.</div>
+      <div class="platform-grid">
+        <div class="platform-card">
+          <img src="assets/opensearch-core.png" alt="" class="pf-logo">
+          <div class="pf-name">OpenSearch Core</div>
+          <div class="pf-desc">Distributed search and analytics engine with an integrated <strong>vector database</strong> for hybrid + RAG workloads.</div>
+        </div>
+        <div class="platform-card">
+          <img src="assets/opensearch-dashboards.png" alt="" class="pf-logo">
+          <div class="pf-name">OpenSearch Dashboards</div>
+          <div class="pf-desc">Open source data visualization and UI: dashboards, alerts, anomaly detection, and observability views.</div>
+        </div>
+        <div class="platform-card">
+          <img src="assets/opensearch-dataprepper.png" alt="" class="pf-logo">
+          <div class="pf-name">Data Prepper</div>
+          <div class="pf-desc">Lightweight collector for enriching, transforming, and aggregating telemetry into OpenSearch.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INTRO: HOW PEOPLE USE ============ -->
+    <section>
+      <h2>How people use OpenSearch</h2>
+      <div class="key">Four primary workloads on one engine: today we focus on <strong>Observability + Prometheus metrics</strong>.</div>
+      <div class="use-grid">
+        <div class="use-card">
+          <img src="assets/icon-search.png" alt="" class="use-img">
+          <div class="use-name">Search</div>
+          <div class="use-desc">Full-text + vector + hybrid search across documents, products, knowledge.</div>
+        </div>
+        <div class="use-card highlight">
+          <img src="assets/icon-observability.png" alt="" class="use-img">
+          <div class="use-name">Observability</div>
+          <div class="use-desc">Logs, traces, and Prometheus metrics: unified for distributed + agentic systems.</div>
+        </div>
+        <div class="use-card">
+          <img src="assets/icon-security.png" alt="" class="use-img">
+          <div class="use-name">Security analytics</div>
+          <div class="use-desc">SIEM, threat detection, and compliance investigations at petabyte scale.</div>
+        </div>
+        <div class="use-card">
+          <img src="assets/icon-ai.png" alt="" class="use-img">
+          <div class="use-name">AI / ML</div>
+          <div class="use-desc">Vector store, RAG retrieval, and ML-powered ranking inside the same cluster.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INTRO: BY THE NUMBERS ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-numbers.jpeg" alt="OpenSearch by the Numbers">
+    </section>
+
+    <!-- ============ INTRO: FOUNDATION ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-foundation.png" alt="OpenSearch Software Foundation under the Linux Foundation">
+    </section>
+
+    <!-- ============ INTRO: MEMBERS ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-members.png" alt="OpenSearch Foundation Members">
+    </section>
+
+    <!-- ============ BRIDGE TO TOPIC ============ -->
+    <section class="eyebrow-slide">
+      <div class="eyebrow">Today's focus</div>
+      <h1>Keep your Prometheus metrics.<br>Get one pane for everything else.</h1>
+      <p style="color: var(--os-muted); font-size: 0.95em; max-width: 75%; margin: 0.6em auto 0 auto;">
+        OpenSearch Dashboards now speaks <strong>Prometheus metrics</strong> natively: PromQL, Alertmanager, rules, and multi-cluster federation. <em>Additive, not replacement.</em>
+      </p>
+    </section>
+
+    <!-- ============ AGENDA ============ -->
+    <section class="center-slide">
+      <h2>Agenda</h2>
+      <ol>
+        <li>The pane problem: why "single pane" keeps failing</li>
+        <li>Prometheus metrics, natively: design principles &amp; architecture</li>
+        <li><strong>Demo I</strong>: Discover Metrics &amp; the metrics builder</li>
+        <li>Dashboards + variables across logs, metrics, traces</li>
+        <li><strong>Demo II</strong>: Alerts, SLO/SLI catalog</li>
+        <li>How to join: playground, docs, TAG</li>
+      </ol>
+    </section>
+
+    <!-- ============ PART 1 DIVIDER ============ -->
+    <section class="eyebrow-slide">
+      <div class="eyebrow">Part 1</div>
+      <h1>The Pane Problem</h1>
+      <p style="color: var(--os-muted); font-size: 0.95em;">Why operators run five tabs to answer one question.</p>
+    </section>
+
+    <!-- ============ THE PANE PROBLEM ============ -->
+    <section>
+      <h2>The operator's reality at 3 AM</h2>
+      <div class="key">A page fires. Five tabs open. Three query languages. Two auth systems. <strong>One incident.</strong></div>
+      <ul>
+        <li><strong>Prometheus metrics</strong> in Prometheus / federations: your team already runs it, depends on it, can't move off it</li>
+        <li><strong>OpenSearch</strong> for logs: petabytes, full-text, the system of record for what happened</li>
+        <li>A separate <strong>tracing tool</strong> for traces: the only place to find <em>why</em></li>
+        <li>Stitched together by three SSO logins and tribal knowledge</li>
+      </ul>
+    </section>
+
+    <!-- ============ PULL QUOTE 1 ============ -->
+    <section class="pull-quote">
+      <blockquote>
+        The "single pane of glass" promise<br>
+        keeps failing because every vendor wants <em>their</em> pane.
+      </blockquote>
+    </section>
+
+    <!-- ============ WHY OPENSEARCH ============ -->
+    <section>
+      <h2>The missing leg of the tripod</h2>
+      <div class="key">OpenSearch already runs your <strong>logs</strong> and <strong>traces</strong>. Metrics was the gap. <em>Now closed.</em></div>
+      <div class="two-col">
+        <div>
+          <h3>What was already here</h3>
+          <ul>
+            <li>Logs at petabyte scale, full-text + structured</li>
+            <li>OTel-native trace ingestion + service maps</li>
+            <li>Anomaly detection, alerting, dashboards</li>
+            <li>Apache 2.0, vendor-neutral, foundation-governed</li>
+          </ul>
+        </div>
+        <div>
+          <h3>What's new in this release</h3>
+          <ul>
+            <li><strong>Native Prometheus metrics datasource</strong>: PromQL through the wire</li>
+            <li><strong>Discover Metrics</strong>: Explore, Row, Columns, Builder, Query</li>
+            <li><strong>Variables</strong> across logs, metrics, traces in one dashboard</li>
+            <li><strong>Alerts + SLO/SLI</strong> rendering Alertmanager + recording rules</li>
+            <li><strong>Multi-cluster</strong> Prometheus metrics datasources under one pane</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PART 2 DIVIDER ============ -->
+    <section class="eyebrow-slide">
+      <div class="eyebrow">Part 2</div>
+      <h1>Prometheus Metrics, Natively</h1>
+      <p style="color: var(--os-muted); font-size: 0.95em;">We didn't fork the ecosystem. We joined it.</p>
+    </section>
+
+    <!-- ============ DESIGN PRINCIPLES ============ -->
+    <section>
+      <h2>Three rules we held ourselves to</h2>
+      <div class="key">Every line of code in this release had to pass <strong>all three</strong>.</div>
+      <div class="principles">
+        <div class="principle">
+          <div class="pn-eyebrow">Rule 01</div>
+          <div class="pn-title">Don't fork PromQL</div>
+          <div class="pn-desc">Speak it on the wire. Every query the pane builds is a real PromQL query you can copy into recording rules or curl.</div>
+        </div>
+        <div class="principle">
+          <div class="pn-eyebrow">Rule 02</div>
+          <div class="pn-title">Don't replace Alertmanager</div>
+          <div class="pn-desc">Render it. Route it. Make it legible. Your existing alert pipeline keeps running. We just give it a face.</div>
+        </div>
+        <div class="principle">
+          <div class="pn-eyebrow">Rule 03</div>
+          <div class="pn-title">Don't lock data in</div>
+          <div class="pn-desc">Datasources, not silos. Point at a single Prometheus or any Prometheus-API-compatible metrics backend. Same pane, no migration.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ARCHITECTURE ============ -->
+    <section>
+      <h2>How it fits together</h2>
+      <div class="key">OpenSearch Dashboards becomes the <strong>read pane for humans and AI</strong>. Your Prometheus metrics stack stays the source of truth.</div>
+      <div class="arch">
+        <div class="arch-node amber">
+          <div class="an-name">Operators &amp; SREs</div>
+          <div class="an-desc">PromQL, dashboards, alerts, SLOs in one pane &amp; one API for humans and AI</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <div class="an-name">OpenSearch Dashboards</div>
+          <div class="an-desc">Datasource picker · variables · Discover Metrics · alerts · SLO catalog</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node prom">
+          <div class="an-name">Your Prometheus metrics stack</div>
+          <div class="an-desc">Prometheus + Alertmanager (unchanged)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DATASOURCE PICKER THESIS ============ -->
+    <section class="center-slide">
+      <h2>The "one pane" thesis in four pixels</h2>
+      <div class="key" style="margin: 0 auto 0.8em auto; display: inline-block;">One datasource picker. <strong>Logs, traces, Prometheus metrics, multi-cluster federations</strong>: all callable from the same dashboard.</div>
+      <div style="margin-top: 1.4em;">
+        <div class="ds-picker">
+          <span style="color: var(--os-muted); font-size: 0.85em;">datasource:</span>
+          <span class="ds-tag">⚡ OpenSearch · logs &amp; traces</span>
+          <span class="ds-tag prom">🔥 Prometheus metrics · prod-eu-west-1</span>
+          <span class="ds-tag prom">🔥 Prometheus metrics · prod-us-east-2</span>
+        </div>
+        <p style="color: var(--os-muted); font-size: 0.7em; margin-top: 1em;">No federation hop. No tab switch. No second auth.</p>
+      </div>
+    </section>
+
+    <!-- ============ PART 3 DIVIDER (DEMO I) ============ -->
+    <section class="eyebrow-slide">
+      <div class="eyebrow">Part 3</div>
+      <h1>Demo I · Discover Metrics</h1>
+      <p style="color: var(--os-muted); font-size: 0.95em;">Live on observability.playground.opensearch.org</p>
+    </section>
+
+    <!-- ============ DEMO I FLOW ============ -->
+    <section>
+      <span class="demo-badge">Live demo · ~5 min</span>
+      <h2>Finding metrics shouldn't feel like archaeology</h2>
+      <div class="key">Grid view · histogram + counter badges · search by name or label.</div>
+      <div class="shot">
+        <img src="assets/shot-discover-metrics.png" alt="Discover Metrics grid view">
+        <div class="caption">Discover · Metrics · A–Z</div>
+      </div>
+    </section>
+
+    <!-- ============ DEMO I TABS ============ -->
+    <section>
+      <h2>Five tabs, one query language</h2>
+      <div class="key">Click a metric → land in <strong>Explore</strong>. Refine in <strong>Row</strong> / <strong>Columns</strong>. Build with <strong>Metrics builder</strong>. Drop to raw <strong>PromQL</strong> any time.</div>
+      <ul>
+        <li><strong>Explore</strong>: instant chart with sensible defaults (rate, p95, sum)</li>
+        <li><strong>Row / Columns</strong>: pivot label dimensions without re-querying</li>
+        <li><strong>Metrics builder</strong>: compose PromQL visually; <em>see the generated query live</em></li>
+        <li><strong>Query</strong>: paste any PromQL you already have. It just runs.</li>
+        <li><strong>Label inspector</strong>: discover cardinality before it bites you</li>
+      </ul>
+    </section>
+
+    <!-- ============ PART 4 DIVIDER ============ -->
+    <section class="eyebrow-slide">
+      <div class="eyebrow">Part 4</div>
+      <h1>Dashboards + Variables</h1>
+      <p style="color: var(--os-muted); font-size: 0.95em;">One dashboard, three signal types, one time picker.</p>
+    </section>
+
+    <!-- ============ ASTRONOMY DASHBOARD ============ -->
+    <section>
+      <h2>Business + telemetry on one canvas</h2>
+      <div class="key">Numbers, charts, log tables, donut breakdowns. Prometheus metrics &amp; OpenSearch logs side by side, no iframe trick.</div>
+      <div class="shot">
+        <img src="assets/shot-dashboard-astronomy.png" alt="Astronomy Shop dashboard">
+        <div class="caption">Astronomy Shop · business KPIs + APM + error logs</div>
+      </div>
+    </section>
+
+    <!-- ============ VARIABLES ============ -->
+    <section>
+      <h2>Variables that span all three signals</h2>
+      <div class="key">Define once with <strong>PPL</strong> or <strong>PromQL</strong>. Apply to logs panels, metrics panels, trace panels with the same syntax: <code>$service</code>, <code>${env}</code>.</div>
+      <div class="shot">
+        <img src="assets/shot-dashboard-variables.png" alt="Add variable panel">
+        <div class="caption">Add variable · Query type · Regex · Refresh on dashboard load</div>
+      </div>
+    </section>
+
+    <!-- ============ PART 5 DIVIDER (DEMO II) ============ -->
+    <section class="eyebrow-slide">
+      <div class="eyebrow">Part 5</div>
+      <h1>Demo II · Alerts, SLOs, Multi-cluster</h1>
+      <p style="color: var(--os-muted); font-size: 0.95em;">The climax: where the pane actually pays off.</p>
+    </section>
+
+    <!-- ============ ALERTS LIST ============ -->
+    <section>
+      <span class="demo-badge">Live demo · ~6 min</span>
+      <h2>Every alert. Every datasource. One list.</h2>
+      <div class="key">Unified view of <strong>OpenSearch text/log alerts</strong> and <strong>Prometheus metrics alerts</strong> in one list. Filter by severity, state, label, source.</div>
+      <div class="shot">
+        <img src="assets/shot-alerts-list.png" alt="Alerts list filtered by datasource">
+        <div class="caption">Alerts · OpenSearch text alerts + Prometheus metrics alerts · severity / state / label filters</div>
+      </div>
+    </section>
+
+    <!-- ============ ROUTING TREE ============ -->
+    <section>
+      <h2>Alertmanager, finally legible</h2>
+      <div class="key">Read-only view of your live route tree, receivers, and matchers. <em>We don't take it over. We make it readable.</em></div>
+      <div class="shot">
+        <img src="assets/shot-alerts-routing.png" alt="Alertmanager routing tree">
+        <div class="caption">Routing · receivers · matchers · live from Alertmanager v0.27</div>
+      </div>
+    </section>
+
+    <!-- ============ SLO CATALOG ============ -->
+    <section>
+      <h2>SLOs as first-class citizens</h2>
+      <div class="key">Filter by service, team, SLI type, canonical kind. Health overview at a glance. <strong>Worst-error-budget-first</strong>.</div>
+      <div class="shot">
+        <img src="assets/shot-slo-catalog.png" alt="SLO catalog">
+        <div class="caption">SLO/SLI catalog · 4 SLOs · health mix · at-risk first</div>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="cta-slide">
+      <h2 style="text-align: center; margin-bottom: 0.3em;">Get involved</h2>
+      <div class="key" style="margin: 0 auto 0.9em auto; display: block; text-align: center; max-width: 80%;">
+        Open source, vendor-neutral, foundation-governed: <strong>build it with us</strong>.
+      </div>
+      <div class="cta-grid">
+        <div class="cta-cards">
+          <div class="cta-card">
+            <div class="cta-eyebrow">Try</div>
+            <div class="cta-body">
+              <div class="cta-title">Live playground</div>
+              <div class="cta-url">observability.playground.opensearch.org</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Docs</div>
+            <div class="cta-body">
+              <div class="cta-title">Discover Metrics reference</div>
+              <div class="cta-url">observability.opensearch.org/docs</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Stack</div>
+            <div class="cta-body">
+              <div class="cta-title">Observability Stack</div>
+              <div class="cta-url">opensearch.org/platform/observability-stack</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">TAG</div>
+            <div class="cta-body">
+              <div class="cta-title">Join the Observability TAG</div>
+              <div class="cta-url">opensearch.org/slack &nbsp;·&nbsp; #observability</div>
+            </div>
+          </div>
+        </div>
+        <div class="cta-qr">
+          <img src="assets/playground-qr.png" alt="QR code to the live playground">
+          <div class="qr-caption">scan · try it live</div>
+          <div class="qr-url">observability.playground.opensearch.org</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Q&A ============ -->
+    <section class="cover">
+      <h1 style="font-size: 3em;">Questions?</h1>
+      <div class="speakers" style="margin-top: 1em;">
+        <strong>Anirudha Jadhav</strong> · AWS &nbsp;·&nbsp; <strong>Kevin Fallis</strong> · AWS
+      </div>
+      <p style="color: var(--os-muted); font-size: 0.7em; margin-top: 1.6em;">
+        observability.playground.opensearch.org · #observability on opensearch.slack.com
+      </p>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    controls: true,
+    progress: true,
+    slideNumber: 'c/t',
+    history: true,
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 800,
+    margin: 0.06,
+    minScale: 0.5,
+    maxScale: 2.5,
+  });
+
+  function updateWatermark() {
+    var current = Reveal.getCurrentSlide();
+    if (!current) return;
+    var hide = current.classList.contains('cover') ||
+               current.classList.contains('image-slide');
+    document.body.classList.toggle('hide-watermark', hide);
+  }
+  Reveal.on('ready', updateWatermark);
+  Reveal.on('slidechanged', updateWatermark);
+</script>
+</body>
+</html>
