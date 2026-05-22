@@ -490,7 +490,82 @@
       <img src="assets/slide-foundation.png" alt="OpenSearch Software Foundation under the Linux Foundation">
     </section>
 
-    <!-- ========== 5. THE PROBLEM ========== -->
+    <!-- ========== 5. OBSERVABILITY STACK OVERVIEW ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">What we shipped</div>
+      <h1 style="text-align: center; font-size: 2.2em; margin-bottom: 0.3em;">OpenSearch Observability Stack</h1>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 88%; margin: 0 auto 0.4em auto;">
+        Full-stack, agents-to-services, fully OTel-native. <strong>Apache 2.0 · Linux Foundation governed.</strong> The substrate this whole talk sits on top of.
+      </p>
+      <div class="phases">
+        <div class="phase p1">
+          <div class="phase-num">01</div>
+          <div class="phase-eyebrow">Logs · metrics · traces</div>
+          <div class="phase-title">Search-based</div>
+          <div class="phase-desc">Free-form investigation with PPL. Logs from your services, metrics from Prometheus, traces from OTel — one query language.</div>
+        </div>
+        <div class="phase p2">
+          <div class="phase-num">02</div>
+          <div class="phase-eyebrow">Service catalog · SLOs</div>
+          <div class="phase-title">UI-guided APM</div>
+          <div class="phase-desc">Service maps, dependencies, SLO burn-rate alerts. Built for operators on call — not query writers.</div>
+        </div>
+        <div class="phase p3">
+          <div class="phase-num">03</div>
+          <div class="phase-eyebrow">Conversational</div>
+          <div class="phase-title">LLM-driven, headless</div>
+          <div class="phase-desc">Same topology and skills exposed to your agents. Natural-language queries. On call, in CI, in your IDE.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 6. AGENT OBSERVABILITY HEADER ========== -->
+    <section class="quiet center">
+      <div class="eyebrow">Agent observability on the stack</div>
+      <div class="megaline">Agents are <em>just another node</em><br>on the graph.</div>
+      <p class="sub">
+        Every span you'd expect for a service — <em>plus</em> the agent-specific ones: LLM chat spans, tool invocations, token usage. Same backend. Same query language.
+      </p>
+    </section>
+
+    <!-- ========== 7. APP MAP — AGENTS & SERVICES ========== -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Application Map</div>
+      <h3>Agents &amp; services on one topology</h3>
+      <div class="feature-sub">A single map for the agentic stack — <em>weather-agent</em>, <em>events-agent</em>, <em>mcp-server</em>, alongside <em>frontend</em>, <em>checkout</em>, <em>cart</em>. Correlations everywhere.</div>
+      <div class="feature-shot"><img src="assets/shot-04-appmap.png" alt="Unified agent + service application map"></div>
+    </section>
+
+    <!-- ========== 8. AGENT TRACE ANALYTICS ========== -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Trace Analytics</div>
+      <h3>Conversation &amp; tool search</h3>
+      <div class="feature-sub">Every agent invocation, every <em>LLM chat span</em>, every tool call — with input/output, parent spans, and raw OTel attributes.</div>
+      <div class="feature-shot"><img src="assets/shot-05-agent-trace.png" alt="Agent trace with conversation and tool search"></div>
+    </section>
+
+    <!-- ========== 9. TOKEN USAGE ========== -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Token Economics</div>
+      <h3>Token usage by model</h3>
+      <div class="feature-sub">Input vs. output tokens across <em>every model your agents touch</em> — Claude, GPT, Gemini, Nova, custom. Cost as a first-class metric.</div>
+      <div class="feature-shot"><img src="assets/shot-06-tokens.png" alt="Token usage by model"></div>
+    </section>
+
+    <!-- ========== 10. TRANSITION — REMOTE → LOCAL ========== -->
+    <section class="quiet">
+      <div class="eyebrow">A different problem</div>
+      <div class="megaline">That's <em>production</em>.<br>Now what about <em>your laptop</em>?</div>
+      <p class="sub" style="margin-top: 0.6em;">
+        Remote-hosted observability tells the operator what's happening across the fleet. <strong>It does not help the developer mid-keystroke</strong>, when the agent makes the wrong tool call and you need to see why <em>now</em>.
+      </p>
+      <p class="sub" style="margin-top: 0.7em; max-width: 60ch;">
+        At dev time you don't have a cluster, a collector, or a service map. You have a terminal, a half-broken prompt, and three minutes before you context-switch.
+        <strong style="color: var(--os-amber);">That gap is what we built Agent-Health to close.</strong>
+      </p>
+    </section>
+
+    <!-- ========== 11. THE PROBLEM ========== -->
     <section class="quiet">
       <div class="eyebrow">Why we're here</div>
       <div class="megaline">We kept shipping agents<br>we <em>couldn't debug</em>.</div>
