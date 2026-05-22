@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>See Everything · Open Observability for Agentic AI</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css">
+
+<style>
+  :root {
+    --os-navy: #0a1f44;
+    --os-navy-soft: #2a3d6b;
+    --os-blue: #2f7ec5;
+    --os-blue-deep: #1b5a96;
+    --os-blue-soft: #6fa8d6;
+    --os-amber: #e8a838;
+    --os-amber-soft: #f0c878;
+    --os-bg-top: #0a1f44;
+    --os-bg-mid: #18365e;
+    --os-bg-bottom: #2f7ec5;
+    --os-card: rgba(255, 255, 255, 0.92);
+    --os-card-line: rgba(10, 31, 68, 0.12);
+    --os-text: #1f2d4d;
+    --os-muted: #5a6885;
+    --agent-purple: #7c5cff;
+    --agent-pink: #ff5b8a;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    color: #f0f4ff;
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%);
+  }
+  .reveal-viewport {
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%) !important;
+  }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    margin-bottom: 0.6em;
+  }
+  .reveal h1 { font-size: 2.6em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.7em; line-height: 1.15; }
+  .reveal h3 { font-size: 1.15em; color: var(--os-amber-soft); font-weight: 700; }
+
+  .reveal p, .reveal li { font-size: 0.85em; line-height: 1.55; color: #d8def0; }
+  .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+  .reveal li { margin: 0.4em 0; }
+  .reveal li::marker { color: var(--os-amber); }
+
+  .reveal strong { color: #ffffff; font-weight: 700; }
+  .reveal em { color: var(--os-amber); font-style: italic; font-weight: 600; }
+
+  .reveal blockquote {
+    background: transparent;
+    border: none;
+    border-left: 6px solid var(--os-amber);
+    color: #ffffff;
+    font-style: normal;
+    font-size: 1.4em;
+    line-height: 1.4;
+    font-weight: 600;
+    width: 80%;
+    margin: 0 auto;
+    padding: 0.5em 1em;
+    box-shadow: none;
+  }
+
+  .reveal code {
+    font-family: "JetBrains Mono", monospace;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--os-amber-soft);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.95em;
+    font-weight: 600;
+  }
+
+  .reveal section.eyebrow-slide,
+  .reveal section.center-slide,
+  .reveal section.cover { text-align: center; }
+
+  .eyebrow {
+    color: var(--os-amber);
+    font-size: 0.7em;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+  }
+
+  .cover h1 {
+    font-size: 3em;
+    line-height: 1.05;
+    margin-bottom: 0.4em;
+  }
+  .cover .subtitle {
+    color: var(--os-blue-soft);
+    font-size: 1.1em;
+    margin-bottom: 1.6em;
+    font-weight: 500;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cover .speakers {
+    color: #d8def0;
+    font-size: 0.7em;
+    letter-spacing: 0.05em;
+  }
+  .cover .speakers strong { color: #ffffff; }
+  .cover-logo {
+    width: 240px;
+    margin: 0 auto 1.4em auto;
+    display: block;
+    filter: brightness(0) invert(1);
+  }
+
+  /* Image slides reuse the existing PNGs (light backgrounds) */
+  .image-slide {
+    text-align: center;
+    padding: 0 !important;
+    height: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-slide img {
+    max-width: 100%;
+    max-height: 88vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
+    object-fit: contain;
+  }
+
+  /* Feature slide: caption + product screenshot */
+  .feature-slide {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.4em 0 0 0 !important;
+    height: 100%;
+    text-align: center;
+  }
+  .feature-slide .feature-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 0.25em;
+  }
+  .feature-slide h3 {
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 800;
+    margin-bottom: 0.25em;
+    line-height: 1.15;
+  }
+  .feature-slide .feature-sub {
+    color: var(--os-blue-soft);
+    font-size: 0.7em;
+    font-weight: 500;
+    max-width: 78%;
+    line-height: 1.45;
+    margin-bottom: 0.55em;
+  }
+  .feature-slide .feature-sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
+  .feature-shot {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .feature-shot img {
+    max-width: 90%;
+    max-height: 70vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
+    object-fit: contain;
+  }
+
+  /* Big problem slide */
+  .blind {
+    text-align: center;
+  }
+  .blind .megaline {
+    font-size: 2.4em;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+    letter-spacing: -0.02em;
+  }
+  .blind .megaline em { color: var(--os-amber); font-style: normal; }
+  .blind .sub {
+    font-size: 1em;
+    color: var(--os-blue-soft);
+    font-weight: 500;
+    max-width: 75%;
+    margin: 0 auto;
+  }
+
+  /* The agent hop visualization */
+  .hop-flow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.7em;
+    margin: 1.2em 0 0.4em 0;
+    flex-wrap: wrap;
+  }
+  .hop {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 0.6em 0.9em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .hop.agent { border-color: var(--agent-purple); color: #c8b8ff; }
+  .hop.llm { border-color: var(--os-amber); color: var(--os-amber-soft); }
+  .hop.tool { border-color: var(--os-blue); color: var(--os-blue-soft); }
+  .hop.mcp { border-color: var(--agent-pink); color: #ffb3c8; }
+  .hop-arrow {
+    color: rgba(255, 255, 255, 0.5);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8em;
+  }
+  .hop-stat {
+    text-align: center;
+    margin-top: 1em;
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+
+  /* Reveal slide cards */
+  .reveal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2em;
+    margin-top: 1em;
+  }
+  .reveal-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 3px solid var(--os-amber);
+    border-radius: 8px;
+    padding: 1em 1em;
+    text-align: left;
+  }
+  .reveal-card .rc-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.4em;
+  }
+  .reveal-card .rc-title {
+    color: #ffffff;
+    font-size: 0.95em;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.4em;
+  }
+  .reveal-card .rc-desc {
+    color: #c8d2eb;
+    font-size: 0.6em;
+    line-height: 1.5;
+  }
+
+  /* Mode chip cards (three modes overview) */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2em;
+    margin-top: 1em;
+  }
+  .mode-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    padding: 1.1em 1em;
+    text-align: left;
+    position: relative;
+  }
+  .mode-card .mode-num {
+    position: absolute;
+    top: 0.7em;
+    right: 0.9em;
+    font-family: "JetBrains Mono", monospace;
+    color: rgba(255, 255, 255, 0.18);
+    font-weight: 800;
+    font-size: 1.6em;
+  }
+  .mode-card .mode-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.4em;
+  }
+  .mode-card .mode-title {
+    color: #ffffff;
+    font-size: 1em;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.4em;
+  }
+  .mode-card .mode-desc {
+    color: #c8d2eb;
+    font-size: 0.6em;
+    line-height: 1.5;
+  }
+  .mode-card.m1 { border-top: 3px solid var(--os-blue); }
+  .mode-card.m2 { border-top: 3px solid var(--os-amber); }
+  .mode-card.m3 { border-top: 3px solid var(--agent-purple); }
+
+  /* Big stat */
+  .big-stat {
+    text-align: center;
+    margin-top: 0.5em;
+  }
+  .big-stat .stat {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 4.5em;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--os-amber);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.2em;
+  }
+  .big-stat .stat-flow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1em;
+    color: var(--os-blue-soft);
+    letter-spacing: 0.05em;
+    margin-top: 0.3em;
+    margin-bottom: 0.7em;
+    font-weight: 700;
+  }
+  .big-stat p { font-size: 0.95em; color: #d8def0; }
+
+  /* Conversational mock */
+  .convo {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1em 1.2em;
+    margin: 0.5em auto 0 auto;
+    max-width: 78%;
+    text-align: left;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  }
+  .convo-line {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em;
+    line-height: 1.6;
+    margin: 0.3em 0;
+  }
+  .convo-line.you { color: var(--os-amber-soft); }
+  .convo-line.os { color: #d8def0; }
+  .convo-line.you::before { content: "you ▸ "; color: var(--os-amber); font-weight: 800; }
+  .convo-line.os::before { content: "obs ▸ "; color: var(--os-blue-soft); font-weight: 800; }
+
+  /* CTA slide */
+  .cta-slide { text-align: center; }
+  .cta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.2em;
+    align-items: center;
+    text-align: left;
+    margin-top: 0.6em;
+  }
+  .cta-text { text-align: left; }
+  .cta-text .cta-line {
+    font-size: 1.2em;
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.6em;
+  }
+  .cta-text .cta-line em { color: var(--os-amber); font-style: normal; }
+  .cta-text .cta-sub {
+    color: var(--os-blue-soft);
+    font-size: 0.8em;
+    line-height: 1.5;
+    margin-bottom: 1em;
+  }
+  .cta-url-line {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-size: 0.95em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .cta-qr {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .cta-qr img {
+    width: 100%;
+    max-width: 260px;
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+    display: block;
+    margin: 0 auto 0.5em auto;
+  }
+  .cta-qr-caption {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Try-it-now closing slide */
+  .try-slide {
+    text-align: left;
+    padding: 0 !important;
+  }
+  .try-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 1.6em;
+    align-items: center;
+  }
+  .try-text { text-align: left; }
+  .try-text h2 em { color: var(--os-amber); font-style: normal; }
+  .try-url {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-size: 1.4em;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    margin-bottom: 0.7em;
+  }
+  .try-cmd {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 0.7em 0.9em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    color: #d8def0;
+    line-height: 1.5;
+    margin-bottom: 1em;
+    word-break: break-all;
+    white-space: normal;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  }
+  .try-cmd .try-cmd-prompt {
+    color: var(--os-amber);
+    font-weight: 800;
+    margin-right: 0.6em;
+  }
+  .try-cmd .try-cmd-body { color: #f0f4ff; }
+  .try-foot {
+    color: #d8def0;
+    font-size: 0.65em;
+    letter-spacing: 0.04em;
+  }
+  .try-foot strong { color: #ffffff; }
+  .try-shot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .try-shot img {
+    max-width: 100%;
+    max-height: 75vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 14px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    opacity: 0.85;
+    z-index: 30;
+  }
+  .watermark {
+    position: fixed;
+    top: 22px;
+    right: 28px;
+    width: 130px;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  .watermark img { width: 100%; height: auto; display: block; filter: brightness(0) invert(1); }
+  body.hide-watermark .watermark { display: none; }
+
+  .reveal .progress { color: var(--os-amber); }
+  .reveal .controls { color: rgba(255, 255, 255, 0.7) !important; }
+</style>
+</head>
+
+<body>
+<div class="watermark" id="watermark">
+  <img src="assets/opensearch-logo-official.svg" alt="OpenSearch">
+</div>
+<div class="footer">
+  <span>See Everything · Observability Summit NA 2026</span>
+  <span>Anirudha Jadhav (AWS)</span>
+</div>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ 1. COVER ============ -->
+    <section class="cover">
+      <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
+      <div class="eyebrow">Observability Summit NA · 2026</div>
+      <h1>See Everything</h1>
+      <div class="subtitle">Open observability for the <strong>agentic AI era</strong></div>
+      <div class="speakers">
+        <strong>Anirudha Jadhav</strong> · AWS · OpenSearch Observability
+      </div>
+    </section>
+
+    <!-- ============ 2. OS NUMBERS ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-numbers.png" alt="OpenSearch by the Numbers">
+    </section>
+
+    <!-- ============ 3. COMMUNITY MEMBERS ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-members.png" alt="Community-driven innovation: premier and general members">
+    </section>
+
+    <!-- ============ 4. FOUNDATION ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-foundation.png" alt="OpenSearch Software Foundation under the Linux Foundation">
+    </section>
+
+    <!-- ============ 4. SETUP — AI ACCELERATING ============ -->
+    <section class="blind">
+      <div class="eyebrow">A remarkable moment in software</div>
+      <div class="megaline">AI is accelerating software<br>development at an <em>exponential pace</em>.</div>
+      <p class="sub">Code is being written faster than at any point in our industry.<br>But here's what we don't talk about enough.</p>
+    </section>
+
+    <!-- ============ 5. PROBLEM — BLIND ============ -->
+    <section class="blind">
+      <div class="eyebrow">The problem</div>
+      <div class="megaline">We have <em>no idea</em> what our<br>AI systems are actually doing.</div>
+      <p class="sub">Agents operate across distributed frameworks. <strong>One request spawns dozens of hops with zero visibility.</strong></p>
+    </section>
+
+    <!-- ============ 6. AGENT HOPS ============ -->
+    <section>
+      <h2 style="text-align: center; margin-bottom: 0.4em;">One request. <em>Dozens of hops.</em> Zero visibility.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 80%; margin: 0 auto;">
+        Planning agent calls a research agent. That agent calls tools. Tools call models through MCP. Different frameworks. Different dialects. <strong>All invisible to each other.</strong>
+      </p>
+      <div class="hop-flow">
+        <span class="hop agent">Planning agent</span>
+        <span class="hop-arrow">→</span>
+        <span class="hop agent">Research agent</span>
+        <span class="hop-arrow">→</span>
+        <span class="hop tool">Tool</span>
+        <span class="hop-arrow">→</span>
+        <span class="hop llm">LLM</span>
+        <span class="hop-arrow">→</span>
+        <span class="hop mcp">MCP server</span>
+        <span class="hop-arrow">→</span>
+        <span class="hop tool">Tool</span>
+      </div>
+      <div class="hop-stat">Distributed frameworks · invisible to each other</div>
+    </section>
+
+    <!-- ============ 7. REVEAL ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Closing the gap · today's announcement</div>
+      <h1 style="text-align: center; font-size: 2.2em; margin-bottom: 0.3em;">OpenSearch Observability Stack</h1>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.9em; max-width: 88%; margin: 0 auto 0.4em auto;">
+        Built for open source contributors — with a growing focus on the developers and operators using these systems every day.
+      </p>
+      <div class="reveal-grid">
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Agents to services</div>
+          <div class="rc-title">Full-stack observability</div>
+          <div class="rc-desc">From the host and the service, to the agent, the tool call, and the model. One pipeline. Every framework. Every model. Every hop visible.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Fully OTel-native</div>
+          <div class="rc-title">Open wire format</div>
+          <div class="rc-desc">OpenTelemetry end-to-end. No proprietary agents. Drop in your existing collectors and instrumentation — it just works.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Open licensing</div>
+          <div class="rc-title">Linux Foundation governed</div>
+          <div class="rc-desc">Apache 2.0. Vendor-neutral governance under the Linux Foundation — the same foundation that stewards Kubernetes and OpenTelemetry.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 8. THREE MODES OVERVIEW ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">How operators actually work</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em;">Three modes of observability — <em>one stack</em>.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.8em; max-width: 80%; margin: 0 auto;">
+        Different jobs need different surfaces. We meet you where you are.
+      </p>
+      <div class="mode-grid">
+        <div class="mode-card m1">
+          <div class="mode-num">01</div>
+          <div class="mode-eyebrow">Search-based</div>
+          <div class="mode-title">Traditional logs &amp; metrics</div>
+          <div class="mode-desc">Free-form investigation across logs and metrics with PPL — the piped processing language for unstructured, ad-hoc queries.</div>
+        </div>
+        <div class="mode-card m2">
+          <div class="mode-num">02</div>
+          <div class="mode-eyebrow">UI-guided</div>
+          <div class="mode-title">APM for services &amp; agents</div>
+          <div class="mode-desc">Guided investigation surfaces. Service catalog, dependency maps, SLOs, agent traces — built for operators, not query writers.</div>
+        </div>
+        <div class="mode-card m3">
+          <div class="mode-num">03</div>
+          <div class="mode-eyebrow">Conversational</div>
+          <div class="mode-title">LLM-driven, headless</div>
+          <div class="mode-desc">LLM-based observability — guided by <strong>topology and skills</strong>. Agents query the stack directly via natural language. On call, in CI, in your IDE.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 9. MODE 1 TITLE ============ -->
+    <section class="blind">
+      <div class="eyebrow">Mode 01 · Search-based</div>
+      <div class="megaline">Traditional logs &amp; metrics.<br><em>Free-form investigation.</em></div>
+      <p class="sub">When you don't yet know what you're looking for — go to the data directly.</p>
+    </section>
+
+    <!-- ============ 10. PPL ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Logs &amp; Traces · PPL</div>
+      <h3>Piped Processing Language</h3>
+      <div class="feature-sub">Investigate logs and traces with <em>unstructured data</em> — arbitrary, expressive, fast.</div>
+      <div class="feature-shot"><img src="assets/shot-03-ppl.png" alt="PPL for logs and tracing"></div>
+    </section>
+
+    <!-- ============ 11. ALERTS ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Alerts · Rules · Routing</div>
+      <h3>Unified, multi-datasource alerting</h3>
+      <div class="feature-sub">Text-based alerts on <em>OpenSearch</em> and metric-based alerts on <em>Prometheus</em> — with multi-cluster support and unified routing.</div>
+      <div class="feature-shot"><img src="assets/shot-01-alerts.png" alt="Unified multi-datasource alerts"></div>
+    </section>
+
+    <!-- ============ 12. DASHBOARDS ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Dashboards</div>
+      <h3>Multi-datasource dashboards</h3>
+      <div class="feature-sub">Variables and <em>client-side transforms</em> for stitching data from disparate sources into one pane.</div>
+      <div class="feature-shot"><img src="assets/shot-02-dashboards.png" alt="Multi-datasource dashboards"></div>
+    </section>
+
+    <!-- ============ 13. MODE 2 TITLE ============ -->
+    <section class="blind">
+      <div class="eyebrow">Mode 02 · UI-guided</div>
+      <div class="megaline">APM for <em>services and agents</em>.</div>
+      <p class="sub">Service catalog, dependencies, SLOs — guided surfaces for operators on call.</p>
+    </section>
+
+    <!-- ============ 14. SERVICES ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Service Catalog</div>
+      <h3>Comprehensive service health</h3>
+      <div class="feature-sub">Latency, throughput, failure rate, fault rate — with <em>SLO tracking</em> across every service.</div>
+      <div class="feature-shot"><img src="assets/shot-07-services.png" alt="Service catalog with SLO health"></div>
+    </section>
+
+    <!-- ============ 15. SERVICE DETAIL ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Service Detail</div>
+      <h3>Detailed investigations &amp; correlations</h3>
+      <div class="feature-sub">Drill into a service. View <em>correlated spans, logs, and attributes</em> — without leaving the page.</div>
+      <div class="feature-shot"><img src="assets/shot-08-currency.png" alt="Service detail with correlations"></div>
+    </section>
+
+    <!-- ============ 16. DEPENDENCIES ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Dependencies</div>
+      <h3>Service dependency metrics</h3>
+      <div class="feature-sub">Per-dependency requests, faults, errors, and latency percentiles — <em>filterable by remote operation</em>.</div>
+      <div class="feature-shot"><img src="assets/shot-09-dependencies.png" alt="Service dependency metrics"></div>
+    </section>
+
+    <!-- ============ 17. SLO ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">SLO &amp; Burn-rate</div>
+      <h3>Complete control over SLOs</h3>
+      <div class="feature-sub">Error budgets, multi-window multi-burn-rate alerts, and <em>recommendations on SLO creation</em> from your existing telemetry.</div>
+      <div class="feature-shot"><img src="assets/shot-10-slo.png" alt="SLO with burn-rate alerts"></div>
+    </section>
+
+    <!-- ============ 18. APP MAP (still Mode 02) ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Application Map</div>
+      <h3>Agents &amp; services on one topology</h3>
+      <div class="feature-sub">A single map for the agentic stack — <em>weather-agent</em>, <em>events-agent</em>, <em>mcp-server</em>, alongside <em>frontend</em>, <em>checkout</em>, <em>cart</em>. Correlations everywhere.</div>
+      <div class="feature-shot"><img src="assets/shot-04-appmap.png" alt="Unified agent + service application map"></div>
+    </section>
+
+    <!-- ============ 19. AGENT TRACES ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Trace Analytics</div>
+      <h3>Conversation &amp; tool search</h3>
+      <div class="feature-sub">Every agent invocation, every <em>LLM chat span</em>, every tool call — with input/output, parent spans, and raw OTel attributes.</div>
+      <div class="feature-shot"><img src="assets/shot-05-agent-trace.png" alt="Agent trace with conversation and tool search"></div>
+    </section>
+
+    <!-- ============ 20. TOKEN USAGE ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Token Economics</div>
+      <h3>Token usage by model</h3>
+      <div class="feature-sub">Input vs. output tokens across <em>every model your agents touch</em> — Claude, GPT, Gemini, Nova, custom. Cost as a first-class metric.</div>
+      <div class="feature-shot"><img src="assets/shot-06-tokens.png" alt="Token usage by model"></div>
+    </section>
+
+    <!-- ============ 21. MODE 3 TITLE ============ -->
+    <section class="blind">
+      <div class="eyebrow">Mode 03 · Conversational</div>
+      <div class="megaline">LLM-driven, <em>headless</em> observability.</div>
+      <p class="sub">Guided by topology and skills. Your agents query the stack directly — on call, in CI, in your IDE.</p>
+    </section>
+
+    <!-- ============ 22. CONVERSATIONAL DEMO ============ -->
+    <section>
+      <h2 style="text-align: center; margin-bottom: 0.3em;">The data plane is <em>open</em>.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 80%; margin: 0 auto 0.4em auto;">
+        No proprietary API. No UI required. The same topology and skills that power our APM are exposed to <strong>your</strong> agents.
+      </p>
+      <div class="convo">
+        <div class="convo-line you">why is checkout p99 spiking in the last 15 minutes?</div>
+        <div class="convo-line os">checkout depends on product-catalog (9.27% fault rate). SLO breached. Burn-rate alerts firing on Page · Slow and Ticket · Slow tiers.</div>
+        <div class="convo-line you">show me the agent traces touching product-catalog</div>
+        <div class="convo-line os">42 traces, 144 errors. Top failure: <code>get_current_weather</code> tool call returned 500 from 3 models. Want the trace IDs?</div>
+      </div>
+    </section>
+
+    <!-- ============ 23. CTA ============ -->
+    <section class="cta-slide">
+      <div class="eyebrow">Join us</div>
+      <h2 style="margin-bottom: 0.2em;">AI is making open source <em>go faster</em>.</h2>
+      <p style="color: var(--os-blue-soft); font-size: 0.9em; margin-bottom: 0.6em;">The agentic era deserves open infrastructure. Let's build it together.</p>
+      <div class="cta-grid">
+        <div class="cta-text">
+          <div class="cta-line">Join us at the <em>Observability TAG</em>.</div>
+          <div class="cta-sub">Start using the product live today. Open source, Apache 2.0, Linux Foundation governed. File issues, contribute, ship.</div>
+          <div class="cta-url-line">observability.opensearch.org</div>
+          <div class="cta-url-line" style="font-size: 0.8em; color: var(--os-blue-soft); margin-top: 0.3em;">observability-stack &nbsp;·&nbsp; #observability</div>
+        </div>
+        <div class="cta-qr">
+          <img src="assets/playground-qr.png" alt="QR code to the playground">
+          <div class="cta-qr-caption">scan · try it live</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 24. TRY IT NOW ============ -->
+    <section class="try-slide">
+      <div class="try-grid">
+        <div class="try-text">
+          <div class="eyebrow" style="margin-bottom: 0.5em;">Try the stack now</div>
+          <h2 style="font-size: 1.9em; line-height: 1.1; margin-bottom: 0.4em;">Full-stack observability.<br><em>Deployed in one command.</em></h2>
+          <p style="color: var(--os-blue-soft); font-size: 0.78em; line-height: 1.5; margin-bottom: 0.7em; max-width: 95%;">
+            AI agent tracing, APM, service maps, logs, metrics, dashboards — one open-source, OpenTelemetry-native platform. Apache 2.0. Self-host anywhere.
+          </p>
+          <div class="try-url">otel.opensearch.org</div>
+          <div class="try-foot" style="margin-top: 1em;">
+            <strong>Anirudha Jadhav</strong> · AWS · OpenSearch Observability
+          </div>
+        </div>
+        <div class="try-shot">
+          <img src="assets/site-hero.png" alt="otel.opensearch.org — OpenSearch Observability Stack landing page">
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    controls: true,
+    progress: true,
+    slideNumber: 'c/t',
+    history: true,
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 860,
+    margin: 0.05,
+    minScale: 0.5,
+    maxScale: 2.5,
+  });
+
+  function updateWatermark() {
+    var current = Reveal.getCurrentSlide();
+    if (!current) return;
+    var hide = current.classList.contains('cover') ||
+               current.classList.contains('image-slide');
+    document.body.classList.toggle('hide-watermark', hide);
+  }
+  Reveal.on('ready', updateWatermark);
+  Reveal.on('slidechanged', updateWatermark);
+</script>
+</body>
+</html>
