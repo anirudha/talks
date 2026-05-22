@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ship Agents in Weeks · Observability-First Development</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css">
+
+<style>
+  :root {
+    --os-navy: #0a1f44;
+    --os-navy-soft: #2a3d6b;
+    --os-blue: #2f7ec5;
+    --os-blue-deep: #1b5a96;
+    --os-blue-soft: #6fa8d6;
+    --os-amber: #e8a838;
+    --os-amber-soft: #f0c878;
+    --os-bg-top: #0a1f44;
+    --os-bg-mid: #18365e;
+    --os-bg-bottom: #2f7ec5;
+    --os-text: #1f2d4d;
+    --os-muted: #5a6885;
+    --agent-purple: #7c5cff;
+    --agent-pink: #ff5b8a;
+    --eval-green: #22c55a;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    color: #f0f4ff;
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%);
+  }
+  .reveal-viewport {
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%) !important;
+  }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    margin-bottom: 0.6em;
+  }
+  .reveal h1 { font-size: 2.6em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.7em; line-height: 1.15; }
+  .reveal h3 { font-size: 1.15em; color: var(--os-amber-soft); font-weight: 700; }
+
+  .reveal p, .reveal li { font-size: 0.85em; line-height: 1.55; color: #d8def0; }
+  .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+  .reveal li { margin: 0.45em 0; }
+  .reveal li::marker { color: var(--os-amber); }
+
+  .reveal strong { color: #ffffff; font-weight: 700; }
+  .reveal em { color: var(--os-amber); font-style: italic; font-weight: 600; }
+
+  .reveal code {
+    font-family: "JetBrains Mono", monospace;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--os-amber-soft);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.95em;
+    font-weight: 600;
+  }
+
+  .reveal section.cover { text-align: center; }
+
+  .eyebrow {
+    color: var(--os-amber);
+    font-size: 0.7em;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+  }
+
+  /* Cover */
+  .cover h1 {
+    font-size: 2.6em;
+    line-height: 1.05;
+    margin-bottom: 0.4em;
+    max-width: 18ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cover .subtitle {
+    color: var(--os-blue-soft);
+    font-size: 1em;
+    margin-bottom: 1.6em;
+    font-weight: 500;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cover .speakers {
+    color: #d8def0;
+    font-size: 0.7em;
+    letter-spacing: 0.05em;
+  }
+  .cover .speakers strong { color: #ffffff; }
+  .cover-logo {
+    width: 220px;
+    margin: 0 auto 1.4em auto;
+    display: block;
+    filter: brightness(0) invert(1);
+  }
+
+  /* Big quiet line slide */
+  .quiet { text-align: left; }
+  .quiet .megaline {
+    font-size: 2.2em;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+    letter-spacing: -0.02em;
+    max-width: 22ch;
+  }
+  .quiet .megaline em { color: var(--os-amber); font-style: normal; }
+  .quiet .sub {
+    font-size: 0.95em;
+    color: var(--os-blue-soft);
+    font-weight: 500;
+    max-width: 60ch;
+  }
+  .quiet .sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
+  .quiet.center { text-align: center; }
+  .quiet.center .megaline { margin-left: auto; margin-right: auto; }
+  .quiet.center .sub { margin-left: auto; margin-right: auto; }
+
+  /* Two-stanza thesis */
+  .stanza {
+    margin: 1.1em 0;
+    padding-left: 0.9em;
+    border-left: 3px solid var(--os-amber);
+    max-width: 60ch;
+  }
+  .stanza .line {
+    font-size: 1.2em;
+    color: #ffffff;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .stanza .line em { color: var(--os-amber); font-style: normal; font-weight: 800; }
+  .stanza.alt { border-left-color: var(--eval-green); }
+
+  /* Feature slide: caption + screenshot */
+  .feature-slide {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.4em 0 0 0 !important;
+    height: 100%;
+    text-align: center;
+  }
+  .feature-slide .feature-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 0.25em;
+  }
+  .feature-slide h3 {
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 800;
+    margin-bottom: 0.25em;
+    line-height: 1.15;
+  }
+  .feature-slide .feature-sub {
+    color: var(--os-blue-soft);
+    font-size: 0.7em;
+    font-weight: 500;
+    max-width: 78%;
+    line-height: 1.45;
+    margin-bottom: 0.55em;
+  }
+  .feature-slide .feature-sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
+  .feature-shot {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .feature-shot img {
+    max-width: 90%;
+    max-height: 68vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
+    object-fit: contain;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Code block */
+  .code-block {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 1.1em 1.3em;
+    margin: 0.6em auto 0 auto;
+    max-width: 85%;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    color: #d8def0;
+    line-height: 1.7;
+    text-align: left;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  }
+  .code-block .cb-comment { color: var(--os-blue-soft); }
+  .code-block .cb-kw { color: var(--os-amber); font-weight: 700; }
+  .code-block .cb-str { color: var(--eval-green); }
+  .code-block .cb-prompt { color: var(--os-amber); font-weight: 800; margin-right: 0.6em; }
+
+  /* Phase cards */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2em;
+    margin-top: 1em;
+  }
+  .phase {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    padding: 1.1em 1em;
+    text-align: left;
+    position: relative;
+  }
+  .phase .phase-num {
+    position: absolute;
+    top: 0.7em;
+    right: 0.9em;
+    font-family: "JetBrains Mono", monospace;
+    color: rgba(255, 255, 255, 0.18);
+    font-weight: 800;
+    font-size: 1.6em;
+  }
+  .phase .phase-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.4em;
+  }
+  .phase .phase-title {
+    color: #ffffff;
+    font-size: 1em;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.4em;
+  }
+  .phase .phase-desc {
+    color: #c8d2eb;
+    font-size: 0.6em;
+    line-height: 1.5;
+  }
+  .phase.p1 { border-top: 3px solid var(--os-blue); }
+  .phase.p2 { border-top: 3px solid var(--os-amber); }
+  .phase.p3 { border-top: 3px solid var(--eval-green); }
+
+  /* Lessons / scars list */
+  .scars {
+    list-style: none;
+    margin: 1em 0 0 0 !important;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8em 1.4em;
+  }
+  .scars li {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 3px solid var(--agent-pink);
+    border-radius: 8px;
+    padding: 0.7em 0.9em;
+    margin: 0 !important;
+    font-size: 0.62em;
+    line-height: 1.45;
+    color: #d8def0;
+  }
+  .scars li::marker { content: ""; }
+  .scars li strong { color: #ffffff; display: block; margin-bottom: 0.25em; font-size: 1.05em; }
+
+  /* Case study lines */
+  .case-list {
+    list-style: none;
+    margin: 0.8em 0 0 0 !important;
+    padding: 0;
+  }
+  .case-list li {
+    margin: 0.5em 0;
+    padding-left: 1em;
+    position: relative;
+    font-size: 0.78em;
+    color: #d8def0;
+    list-style: none;
+  }
+  .case-list li::marker { content: ""; }
+  .case-list li::before {
+    content: "▸";
+    color: var(--os-amber);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 800;
+  }
+  .case-list li strong { color: #ffffff; }
+  .case-tag {
+    display: inline-block;
+    background: rgba(232, 168, 56, 0.15);
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7em;
+    font-weight: 700;
+    padding: 0.15em 0.6em;
+    border-radius: 4px;
+    margin-right: 0.5em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Takeaway list */
+  .takeaways {
+    list-style: none;
+    margin: 1em 0 0 0 !important;
+    padding: 0;
+    counter-reset: tk;
+  }
+  .takeaways li {
+    counter-increment: tk;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 0.7em 0.9em 0.7em 3em;
+    margin: 0.5em 0 !important;
+    position: relative;
+    font-size: 0.7em;
+    line-height: 1.45;
+    color: #d8def0;
+    list-style: none;
+  }
+  .takeaways li::marker { content: ""; }
+  .takeaways li::before {
+    content: counter(tk);
+    position: absolute;
+    left: 0.8em;
+    top: 0.55em;
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 50%;
+    background: var(--os-amber);
+    color: var(--os-navy);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 800;
+    font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .takeaways li strong { color: #ffffff; }
+
+  /* CTA / closing */
+  .cta-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 1.6em;
+    align-items: center;
+  }
+  .cta-text { text-align: left; }
+  .cta-text h2 em { color: var(--os-amber); font-style: normal; }
+  .cta-url {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-size: 1em;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    margin: 0.5em 0;
+    word-break: break-all;
+  }
+  .cta-foot {
+    color: #d8def0;
+    font-size: 0.65em;
+    letter-spacing: 0.04em;
+    margin-top: 1em;
+  }
+  .cta-foot strong { color: #ffffff; }
+
+  .footer {
+    position: fixed;
+    bottom: 14px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    opacity: 0.85;
+    z-index: 30;
+  }
+  .watermark {
+    position: fixed;
+    top: 22px;
+    right: 28px;
+    width: 130px;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  .watermark img { width: 100%; height: auto; display: block; filter: brightness(0) invert(1); }
+  body.hide-watermark .watermark { display: none; }
+
+  .reveal .progress { color: var(--os-amber); }
+  .reveal .controls { color: rgba(255, 255, 255, 0.7) !important; }
+</style>
+</head>
+
+<body>
+<div class="watermark" id="watermark">
+  <img src="assets/opensearch-logo-official.svg" alt="OpenSearch">
+</div>
+<div class="footer">
+  <span>Observability-First · Observability Summit NA 2026</span>
+  <span>Anirudha Jadhav · Kevin Fallis</span>
+</div>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ========== 1. COVER ========== -->
+    <section class="cover">
+      <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
+      <div class="eyebrow">Observability Summit NA · May 21–22 · 2026</div>
+      <h1>Ship Agents in <em>Weeks</em>, Not Months</h1>
+      <div class="subtitle">Observability-first development for autonomous agents</div>
+      <div class="speakers">
+        <strong>Anirudha Jadhav</strong> &nbsp;·&nbsp; <strong>Kevin Fallis</strong> &nbsp;·&nbsp; AWS · OpenSearch
+      </div>
+    </section>
+
+    <!-- ========== 2. THE PROBLEM ========== -->
+    <section class="quiet">
+      <div class="eyebrow">Why we're here</div>
+      <div class="megaline">We kept shipping agents<br>we <em>couldn't debug</em>.</div>
+      <p class="sub">
+        Traditional APM was built for request → response services. Agents <strong>reason, plan, and execute multi-step workflows.</strong>
+        Standard metrics and traces don't tell you <em>why</em> an agent made the decision it did.
+        Without that, debugging is guessing.
+      </p>
+    </section>
+
+    <!-- ========== 3. TWO WORLDS / THESIS ========== -->
+    <section class="quiet">
+      <div class="eyebrow">Here's what we noticed</div>
+      <div class="stanza">
+        <div class="line">When you only have inputs and outputs,<br>debugging an agent means <em>reading prompts and guessing</em>.</div>
+      </div>
+      <div class="stanza alt">
+        <div class="line">When you can see the decision sequence,<br>debugging becomes a <em>normal engineering task</em>.</div>
+      </div>
+    </section>
+
+    <!-- ========== 4. CONCEPT 1 — AGENT TRACES ========== -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Concept · 01</div>
+      <h3>What are agent traces?</h3>
+      <div class="feature-sub">
+        The decision sequence the agent <em>actually took</em>. Every prompt, every tool call, every hop between services — each one a span.
+      </div>
+      <div class="feature-shot"><img src="assets/trace-waterfall.png" alt="Agent trace waterfall showing call graph"></div>
+    </section>
+
+    <!-- ========== 5. CONCEPT 2 — AGENT EVALS ========== -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Concept · 02</div>
+      <h3>What are agent evals?</h3>
+      <div class="feature-sub">
+        Scores on the <em>reasoning path</em>, not just the answer. <strong>Offline:</strong> benchmark suites you run before shipping. <strong>Online:</strong> continuous scoring of real traffic.
+      </div>
+      <div class="feature-shot"><img src="assets/agent-evals.png" alt="Agent evals UI with scores, rubrics, and pass/fail results"></div>
+    </section>
+
+    <!-- ========== 6. THE THREE PHASES ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Our staged approach</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em;">Three phases. <em>One loop.</em></h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.8em; max-width: 80%; margin: 0 auto;">
+        We didn't get here in one step. Every phase has a job, and every phase pays off the next one.
+      </p>
+      <div class="phases">
+        <div class="phase p1">
+          <div class="phase-num">01</div>
+          <div class="phase-eyebrow">Before features</div>
+          <div class="phase-title">Instrument first</div>
+          <div class="phase-desc">OTel spans for every prompt, tool call, retrieval. Three lines of config, before line one of agent logic.</div>
+        </div>
+        <div class="phase p2">
+          <div class="phase-num">02</div>
+          <div class="phase-eyebrow">Ready to ship</div>
+          <div class="phase-title">Evals as a gate</div>
+          <div class="phase-desc">Integration tests for reasoning. Score the decision path. Block the merge when scores regress.</div>
+        </div>
+        <div class="phase p3">
+          <div class="phase-num">03</div>
+          <div class="phase-eyebrow">In production</div>
+          <div class="phase-title">Close the loop</div>
+          <div class="phase-desc">Continuous scoring on live traffic. Failed evals → fix → re-ship. Drift caught in hours, not weeks.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 7. PHASE 1 — INSTRUMENT BEFORE FEATURES ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Phase 01 · Before the first feature</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em;">We instrument <em>before</em> we add features.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 75%; margin: 0 auto 0.4em auto;">
+        Works with any OTel-compatible framework — Strands, LangGraph, CrewAI — and any OTLP-speaking backend (Agent Health, Phoenix, Langfuse, Braintrust).
+      </p>
+      <pre class="code-block"><span class="cb-comment"># 1. Stand up an OTel-compatible backend</span>
+docker compose up -d  <span class="cb-comment"># collector + storage + UI</span>
+
+<span class="cb-comment"># 2. Point your agent's OTel exporter at the collector</span>
+<span class="cb-kw">export</span> OTEL_EXPORTER_OTLP_ENDPOINT=<span class="cb-str">"http://localhost:4318"</span>
+
+<span class="cb-comment"># 3. Run. Every tool call, LLM hop, and retrieval is now a span</span>
+python my_agent.py <span class="cb-str">"Why did latency spike at 3am?"</span></pre>
+    </section>
+
+    <!-- ========== 8. PHASE 2 — EVALS AS GATE ========== -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Phase 02 · Ready to ship</div>
+      <h3>Evals as a shipping gate</h3>
+      <div class="feature-sub">
+        Integration tests for <em>reasoning</em>. Fails the build when scores regress — the same way unit tests fail when a function does.
+      </div>
+      <div class="feature-shot"><img src="assets/eval-pipeline.png" alt="CI/CD pipeline diagram with evals as a gating stage"></div>
+    </section>
+
+    <!-- ========== 9. PATTERN — KEEPING EVALS + TRACES TOGETHER ========== -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">A pattern worth stealing</div>
+      <h3>Keep evals and traces <em>together</em></h3>
+      <div class="feature-sub">
+        Each eval is written back as a <em>child span</em> of the agent run. One trace. One view. Queryable and alertable like any metric. Reference: <strong>opensearch-genai-sdk</strong> (Python + JS) — built into Strands evals.
+      </div>
+      <div class="feature-shot"><img src="assets/trace-with-evals.png" alt="Trace with evals attached as child spans"></div>
+    </section>
+
+    <!-- ========== 10. PHASE 3 — CLOSING THE LOOP ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Phase 03 · In production</div>
+      <h2 style="text-align: center; margin-bottom: 0.4em;">How we <em>close the loop</em> in production.</h2>
+      <ul style="max-width: 70ch; margin: 1em auto 0 auto; font-size: 1em;">
+        <li><strong>Continuous scoring</strong> of live traffic — not just synthetic benchmarks.</li>
+        <li>Support tickets and eval regressions surface <strong>degradation before it spreads</strong>.</li>
+        <li>The feedback loop: <em>prod trace → failed eval → fix → re-ship.</em></li>
+      </ul>
+    </section>
+
+    <!-- ========== 11. SCARS / WHAT WE GOT WRONG ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Scars, not slides</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em;">What we got <em>wrong</em>.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 75%; margin: 0 auto 0.3em auto;">
+        Four habits we had to unlearn. The credibility tax for talking about anything that worked.
+      </p>
+      <ul class="scars">
+        <li><strong>Over-indexed on LLM-as-judge early.</strong>
+          Rules and assertions are faster, cheaper, and often sufficient for structured outputs.</li>
+        <li><strong>Stored evals separately from traces.</strong>
+          Correlating them by hand became unsustainable around eval #50.</li>
+        <li><strong>Wrote vague rubrics.</strong>
+          "Is the answer helpful?" gives noisy judges. Specific rubrics give signal.</li>
+        <li><strong>Didn't budget for cardinality.</strong>
+          Agent traces generate a lot of spans. Sample intentionally — or your storage bill will teach you.</li>
+      </ul>
+    </section>
+
+    <!-- ========== 12. CASE STUDY — CONVERSATION HISTORY BUG ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">One bug, one trace</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em;">The <em>conversation history</em> bug.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 65ch; margin: 0 auto 0.3em auto;">
+        An agent we were building. Answers looked fine. Cost <strong>didn't</strong>.
+      </p>
+      <ul class="case-list" style="max-width: 75ch; margin: 0.6em auto 0 auto;">
+        <li><span class="case-tag">Symptom</span><strong>Token usage climbed quadratically</strong> with every conversation turn.</li>
+        <li><span class="case-tag">Without tracing</span>Latency and cost both up. Outputs unchanged. <strong>No obvious cause.</strong></li>
+        <li><span class="case-tag">In the trace</span>The full conversation history was <strong>re-sent on every LLM call</strong>.</li>
+        <li><span class="case-tag">The fix</span>Proper memory — summarization plus sliding window. Token usage flattened to linear.</li>
+      </ul>
+      <p style="text-align: center; color: var(--os-amber); font-size: 0.85em; max-width: 60ch; margin: 0.7em auto 0 auto; font-weight: 600;">
+        The fix was easy. The harder part was <em>noticing</em>.
+      </p>
+    </section>
+
+    <!-- ========== 13. TAKEAWAYS ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">What you'll walk away with</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em;">Four things.</h2>
+      <ol class="takeaways" style="max-width: 78ch; margin: 0.6em auto 0 auto;">
+        <li><strong>Patterns</strong> for instrumenting agents with the OpenTelemetry GenAI SemConv.</li>
+        <li><strong>Techniques</strong> for evaluating full decision sequences — not just outputs.</li>
+        <li><strong>A staged approach</strong>: instrument first, gate with evals, close the loop in production.</li>
+        <li><strong>How observability-first changed how we build agents</strong>, and the scars we got along the way.</li>
+      </ol>
+    </section>
+
+    <!-- ========== 14. GETTING STARTED ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Getting started</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em;">How <em>we</em> started.</h2>
+      <ol class="takeaways" style="max-width: 70ch; margin: 0.6em auto 0 auto;">
+        <li><strong>OTel traces.</strong> No evals yet. Just see what the agent is doing.</li>
+        <li><strong>5 eval cases</strong> from real queries. Written as code. Scored by hand.</li>
+        <li><strong>LLM-as-judge.</strong> Run on every PR. Block merges that drop scores.</li>
+        <li><strong>Online evals.</strong> Expand coverage. Catch drift on live traffic.</li>
+      </ol>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 75ch; margin: 1em auto 0 auto;">
+        Pick one tool and start: <strong>Agent Health, Phoenix, Braintrust, Langfuse</strong>. Anything that speaks OTel.
+        The UI is the view — <em>version-control your eval suite in git.</em>
+      </p>
+    </section>
+
+    <!-- ========== 15. OPEN SOURCE INVITATION ========== -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Build with us</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em;">Open source, built <em>in the open</em>.</h2>
+      <ul style="max-width: 78ch; margin: 1em auto 0 auto; font-size: 0.95em;">
+        <li><strong>Agent Health</strong> — OpenSearch-backed agent observability. Apache 2.0.</li>
+        <li><strong>opensearch-genai-sdk</strong> — Python + JS. Write evals back onto your traces.</li>
+        <li>Good first issues tagged. Roadmap public. PRs welcome from anyone.</li>
+        <li>Join the OpenSearch Slack <code>#agent-health</code> to talk with the team and other users.</li>
+      </ul>
+      <p style="text-align: center; color: var(--os-amber); font-family: 'JetBrains Mono', monospace; font-size: 0.85em; margin-top: 1.2em; letter-spacing: 0.03em; font-weight: 700;">
+        github.com/opensearch-project/agent-health
+      </p>
+    </section>
+
+    <!-- ========== 16. CLOSING — COME BUILD WITH US ========== -->
+    <section class="cover">
+      <div class="eyebrow">Thank you</div>
+      <h1 style="font-size: 3em; margin-bottom: 0.2em;">Come <em>build</em> with us.</h1>
+      <p class="subtitle" style="font-size: 0.95em;">
+        Observability-first development is how we ship agents in weeks, not months. The code is open. The roadmap is public. The door is open.
+      </p>
+      <div class="cta-url" style="margin-top: 1em;">github.com/opensearch-project/agent-health</div>
+      <p class="cta-foot">
+        <strong>Anirudha Jadhav</strong> · <strong>Kevin Fallis</strong> · AWS · OpenSearch
+      </p>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    controls: true,
+    progress: true,
+    slideNumber: 'c/t',
+    history: true,
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 860,
+    margin: 0.05,
+    minScale: 0.5,
+    maxScale: 2.5,
+  });
+
+  function updateWatermark() {
+    var current = Reveal.getCurrentSlide();
+    if (!current) return;
+    var hide = current.classList.contains('cover');
+    document.body.classList.toggle('hide-watermark', hide);
+  }
+  Reveal.on('ready', updateWatermark);
+  Reveal.on('slidechanged', updateWatermark);
+</script>
+</body>
+</html>
