@@ -675,16 +675,6 @@ python my_agent.py <span class="cb-str">"Why did latency spike at 3am?"</span></
       <div class="feature-shot"><img src="assets/eval-pipeline.png" alt="CI/CD pipeline diagram with evals as a gating stage"></div>
     </section>
 
-    <!-- ========== 9. PATTERN — KEEPING EVALS + TRACES TOGETHER ========== -->
-    <section class="feature-slide">
-      <div class="feature-eyebrow">A pattern worth stealing</div>
-      <h3>Keep evals and traces <em>together</em></h3>
-      <div class="feature-sub">
-        Each eval is written back as a <em>child span</em> of the agent run. One trace. One view. Queryable and alertable like any metric. Reference: <strong>opensearch-genai-sdk</strong> (Python + JS) — built into Strands evals.
-      </div>
-      <div class="feature-shot"><img src="assets/trace-with-evals.png" alt="Trace with evals attached as child spans"></div>
-    </section>
-
     <!-- ========== 10. PHASE 3 — CLOSING THE LOOP ========== -->
     <section>
       <div class="eyebrow" style="text-align: center;">Phase 03 · In production</div>
