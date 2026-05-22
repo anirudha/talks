@@ -151,6 +151,25 @@
   .stanza .line em { color: var(--os-amber); font-style: normal; font-weight: 800; }
   .stanza.alt { border-left-color: var(--eval-green); }
 
+  /* Full-bleed image slides (intro context) */
+  .image-slide {
+    text-align: center;
+    padding: 0 !important;
+    height: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-slide img {
+    max-width: 100%;
+    max-height: 88vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
+    object-fit: contain;
+  }
+
   /* Feature slide: caption + screenshot */
   .feature-slide {
     display: flex !important;
@@ -456,7 +475,22 @@
       </div>
     </section>
 
-    <!-- ========== 2. THE PROBLEM ========== -->
+    <!-- ========== 2. OPENSEARCH NUMBERS ========== -->
+    <section class="image-slide">
+      <img src="assets/slide-numbers.png" alt="OpenSearch by the Numbers">
+    </section>
+
+    <!-- ========== 3. COMMUNITY MEMBERS ========== -->
+    <section class="image-slide">
+      <img src="assets/slide-members.png" alt="Community-driven innovation: premier and general members">
+    </section>
+
+    <!-- ========== 4. FOUNDATION ========== -->
+    <section class="image-slide">
+      <img src="assets/slide-foundation.png" alt="OpenSearch Software Foundation under the Linux Foundation">
+    </section>
+
+    <!-- ========== 5. THE PROBLEM ========== -->
     <section class="quiet">
       <div class="eyebrow">Why we're here</div>
       <div class="megaline">We kept shipping agents<br>we <em>couldn't debug</em>.</div>
@@ -692,7 +726,8 @@ python my_agent.py <span class="cb-str">"Why did latency spike at 3am?"</span></
   function updateWatermark() {
     var current = Reveal.getCurrentSlide();
     if (!current) return;
-    var hide = current.classList.contains('cover');
+    var hide = current.classList.contains('cover') ||
+               current.classList.contains('image-slide');
     document.body.classList.toggle('hide-watermark', hide);
   }
   Reveal.on('ready', updateWatermark);
