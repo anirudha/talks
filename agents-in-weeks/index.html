@@ -420,6 +420,40 @@
   }
   .cta-foot strong { color: #ffffff; }
 
+  .qr-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 5em;
+    margin: 1.4em auto 0 auto;
+  }
+  .qr-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8em;
+  }
+  .qr-img {
+    width: 240px;
+    height: 240px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-img img { width: 100%; height: 100%; display: block; }
+  .qr-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7em;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--os-amber);
+    font-weight: 700;
+  }
+
   .footer {
     position: fixed;
     bottom: 14px;
@@ -535,15 +569,11 @@
     </section>
 
     <!-- ========== 10. TRANSITION — REMOTE → LOCAL ========== -->
-    <section class="quiet">
+    <section class="quiet center">
       <div class="eyebrow">A different problem</div>
       <div class="megaline">That's <em>production</em>.<br>Now what about <em>your laptop</em>?</div>
-      <p class="sub" style="margin-top: 0.6em;">
-        Remote-hosted observability tells the operator what's happening across the fleet. <strong>It does not help the developer mid-keystroke</strong>, when the agent makes the wrong tool call and you need to see why <em>now</em>.
-      </p>
-      <p class="sub" style="margin-top: 0.7em; max-width: 60ch;">
-        At dev time you don't have a cluster, a collector, or a service map. You have a terminal, a half-broken prompt, and three minutes before you context-switch.
-        <strong style="color: var(--os-amber);">That gap is what we built Agent-Health to close.</strong>
+      <p class="sub" style="margin-top: 1em; font-size: 1em; color: var(--os-amber); font-weight: 600;">
+        That gap is what <strong>Agent-Health</strong> closes.
       </p>
     </section>
 
@@ -703,18 +733,6 @@ python my_agent.py <span class="cb-str">"Why did latency spike at 3am?"</span></
       </p>
     </section>
 
-    <!-- ========== 13. TAKEAWAYS ========== -->
-    <section>
-      <div class="eyebrow" style="text-align: center;">What you'll walk away with</div>
-      <h2 style="text-align: center; margin-bottom: 0.2em;">Four things.</h2>
-      <ol class="takeaways" style="max-width: 78ch; margin: 0.6em auto 0 auto;">
-        <li><strong>Patterns</strong> for instrumenting agents with the OpenTelemetry GenAI SemConv.</li>
-        <li><strong>Techniques</strong> for evaluating full decision sequences — not just outputs.</li>
-        <li><strong>A staged approach</strong>: instrument first, gate with evals, close the loop in production.</li>
-        <li><strong>How observability-first changed how we build agents</strong>, and the scars we got along the way.</li>
-      </ol>
-    </section>
-
     <!-- ========== 14. GETTING STARTED ========== -->
     <section>
       <div class="eyebrow" style="text-align: center;">Getting started</div>
@@ -749,12 +767,18 @@ python my_agent.py <span class="cb-str">"Why did latency spike at 3am?"</span></
     <!-- ========== 16. CLOSING — COME BUILD WITH US ========== -->
     <section class="cover">
       <div class="eyebrow">Thank you</div>
-      <h1 style="font-size: 3em; margin-bottom: 0.2em;">Come <em>build</em> with us.</h1>
-      <p class="subtitle" style="font-size: 0.95em;">
-        Observability-first development is how we ship agents in weeks, not months. The code is open. The roadmap is public. The door is open.
-      </p>
-      <div class="cta-url" style="margin-top: 1em;">github.com/opensearch-project/agent-health</div>
-      <p class="cta-foot">
+      <h1 style="font-size: 2.4em; margin-bottom: 0.15em;">Come <em>build</em> with us.</h1>
+      <div class="qr-row">
+        <div class="qr-card">
+          <div class="qr-img"><img src="assets/read_the_blog.svg" alt="Read the blog"></div>
+          <div class="qr-label">Read the blog</div>
+        </div>
+        <div class="qr-card">
+          <div class="qr-img"><img src="assets/deploy_the_solution.svg" alt="Deploy the solution"></div>
+          <div class="qr-label">Deploy the solution</div>
+        </div>
+      </div>
+      <p class="cta-foot" style="margin-top: 1em;">
         <strong>Anirudha Jadhav</strong> · <strong>Kevin Fallis</strong> · AWS · OpenSearch
       </p>
     </section>
