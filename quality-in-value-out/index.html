@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quality In, Value Out · Benchmarking Instrumentation for OpenSearch Observability</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css">
+
+<style>
+  :root {
+    --os-navy: #0a1f44;
+    --os-navy-soft: #2a3d6b;
+    --os-blue: #2f7ec5;
+    --os-blue-deep: #1b5a96;
+    --os-blue-soft: #6fa8d6;
+    --os-amber: #e8a838;
+    --os-amber-soft: #f0c878;
+    --os-bg-top: #0a1f44;
+    --os-bg-mid: #18365e;
+    --os-bg-bottom: #2f7ec5;
+    --os-text: #1f2d4d;
+    --os-muted: #5a6885;
+    --crit: #ff5b6e;
+    --imp: #e8a838;
+    --norm: #6fa8d6;
+    --low: #8aa0c4;
+    --good: #4cd1a0;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    color: #f0f4ff;
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%);
+  }
+  .reveal-viewport {
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%) !important;
+  }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    margin-bottom: 0.6em;
+  }
+  .reveal h1 { font-size: 2.6em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.7em; line-height: 1.15; }
+  .reveal h3 { font-size: 1.15em; color: var(--os-amber-soft); font-weight: 700; }
+
+  .reveal p, .reveal li { font-size: 0.85em; line-height: 1.55; color: #d8def0; }
+  .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+  .reveal li { margin: 0.4em 0; }
+  .reveal li::marker { color: var(--os-amber); }
+
+  .reveal strong { color: #ffffff; font-weight: 700; }
+  .reveal em { color: var(--os-amber); font-style: italic; font-weight: 600; }
+
+  .reveal blockquote {
+    background: transparent;
+    border: none;
+    border-left: 6px solid var(--os-amber);
+    color: #ffffff;
+    font-style: normal;
+    font-size: 1.4em;
+    line-height: 1.4;
+    font-weight: 600;
+    width: 80%;
+    margin: 0 auto;
+    padding: 0.5em 1em;
+    box-shadow: none;
+  }
+
+  .reveal code {
+    font-family: "JetBrains Mono", monospace;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--os-amber-soft);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.95em;
+    font-weight: 600;
+  }
+
+  .reveal section.eyebrow-slide,
+  .reveal section.center-slide,
+  .reveal section.cover { text-align: center; }
+
+  .eyebrow {
+    color: var(--os-amber);
+    font-size: 0.7em;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+  }
+
+  .cover h1 { font-size: 2.9em; line-height: 1.05; margin-bottom: 0.4em; }
+  .cover .subtitle {
+    color: var(--os-blue-soft);
+    font-size: 1.05em;
+    margin-bottom: 1.6em;
+    font-weight: 500;
+    max-width: 82%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cover .speakers { color: #d8def0; font-size: 0.7em; letter-spacing: 0.05em; }
+  .cover .speakers strong { color: #ffffff; }
+  .cover-logo {
+    width: 220px;
+    margin: 0 auto 1.4em auto;
+    display: block;
+    filter: brightness(0) invert(1);
+  }
+
+  .image-slide {
+    text-align: center;
+    padding: 0 !important;
+    height: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-slide img {
+    max-width: 100%;
+    max-height: 88vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
+    object-fit: contain;
+  }
+
+  .feature-slide {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.4em 0 0 0 !important;
+    height: 100%;
+    text-align: center;
+  }
+  .feature-slide .feature-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 0.25em;
+  }
+  .feature-slide h3 {
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: 800;
+    margin-bottom: 0.25em;
+    line-height: 1.15;
+  }
+  .feature-slide .feature-sub {
+    color: var(--os-blue-soft);
+    font-size: 0.7em;
+    font-weight: 500;
+    max-width: 78%;
+    line-height: 1.45;
+    margin-bottom: 0.55em;
+  }
+  .feature-slide .feature-sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
+  .feature-shot {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .feature-shot img {
+    max-width: 90%;
+    max-height: 70vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
+    object-fit: contain;
+  }
+
+  .blind { text-align: center; }
+  .blind .megaline {
+    font-size: 2.4em;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
+    margin-bottom: 0.5em;
+    letter-spacing: -0.02em;
+  }
+  .blind .megaline em { color: var(--os-amber); font-style: normal; }
+  .blind .sub {
+    font-size: 1em;
+    color: var(--os-blue-soft);
+    font-weight: 500;
+    max-width: 78%;
+    margin: 0 auto;
+  }
+
+  /* Mantra split slide */
+  .mantra-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6em;
+    margin-top: 0.6em;
+  }
+  .mantra-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    padding: 1.4em 1.4em;
+    text-align: left;
+  }
+  .mantra-card .m-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 0.5em;
+  }
+  .mantra-card .m-quote {
+    font-size: 1.5em;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 0.6em;
+  }
+  .mantra-card .m-quote em { color: var(--os-amber); font-style: normal; }
+  .mantra-card .m-body {
+    color: #c8d2eb;
+    font-size: 0.7em;
+    line-height: 1.55;
+  }
+  .mantra-card.old { border-top: 3px solid var(--low); }
+  .mantra-card.old .m-quote { color: #aab8d4; text-decoration: line-through; text-decoration-color: rgba(255, 91, 110, 0.6); }
+  .mantra-card.now { border-top: 3px solid var(--os-amber); }
+
+  /* Reveal cards / takeaways */
+  .reveal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2em;
+    margin-top: 1em;
+  }
+  .reveal-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 3px solid var(--os-amber);
+    border-radius: 8px;
+    padding: 1em 1em;
+    text-align: left;
+  }
+  .reveal-card .rc-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.4em;
+  }
+  .reveal-card .rc-title {
+    color: #ffffff;
+    font-size: 0.95em;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.4em;
+  }
+  .reveal-card .rc-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+
+  /* The score visual */
+  .score-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2em;
+    margin-top: 0.4em;
+  }
+  .score-dial {
+    width: 320px;
+    height: 320px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .score-dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .score-dial .ring-bg { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 22; }
+  .score-dial .ring-fg {
+    fill: none;
+    stroke: var(--os-amber);
+    stroke-width: 22;
+    stroke-linecap: round;
+    stroke-dasharray: 754;
+    stroke-dashoffset: 218;  /* ~71/100 */
+  }
+  .score-dial .score-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .score-dial .score-num .n {
+    font-size: 4.2em;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .score-dial .score-num .l {
+    font-size: 0.7em;
+    color: var(--os-amber);
+    letter-spacing: 0.18em;
+    font-weight: 800;
+    margin-top: 0.4em;
+    text-transform: uppercase;
+  }
+  .score-bands { text-align: left; }
+  .score-band {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 1em;
+    align-items: center;
+    margin-bottom: 0.55em;
+    font-size: 0.75em;
+  }
+  .score-band .band-range {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .score-band .band-label { color: #ffffff; font-weight: 700; }
+  .score-band .band-desc { color: var(--os-blue-soft); font-size: 0.85em; font-weight: 500; }
+
+  /* Weight tiers */
+  .weight-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1em;
+    margin-top: 0.8em;
+  }
+  .weight-card {
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px;
+    padding: 1em;
+    text-align: left;
+    background: rgba(255,255,255,0.04);
+  }
+  .weight-card .w-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 2.4em;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.2em;
+  }
+  .weight-card .w-tier {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 0.5em;
+  }
+  .weight-card .w-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+  .weight-card.crit { border-top: 3px solid var(--crit); }
+  .weight-card.crit .w-num, .weight-card.crit .w-tier { color: var(--crit); }
+  .weight-card.imp { border-top: 3px solid var(--imp); }
+  .weight-card.imp .w-num, .weight-card.imp .w-tier { color: var(--imp); }
+  .weight-card.norm { border-top: 3px solid var(--norm); }
+  .weight-card.norm .w-num, .weight-card.norm .w-tier { color: var(--norm); }
+  .weight-card.low { border-top: 3px solid var(--low); }
+  .weight-card.low .w-num, .weight-card.low .w-tier { color: var(--low); }
+
+  /* Rule chips list */
+  .rule-list { margin-top: 0.6em; }
+  .rule-row {
+    display: grid;
+    grid-template-columns: 78px 110px 1fr 100px;
+    gap: 0.8em;
+    align-items: center;
+    padding: 0.45em 0.7em;
+    margin-bottom: 0.35em;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 7px;
+    font-size: 0.65em;
+  }
+  .rule-row .r-id {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .rule-row .r-target {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-blue-soft);
+    font-size: 0.85em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .rule-row .r-desc { color: #f0f4ff; font-weight: 500; line-height: 1.35; }
+  .rule-row .r-impact {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85em;
+    text-align: center;
+    padding: 0.25em 0.5em;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .r-impact.crit { background: rgba(255, 91, 110, 0.18); color: var(--crit); border: 1px solid rgba(255,91,110,0.35); }
+  .r-impact.imp { background: rgba(232, 168, 56, 0.18); color: var(--imp); border: 1px solid rgba(232,168,56,0.35); }
+  .r-impact.norm { background: rgba(111, 168, 214, 0.18); color: var(--norm); border: 1px solid rgba(111,168,214,0.35); }
+  .r-impact.low { background: rgba(138, 160, 196, 0.16); color: var(--low); border: 1px solid rgba(138,160,196,0.30); }
+
+  /* Pipeline visual */
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr 60px 1fr 60px 1fr;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: 1.4em;
+  }
+  .pipe-stage {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px;
+    padding: 0.85em 0.7em;
+    text-align: center;
+  }
+  .pipe-stage .ps-eyebrow {
+    color: var(--os-blue-soft);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 0.3em;
+  }
+  .pipe-stage .ps-title {
+    color: #ffffff;
+    font-size: 0.78em;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.25em;
+  }
+  .pipe-stage .ps-sub {
+    color: #c8d2eb;
+    font-size: 0.55em;
+    line-height: 1.4;
+  }
+  .pipe-stage.audit { border-top: 3px solid var(--os-amber); }
+  .pipe-arrow {
+    text-align: center;
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.2em;
+    font-weight: 800;
+  }
+
+  /* Two column comparison */
+  .vs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6em;
+    margin-top: 0.4em;
+  }
+  .vs-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 1.1em 1.2em;
+    text-align: left;
+  }
+  .vs-card.bad { border-top: 3px solid var(--crit); }
+  .vs-card.good { border-top: 3px solid var(--good); }
+  .vs-card .vs-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 0.4em;
+  }
+  .vs-card.bad .vs-eyebrow { color: var(--crit); }
+  .vs-card.good .vs-eyebrow { color: var(--good); }
+  .vs-card .vs-title { color: #ffffff; font-weight: 800; font-size: 1.05em; margin-bottom: 0.4em; }
+  .vs-card pre {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 0.6em 0.8em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    line-height: 1.5;
+    color: #d8def0;
+    margin: 0.4em 0;
+    overflow: hidden;
+    white-space: pre-wrap;
+  }
+  .vs-card pre .k { color: var(--os-amber-soft); }
+  .vs-card pre .s { color: #ffd1a0; }
+  .vs-card pre .miss { color: var(--crit); text-decoration: line-through; }
+  .vs-card pre .ok { color: var(--good); }
+  .vs-card .vs-foot {
+    color: #c8d2eb;
+    font-size: 0.65em;
+    line-height: 1.45;
+    margin-top: 0.5em;
+  }
+
+  /* Big stat */
+  .big-stat { text-align: center; margin-top: 0.5em; }
+  .big-stat .stat {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 4.5em;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--os-amber);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.2em;
+  }
+  .big-stat .stat-flow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.95em;
+    color: var(--os-blue-soft);
+    letter-spacing: 0.05em;
+    margin-top: 0.3em;
+    margin-bottom: 0.7em;
+    font-weight: 700;
+  }
+
+  /* CTA */
+  .cta-slide { text-align: center; }
+  .cta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.2em;
+    align-items: center;
+    text-align: left;
+    margin-top: 0.6em;
+  }
+  .cta-text { text-align: left; }
+  .cta-text .cta-line {
+    font-size: 1.2em;
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.6em;
+  }
+  .cta-text .cta-line em { color: var(--os-amber); font-style: normal; }
+  .cta-text .cta-sub {
+    color: var(--os-blue-soft);
+    font-size: 0.8em;
+    line-height: 1.5;
+    margin-bottom: 1em;
+  }
+  .cta-url-line {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-size: 0.95em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .cta-qr { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cta-qr img {
+    width: 100%;
+    max-width: 260px;
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
+    display: block;
+    margin: 0 auto 0.5em auto;
+  }
+  .cta-qr-caption {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Try-it-now closing slide */
+  .try-slide { text-align: left; padding: 0 !important; }
+  .try-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 1.6em; align-items: center; }
+  .try-text { text-align: left; }
+  .try-text h2 em { color: var(--os-amber); font-style: normal; }
+  .try-url {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-size: 1.4em;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    margin-bottom: 0.7em;
+  }
+  .try-foot { color: #d8def0; font-size: 0.65em; letter-spacing: 0.04em; }
+  .try-foot strong { color: #ffffff; }
+  .try-shot { display: flex; justify-content: center; align-items: center; }
+  .try-shot img {
+    max-width: 100%;
+    max-height: 75vh;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 14px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    opacity: 0.85;
+    z-index: 30;
+  }
+  .watermark {
+    position: fixed;
+    top: 22px;
+    right: 28px;
+    width: 130px;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  .watermark img { width: 100%; height: auto; display: block; filter: brightness(0) invert(1); }
+  body.hide-watermark .watermark { display: none; }
+
+  .reveal .progress { color: var(--os-amber); }
+  .reveal .controls { color: rgba(255, 255, 255, 0.7) !important; }
+
+  /* Source attribution chip */
+  .src-chip {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.45);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+
+<body>
+<div class="watermark" id="watermark">
+  <img src="assets/opensearch-logo-official.svg" alt="OpenSearch">
+</div>
+<div class="footer">
+  <span>Quality In, Value Out · Benchmarking Instrumentation</span>
+  <span>Anirudha Jadhav (AWS)</span>
+</div>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ 1. COVER ============ -->
+    <section class="cover">
+      <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
+      <div class="eyebrow">OpenSearch Observability · Webinar</div>
+      <h1>Quality In, Value Out</h1>
+      <div class="subtitle">Benchmarking your instrumentation for <strong>OpenSearch Observability</strong> — and the AI agents that depend on it</div>
+      <div class="speakers">
+        <strong>Anirudha Jadhav</strong> · AWS · OpenSearch Observability
+      </div>
+    </section>
+
+    <!-- ============ 2. THE OLD MANTRA ============ -->
+    <section class="blind">
+      <div class="eyebrow">For a decade, we said</div>
+      <div class="megaline">"Collect <em>everything</em>."</div>
+      <p class="sub">Every log line. Every span. Every metric. Every label. <strong>Sort it out later.</strong></p>
+    </section>
+
+    <!-- ============ 3. WHAT WE GOT ============ -->
+    <section class="blind">
+      <div class="eyebrow">What we got instead</div>
+      <div class="megaline">A <em>data swamp</em>.<br>And a <em>data tax</em>.</div>
+      <p class="sub">Skyrocketing vendor bills. Unreliable dashboards. Alerts that don't fire. Traces that don't connect. <strong>And now — AI agents reasoning over it all.</strong></p>
+    </section>
+
+    <!-- ============ 4. AI AMPLIFIES IT ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">The agentic era amplifies the problem</div>
+      <h2 style="text-align: center; margin-bottom: 0.4em;">Bad telemetry doesn't just confuse <em>humans</em> anymore.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.9em; max-width: 86%; margin: 0 auto 0.8em auto;">
+        Your AI agent reads the same dashboards, the same traces, the same logs you do — and reasons over them. <strong>Garbage in. Hallucinated MTTR out.</strong>
+      </p>
+      <div class="reveal-grid">
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Dashboards</div>
+          <div class="rc-title">Misleading aggregations</div>
+          <div class="rc-desc">Inconsistent units, missing <code>service.name</code>, and high-cardinality labels mean p99 charts that average across unrelated workloads.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Alerts</div>
+          <div class="rc-title">False quiet, false noise</div>
+          <div class="rc-desc">Without bound cardinality and consistent buckets, thresholds drift. Pages fire on noise. Real incidents stay invisible.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">AI reasoning traces</div>
+          <div class="rc-title">Confidently wrong</div>
+          <div class="rc-desc">Agents pattern-match on attributes you forgot to set. The answer looks plausible. The conclusion is fabricated.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 5. NEW MANTRA ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">The mandate is shifting</div>
+      <div class="mantra-grid">
+        <div class="mantra-card old">
+          <div class="m-eyebrow">Yesterday</div>
+          <div class="m-quote">Collect everything.</div>
+          <div class="m-body">Volume = visibility. Bigger pipelines, bigger bills, bigger swamps. Quality was assumed, never measured.</div>
+        </div>
+        <div class="mantra-card now">
+          <div class="m-eyebrow">Today</div>
+          <div class="m-quote"><em>Quality in. Value out.</em></div>
+          <div class="m-body">Measure the data <strong>before it hits the cluster</strong>. High-fidelity instrumentation is the prerequisite for every dashboard, alert, and AI reasoning trace downstream.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. INTRODUCE THE SCORE ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Introducing</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em;">The <em>Instrumentation Score</em>.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 80%; margin: 0 auto 0.8em auto;">
+        A vendor-neutral, community-driven benchmark for OpenTelemetry quality. <strong>0–100. Per service. Computed from your OTLP stream.</strong>
+      </p>
+      <div class="score-stage">
+        <div class="score-dial">
+          <svg viewBox="0 0 280 280">
+            <circle class="ring-bg" cx="140" cy="140" r="120"></circle>
+            <circle class="ring-fg" cx="140" cy="140" r="120"></circle>
+          </svg>
+          <div class="score-num">
+            <div class="n">71</div>
+            <div class="l">Needs improvement</div>
+          </div>
+        </div>
+        <div class="score-bands">
+          <div class="score-band">
+            <div class="band-range">90–100</div>
+            <div><span class="band-label">Excellent</span> · <span class="band-desc">high-standard instrumentation</span></div>
+          </div>
+          <div class="score-band">
+            <div class="band-range">75–89</div>
+            <div><span class="band-label">Good</span> · <span class="band-desc">solid; minor improvements possible</span></div>
+          </div>
+          <div class="score-band">
+            <div class="band-range">50–74</div>
+            <div><span class="band-label">Needs improvement</span> · <span class="band-desc">tangible issues to remediate</span></div>
+          </div>
+          <div class="score-band">
+            <div class="band-range">0–49</div>
+            <div><span class="band-label">Poor</span> · <span class="band-desc">significant problems; urgent action</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="src-chip">source: instrumentation-score.com · OllyGarden · v0.1</div>
+    </section>
+
+    <!-- ============ 7. WEIGHTED SCORING ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">How it scores</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em;">Weighted by <em>impact</em>, not by count.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 84%; margin: 0 auto 0.4em auto;">
+        Borrowed from CVSS and SSL Labs: <strong>critical flaws cap the score</strong>, not just chip away at it. Fix the high-leverage rules first — that's where IS forces you to look.
+      </p>
+      <div class="weight-grid">
+        <div class="weight-card crit">
+          <div class="w-num">40</div>
+          <div class="w-tier">Critical</div>
+          <div class="w-desc">Breaks the foundation. Missing <code>service.name</code>. Score gets capped here.</div>
+        </div>
+        <div class="weight-card imp">
+          <div class="w-num">30</div>
+          <div class="w-tier">Important</div>
+          <div class="w-desc">Misleads analysis. Cardinality blow-ups, root <code>CLIENT</code> spans, <code>k8s.pod.uid</code> missing.</div>
+        </div>
+        <div class="weight-card norm">
+          <div class="w-num">20</div>
+          <div class="w-tier">Normal</div>
+          <div class="w-desc">Hurts efficiency. Logs used as metrics. Excessive internal spans.</div>
+        </div>
+        <div class="weight-card low">
+          <div class="w-num">10</div>
+          <div class="w-tier">Low</div>
+          <div class="w-desc">Hygiene. SDK/runtime version drift, unsupported language versions.</div>
+        </div>
+      </div>
+      <p style="text-align: center; color: #aab8d4; font-size: 0.6em; margin-top: 1em; font-family: 'JetBrains Mono', monospace;">
+        Score = Σ (passed × weight) ÷ Σ (total × weight) × 100
+      </p>
+    </section>
+
+    <!-- ============ 8. RULES SAMPLE ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">A sample of the rule set</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em; font-size: 1.5em;">What IS actually checks.</h2>
+      <div class="rule-list">
+        <div class="rule-row">
+          <div class="r-id">RES-005</div>
+          <div class="r-target">Resource</div>
+          <div class="r-desc"><code>service.name</code> is present and non-empty.</div>
+          <div class="r-impact crit">Critical</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">RES-003</div>
+          <div class="r-target">Resource</div>
+          <div class="r-desc"><code>k8s.pod.uid</code> present on K8s telemetry — survives service meshes where pod IPs don't.</div>
+          <div class="r-impact imp">Important</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">RES-004</div>
+          <div class="r-target">Multi</div>
+          <div class="r-desc">Semantic-convention attributes appear at the right OTLP level (resource vs span vs metric).</div>
+          <div class="r-impact imp">Important</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">SPA-003</div>
+          <div class="r-target">Span</div>
+          <div class="r-desc">Span names have bound cardinality — no embedded SQL literals or path params.</div>
+          <div class="r-impact imp">Important</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">SPA-004</div>
+          <div class="r-target">Span</div>
+          <div class="r-desc">Root spans are not <code>CLIENT</code> — usually means lost trace context or missing instrumentation.</div>
+          <div class="r-impact imp">Important</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">MET-001</div>
+          <div class="r-target">Metric</div>
+          <div class="r-desc">Metric attribute keys stay under 10,000 unique values per hour.</div>
+          <div class="r-impact imp">Important</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">MET-003</div>
+          <div class="r-target">Metric</div>
+          <div class="r-desc">A given metric name uses the <em>same unit</em> across all time series for 14 days.</div>
+          <div class="r-impact imp">Important</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">LOG-001</div>
+          <div class="r-target">Log</div>
+          <div class="r-desc"><code>DEBUG</code> logs are not on in production for more than 14 days.</div>
+          <div class="r-impact imp">Important</div>
+        </div>
+        <div class="rule-row">
+          <div class="r-id">SPA-002</div>
+          <div class="r-target">Span</div>
+          <div class="r-desc">No orphan spans — every <code>parent_span_id</code> resolves within the trace.</div>
+          <div class="r-impact norm">Normal</div>
+        </div>
+      </div>
+      <div class="src-chip">RES · SPA · MET · LOG · SDK rule families · github.com/instrumentation-score/spec</div>
+    </section>
+
+    <!-- ============ 9. CONCRETE EXAMPLE ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">What a single rule fix looks like</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em; font-size: 1.5em;">SPA-003 · <em>Bound cardinality on span names.</em></h2>
+      <div class="vs-grid">
+        <div class="vs-card bad">
+          <div class="vs-eyebrow">Before · cardinality bomb</div>
+          <div class="vs-title">Each request = a new span name</div>
+<pre><span class="k">name:</span> <span class="miss">"GET /users/8472/orders/9c1f"</span>
+<span class="k">name:</span> <span class="miss">"GET /users/2018/orders/3a7d"</span>
+<span class="k">name:</span> <span class="miss">"GET /users/9921/orders/be40"</span>
+<span class="k">name:</span> <span class="miss">"SELECT * FROM o WHERE id=8472"</span></pre>
+          <div class="vs-foot">Indexes blow up. Group-by is meaningless. Service-detail latency charts fragment into thousands of one-sample series.</div>
+        </div>
+        <div class="vs-card good">
+          <div class="vs-eyebrow">After · routes &amp; statements</div>
+          <div class="vs-title">Templated, low-cardinality</div>
+<pre><span class="k">name:</span> <span class="ok">"GET /users/{id}/orders/{order_id}"</span>
+<span class="k">attrs:</span>
+  http.route: <span class="s">"/users/{id}/orders/{order_id}"</span>
+  user.id: <span class="s">"8472"</span>
+  db.statement: <span class="s">"SELECT * FROM o WHERE id = ?"</span></pre>
+          <div class="vs-foot">Aggregations work. Service maps are stable. AI agents can actually <em>reason</em> about <code>/users/{id}/orders/{order_id}</code> as a single endpoint.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10. AUDIT BEFORE THE CLUSTER ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Where IS sits in your pipeline</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.5em;">Audit your data <em>before</em> it hits the cluster.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 86%; margin: 0 auto;">
+        IS reads the OTLP stream itself — same wire format your apps already emit. Score per <code>service.name</code>, sliding 30-day window.
+      </p>
+      <div class="pipeline">
+        <div class="pipe-stage">
+          <div class="ps-eyebrow">Apps</div>
+          <div class="ps-title">OTel SDKs</div>
+          <div class="ps-sub">Traces · metrics · logs</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage audit">
+          <div class="ps-eyebrow">Quality gate</div>
+          <div class="ps-title">Instrumentation Score</div>
+          <div class="ps-sub">OTLP audit · 0–100 per service</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage">
+          <div class="ps-eyebrow">Pipeline</div>
+          <div class="ps-title">OTel Collector</div>
+          <div class="ps-sub">Sample · enrich · route</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-stage">
+          <div class="ps-eyebrow">Backend</div>
+          <div class="ps-title">OpenSearch</div>
+          <div class="ps-sub">APM · dashboards · agents</div>
+        </div>
+      </div>
+      <p style="text-align: center; color: #c8d2eb; font-size: 0.7em; margin-top: 1.4em; max-width: 78%; margin-left: auto; margin-right: auto;">
+        High score = the rest of the stack works as designed. <strong>Low score = every downstream layer is lying to you.</strong>
+      </p>
+    </section>
+
+    <!-- ============ 11. APM PROOF — SERVICE CATALOG ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Mode 02 · APM</div>
+      <h3>Where high-quality data pays off</h3>
+      <div class="feature-sub">Service catalog: <em>latency, throughput, faults, SLOs</em> — only as good as the <code>service.name</code>, units, and route templates that feed it.</div>
+      <div class="feature-shot"><img src="assets/shot-07-services.png" alt="Service catalog with SLO health"></div>
+    </section>
+
+    <!-- ============ 12. APP MAP PROOF ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Application Map</div>
+      <h3>One topology, only if attributes line up</h3>
+      <div class="feature-sub">When semantic conventions are at the right level (RES-004) and span context is unbroken (SPA-002, SPA-004), <em>agents and services share one map</em>.</div>
+      <div class="feature-shot"><img src="assets/shot-04-appmap.png" alt="Unified agent + service application map"></div>
+    </section>
+
+    <!-- ============ 13. AGENT TRACE PROOF ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Trace Analytics</div>
+      <h3>The AI reasoning trace itself</h3>
+      <div class="feature-sub">Every LLM chat span, every tool call — input, output, parent. <em>Quality data here is what makes correlated agent debugging possible at all.</em></div>
+      <div class="feature-shot"><img src="assets/shot-05-agent-trace.png" alt="Agent trace with conversation and tool search"></div>
+    </section>
+
+    <!-- ============ 14. SLO PROOF ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">SLO &amp; Burn-rate</div>
+      <h3>SLOs you can actually trust</h3>
+      <div class="feature-sub">Burn-rate alerts depend on <em>consistent units (MET-002), bound cardinality (MET-001), and matched buckets (MET-004)</em>. IS validates the inputs before the alert ever fires.</div>
+      <div class="feature-shot"><img src="assets/shot-10-slo.png" alt="SLO with burn-rate alerts"></div>
+    </section>
+
+    <!-- ============ 15. ATLASSIAN-STYLE APPROACH ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">How top-tier teams operationalize this</div>
+      <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">Weighted scoring → <em>prioritized backlog</em>.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.82em; max-width: 84%; margin: 0 auto 0.6em auto;">
+        The pattern at teams running OpenTelemetry at scale: stop trying to fix everything. <strong>Use the score to rank instrumentation debt the same way you rank security debt.</strong>
+      </p>
+      <div class="reveal-grid">
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Step 1</div>
+          <div class="rc-title">Score every service, weekly</div>
+          <div class="rc-desc">One number per <code>service.name</code>. Track delta over time. Make the score a tile on the platform team dashboard.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Step 2</div>
+          <div class="rc-title">Fix Critical → Important first</div>
+          <div class="rc-desc">A single Critical fix moves the needle more than ten Lows. Backlog by impact tier — same prioritization muscle as CVSS.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Step 3</div>
+          <div class="rc-title">Make it a quality gate</div>
+          <div class="rc-desc">CI fails when a service ships below threshold. Single Source of Truth becomes <em>provable</em>, not aspirational.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 16. NEUTRALITY ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-foundation.png" alt="OpenSearch Software Foundation under the Linux Foundation">
+    </section>
+
+    <!-- ============ 17. NEUTRALITY ARGUMENT ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Why the substrate matters</div>
+      <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">Neutrality is a <em>strategy</em>, not a checkbox.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 86%; margin: 0 auto 0.7em auto;">
+        Instrumentation Score is vendor-neutral. <strong>So is the cluster underneath.</strong> Apache 2.0, Linux Foundation governance — the same stewardship as Kubernetes and OpenTelemetry.
+      </p>
+      <div class="reveal-grid">
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Apache 2.0</div>
+          <div class="rc-title">No license traps</div>
+          <div class="rc-desc">Self-host anywhere. Fork if you must. The data and the engine both stay yours.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">OTel-native</div>
+          <div class="rc-title">Open wire, open queries</div>
+          <div class="rc-desc">OTLP in. PPL and standard query APIs out. No proprietary agents to rip out when priorities change.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">LF governance</div>
+          <div class="rc-title">Data sovereignty at scale</div>
+          <div class="rc-desc">A neutral foundation is the only durable answer to the data tax. The vendor doesn't own your observability.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 18. TAKEAWAYS ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">If you take three things home</div>
+      <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">The new KPI for observability.</h2>
+      <div class="reveal-grid">
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Define quality</div>
+          <div class="rc-title">Instrumentation Score, 0–100</div>
+          <div class="rc-desc">Stop arguing about "good telemetry." Let the rules — and the weights — settle it. RES, SPA, MET, LOG, SDK.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Cure the swamp</div>
+          <div class="rc-title">Audit before the cluster</div>
+          <div class="rc-desc">IS reads OTLP. Score per service. Fail CI on regressions. Stop paying the data tax for telemetry that lies.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Stay neutral</div>
+          <div class="rc-title">Open standard. Open engine.</div>
+          <div class="rc-desc">OpenTelemetry + OpenSearch + Apache 2.0. The only stack where the score stays portable — and so do you.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 19. CTA ============ -->
+    <section class="cta-slide">
+      <div class="eyebrow">Try it</div>
+      <h2 style="margin-bottom: 0.2em;">Spin up the <em>OpenSearch Observability sandbox</em>.</h2>
+      <p style="color: var(--os-blue-soft); font-size: 0.9em; margin-bottom: 0.6em;">Bring your OTLP stream. Score it. See what your dashboards have been hiding.</p>
+      <div class="cta-grid">
+        <div class="cta-text">
+          <div class="cta-line">Sandbox running <em>live</em>.</div>
+          <div class="cta-sub">Full APM, agent traces, dashboards, SLOs — pre-loaded with the demo OTel stream. Apache 2.0, self-host anywhere.</div>
+          <div class="cta-url-line">otel.opensearch.org</div>
+          <div class="cta-url-line" style="font-size: 0.8em; color: var(--os-blue-soft); margin-top: 0.3em;">spec · github.com/instrumentation-score/spec</div>
+        </div>
+        <div class="cta-qr">
+          <img src="assets/playground-qr.png" alt="QR code to the playground">
+          <div class="cta-qr-caption">scan · try it live</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 20. CLOSING / TRY IT NOW ============ -->
+    <section class="try-slide">
+      <div class="try-grid">
+        <div class="try-text">
+          <div class="eyebrow" style="margin-bottom: 0.5em;">Quality In, Value Out</div>
+          <h2 style="font-size: 1.85em; line-height: 1.1; margin-bottom: 0.4em;">High-fidelity telemetry.<br><em>Open infrastructure.</em></h2>
+          <p style="color: var(--os-blue-soft); font-size: 0.78em; line-height: 1.5; margin-bottom: 0.7em; max-width: 95%;">
+            OpenSearch Observability + Instrumentation Score — the neutral, scalable engine for a high-scoring observability practice.
+          </p>
+          <div class="try-url">otel.opensearch.org</div>
+          <div class="try-foot" style="margin-top: 1em;">
+            <strong>Anirudha Jadhav</strong> · AWS · OpenSearch Observability
+          </div>
+        </div>
+        <div class="try-shot">
+          <img src="assets/site-hero.png" alt="otel.opensearch.org — OpenSearch Observability Stack landing page">
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    controls: true,
+    progress: true,
+    slideNumber: 'c/t',
+    history: true,
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 860,
+    margin: 0.05,
+    minScale: 0.5,
+    maxScale: 2.5,
+  });
+
+  function updateWatermark() {
+    var current = Reveal.getCurrentSlide();
+    if (!current) return;
+    var hide = current.classList.contains('cover') ||
+               current.classList.contains('image-slide');
+    document.body.classList.toggle('hide-watermark', hide);
+  }
+  Reveal.on('ready', updateWatermark);
+  Reveal.on('slidechanged', updateWatermark);
+</script>
+</body>
+</html>
