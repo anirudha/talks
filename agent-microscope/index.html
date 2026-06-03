@@ -28,6 +28,9 @@
     --agent-purple: #9d7cff;
     --agent-pink: #ff5b8a;
     --tool-cyan: #5fd6e0;
+    --content-yellow: #ffd86f;
+    --embed-pink: #ff8fb1;
+    --retrieval-green: #7ce0a0;
   }
 
   .reveal {
@@ -56,7 +59,6 @@
   .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
   .reveal li { margin: 0.4em 0; }
   .reveal li::marker { color: var(--os-amber); }
-
   .reveal strong { color: #ffffff; font-weight: 700; }
   .reveal em { color: var(--os-amber); font-style: italic; font-weight: 600; }
 
@@ -70,8 +72,6 @@
     font-weight: 600;
   }
 
-  .reveal section.eyebrow-slide,
-  .reveal section.center-slide,
   .reveal section.cover { text-align: center; }
 
   .eyebrow {
@@ -83,25 +83,21 @@
     margin-bottom: 1em;
   }
 
+  /* Cover */
   .cover h1 { font-size: 2.7em; line-height: 1.05; margin-bottom: 0.4em; }
   .cover .subtitle {
     color: var(--os-blue-soft);
     font-size: 1em;
-    margin-bottom: 1.4em;
+    margin-bottom: 1.2em;
     font-weight: 500;
     max-width: 86%;
     margin-left: auto;
     margin-right: auto;
   }
   .cover .speakers-row {
-    display: flex;
-    justify-content: center;
-    gap: 2em;
-    margin-top: 1.2em;
-    flex-wrap: wrap;
-    color: #d8def0;
-    font-size: 0.62em;
-    letter-spacing: 0.04em;
+    display: flex; justify-content: center; gap: 2em;
+    margin-top: 1.2em; flex-wrap: wrap;
+    color: #d8def0; font-size: 0.62em; letter-spacing: 0.04em;
   }
   .cover .speakers-row .sp strong { color: #ffffff; display: block; font-size: 1.1em; letter-spacing: 0; margin-bottom: 0.2em; }
   .cover .speakers-row .sp .role { color: var(--os-blue-soft); }
@@ -121,367 +117,316 @@
     filter: brightness(0) invert(1);
   }
 
-  .image-slide {
-    text-align: center;
-    padding: 0 !important;
-    height: 100%;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+  /* Stack overview intro */
+  .stack-intro { text-align: center; }
+  .stack-intro .megaline {
+    font-size: 2.6em; font-weight: 800; line-height: 1.05;
+    color: #ffffff; margin-bottom: 0.5em; letter-spacing: -0.02em;
   }
-  .image-slide img {
-    max-width: 100%;
-    max-height: 88vh;
-    width: auto;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
-    object-fit: contain;
+  .stack-intro .megaline em { color: var(--os-amber); font-style: normal; }
+  .stack-intro .stack-sub {
+    color: var(--os-blue-soft); font-size: 0.95em; font-weight: 500;
+    max-width: 72%; margin: 0 auto;
   }
-
-  .feature-slide {
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 0.4em 0 0 0 !important;
-    height: 100%;
-    text-align: center;
+  .stack-intro .pill-row {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.6em; margin-top: 1.4em;
   }
-  .feature-slide .feature-eyebrow {
-    color: var(--os-amber);
+  .stack-intro .pill {
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.5em;
-    font-weight: 800;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    margin-bottom: 0.25em;
-  }
-  .feature-slide h3 {
-    color: #ffffff;
-    font-size: 1.4em;
-    font-weight: 800;
-    margin-bottom: 0.25em;
-    line-height: 1.15;
-  }
-  .feature-slide .feature-sub {
-    color: var(--os-blue-soft);
-    font-size: 0.7em;
-    font-weight: 500;
-    max-width: 80%;
-    line-height: 1.45;
-    margin-bottom: 0.55em;
-  }
-  .feature-slide .feature-sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
-  .feature-shot {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
-  }
-  .feature-shot img {
-    max-width: 90%;
-    max-height: 70vh;
-    width: auto;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45);
-    object-fit: contain;
+    font-size: 0.55em; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 800;
+    padding: 0.5em 1em; border-radius: 100px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: var(--os-amber);
   }
 
   .blind { text-align: center; }
   .blind .megaline {
-    font-size: 2.4em;
-    font-weight: 800;
-    line-height: 1.1;
-    color: #ffffff;
-    margin-bottom: 0.5em;
-    letter-spacing: -0.02em;
+    font-size: 2.4em; font-weight: 800; line-height: 1.1;
+    color: #ffffff; margin-bottom: 0.5em; letter-spacing: -0.02em;
   }
   .blind .megaline em { color: var(--os-amber); font-style: normal; }
   .blind .sub {
-    font-size: 1em;
-    color: var(--os-blue-soft);
-    font-weight: 500;
-    max-width: 78%;
-    margin: 0 auto;
+    font-size: 1em; color: var(--os-blue-soft); font-weight: 500;
+    max-width: 78%; margin: 0 auto;
   }
 
-  /* Pillar divider slides */
+  /* Pillar dividers */
   .pillar { text-align: center; }
   .pillar .pillar-num {
     font-family: "JetBrains Mono", monospace;
-    color: var(--os-amber);
-    font-size: 0.55em;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    font-weight: 800;
-    margin-bottom: 1.2em;
+    color: var(--os-amber); font-size: 0.55em;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 1.2em;
   }
-  .pillar h2 {
-    font-size: 3em;
-    line-height: 1.05;
-    margin-bottom: 0.4em;
-    letter-spacing: -0.02em;
-  }
+  .pillar h2 { font-size: 3em; line-height: 1.05; margin-bottom: 0.4em; letter-spacing: -0.02em; }
   .pillar h2 em { color: var(--os-amber); font-style: normal; }
   .pillar .pillar-sub {
-    color: var(--os-blue-soft);
-    font-size: 1em;
-    font-weight: 500;
-    max-width: 70ch;
-    margin: 0 auto;
-    line-height: 1.5;
+    color: var(--os-blue-soft); font-size: 1em; font-weight: 500;
+    max-width: 72ch; margin: 0 auto; line-height: 1.5;
   }
   .pillar .pillar-sub strong { color: #ffffff; }
 
-  /* Health SLI grid */
-  .sli-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.9em 1.2em;
-    margin-top: 0.8em;
+  /* Image slide */
+  .image-slide {
+    text-align: center; padding: 0 !important;
+    height: 100%; display: flex !important;
+    align-items: center; justify-content: center;
   }
-  .sli-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-left: 3px solid var(--os-amber);
-    border-radius: 8px;
-    padding: 0.85em 1em;
-    text-align: left;
-  }
-  .sli-card .sli-name {
-    color: #ffffff;
-    font-size: 0.78em;
-    font-weight: 800;
-    margin-bottom: 0.3em;
-    line-height: 1.2;
-  }
-  .sli-card .sli-name code {
-    font-family: "JetBrains Mono", monospace;
-    background: rgba(232,168,56,0.12);
-    color: var(--os-amber-soft);
-    padding: 0.05em 0.4em;
-    border-radius: 3px;
-    font-size: 0.85em;
-    margin-left: 0.3em;
-    font-weight: 700;
-  }
-  .sli-card .sli-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
-  .sli-card.s1 { border-left-color: var(--os-amber); }
-  .sli-card.s2 { border-left-color: var(--agent-purple); }
-  .sli-card.s3 { border-left-color: var(--tool-cyan); }
-  .sli-card.s4 { border-left-color: var(--good); }
-  .sli-card.s5 { border-left-color: var(--crit); }
-  .sli-card.s6 { border-left-color: var(--os-blue-soft); }
-
-  /* Stack-overview intro slide */
-  .stack-intro { text-align: center; }
-  .stack-intro .megaline {
-    font-size: 2.6em;
-    font-weight: 800;
-    line-height: 1.05;
-    color: #ffffff;
-    margin-bottom: 0.5em;
-    letter-spacing: -0.02em;
-  }
-  .stack-intro .megaline em { color: var(--os-amber); font-style: normal; }
-  .stack-intro .stack-sub {
-    color: var(--os-blue-soft);
-    font-size: 0.95em;
-    font-weight: 500;
-    max-width: 72%;
-    margin: 0 auto;
-  }
-  .stack-intro .pill-row {
-    display: inline-flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.6em;
-    margin-top: 1.4em;
-  }
-  .stack-intro .pill {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.55em;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    font-weight: 800;
-    padding: 0.5em 1em;
-    border-radius: 100px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.18);
-    color: var(--os-amber);
+  .image-slide img {
+    max-width: 100%; max-height: 88vh;
+    width: auto; height: auto; border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45); object-fit: contain;
   }
 
-  /* Three failure modes */
-  .fail-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.2em;
-    margin-top: 1em;
+  /* Feature slide */
+  .feature-slide {
+    display: flex !important; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 0.4em 0 0 0 !important;
+    height: 100%; text-align: center;
   }
+  .feature-slide .feature-eyebrow {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.25em;
+  }
+  .feature-slide h3 {
+    color: #ffffff; font-size: 1.4em; font-weight: 800;
+    margin-bottom: 0.25em; line-height: 1.15;
+  }
+  .feature-slide .feature-sub {
+    color: var(--os-blue-soft); font-size: 0.7em; font-weight: 500;
+    max-width: 80%; line-height: 1.45; margin-bottom: 0.55em;
+  }
+  .feature-slide .feature-sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
+  .feature-shot {
+    flex: 1; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 0;
+  }
+  .feature-shot img {
+    max-width: 90%; max-height: 70vh;
+    width: auto; height: auto; border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45); object-fit: contain;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Failure mode cards */
+  .fail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
   .fail-card {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.18);
     border-top: 3px solid var(--crit);
-    border-radius: 10px;
-    padding: 1em 1em;
-    text-align: left;
-    position: relative;
-  }
-  .fail-card .f-icon {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 1.4em;
-    color: var(--crit);
-    font-weight: 800;
-    margin-bottom: 0.4em;
+    border-radius: 10px; padding: 1em; text-align: left;
   }
   .fail-card .f-eyebrow {
-    color: var(--crit);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.5em;
-    font-weight: 800;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    margin-bottom: 0.4em;
+    color: var(--crit); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.4em;
   }
   .fail-card .f-title { color: #ffffff; font-size: 1em; font-weight: 800; line-height: 1.2; margin-bottom: 0.4em; }
   .fail-card .f-desc { color: #c8d2eb; font-size: 0.65em; line-height: 1.5; }
 
   /* Reveal cards */
-  .reveal-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.2em;
-    margin-top: 1em;
-  }
+  .reveal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
   .reveal-card {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-top: 3px solid var(--os-amber);
-    border-radius: 8px;
-    padding: 1em 1em;
-    text-align: left;
+    border-radius: 8px; padding: 1em; text-align: left;
   }
   .reveal-card .rc-eyebrow {
-    color: var(--os-amber);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.5em;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 0.4em;
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.4em;
   }
   .reveal-card .rc-title { color: #ffffff; font-size: 0.95em; font-weight: 800; line-height: 1.2; margin-bottom: 0.4em; }
   .reveal-card .rc-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+
+  /* 5-stage flow */
+  .flow-grid {
+    display: grid; grid-template-columns: 1fr 30px 1fr 30px 1fr 30px 1fr 30px 1fr;
+    align-items: center; gap: 0.3em; margin-top: 1.2em;
+  }
+  .flow-step {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px; padding: 0.85em 0.6em;
+    text-align: center;
+  }
+  .flow-step .fs-num {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-size: 0.5em; letter-spacing: 0.18em;
+    font-weight: 800; margin-bottom: 0.3em;
+  }
+  .flow-step .fs-title {
+    color: #ffffff; font-size: 0.78em;
+    font-weight: 800; line-height: 1.2; margin-bottom: 0.3em;
+  }
+  .flow-step .fs-sub {
+    color: #c8d2eb; font-size: 0.55em; line-height: 1.4;
+  }
+  .flow-step.s1 { border-top: 3px solid var(--os-amber); }
+  .flow-step.s2 { border-top: 3px solid var(--os-blue-soft); }
+  .flow-step.s3 { border-top: 3px solid var(--agent-purple); }
+  .flow-step.s4 { border-top: 3px solid var(--tool-cyan); }
+  .flow-step.s5 { border-top: 3px solid var(--good); }
+  .flow-arrow {
+    text-align: center; color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1em; font-weight: 800;
+  }
+
+  /* Three views chip row */
+  .views-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1em; margin-top: 0.8em;
+  }
+  .view-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px; padding: 1em;
+    text-align: left;
+  }
+  .view-card .v-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; letter-spacing: 0.2em;
+    text-transform: uppercase; font-weight: 800;
+    margin-bottom: 0.4em;
+  }
+  .view-card .v-title {
+    color: #ffffff; font-size: 1em; font-weight: 800;
+    margin-bottom: 0.4em; line-height: 1.2;
+  }
+  .view-card .v-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+  .view-card.v1 { border-top: 3px solid var(--agent-purple); }
+  .view-card.v2 { border-top: 3px solid var(--tool-cyan); }
+  .view-card.v3 { border-top: 3px solid var(--os-amber); }
+  .view-card.v1 .v-eyebrow { color: var(--agent-purple); }
+  .view-card.v2 .v-eyebrow { color: var(--tool-cyan); }
+  .view-card.v3 .v-eyebrow { color: var(--os-amber); }
+
+  /* Span category badges */
+  .cats-row {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.7em; margin-top: 1em;
+  }
+  .cat-chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62em; font-weight: 800;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.55em 1em; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .cat-chip.agent { color: var(--agent-purple); border-color: rgba(157,124,255,0.5); background: rgba(157,124,255,0.1); }
+  .cat-chip.llm { color: var(--os-amber); border-color: rgba(232,168,56,0.5); background: rgba(232,168,56,0.1); }
+  .cat-chip.tool { color: var(--tool-cyan); border-color: rgba(95,214,224,0.5); background: rgba(95,214,224,0.1); }
+  .cat-chip.content { color: var(--content-yellow); border-color: rgba(255,216,111,0.45); background: rgba(255,216,111,0.08); }
+  .cat-chip.embed { color: var(--embed-pink); border-color: rgba(255,143,177,0.5); background: rgba(255,143,177,0.1); }
+  .cat-chip.retrieval { color: var(--retrieval-green); border-color: rgba(124,224,160,0.5); background: rgba(124,224,160,0.1); }
+
+  /* Aggregate metric row */
+  .metric-row {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 1em; margin-top: 1em;
+  }
+  .metric-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px; padding: 0.9em 0.6em;
+    text-align: center;
+  }
+  .metric-card .m-val {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber);
+    font-size: 1.8em; font-weight: 800;
+    line-height: 1.05; letter-spacing: -0.02em;
+  }
+  .metric-card .m-label {
+    color: #c8d2eb; font-size: 0.55em;
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 700; margin-top: 0.5em;
+  }
 
   /* Hierarchical trace tree mock */
   .trace-tree {
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 12px;
-    padding: 1.4em 1.8em;
-    margin: 1em auto 0 auto;
-    max-width: 88%;
-    text-align: left;
+    border-radius: 12px; padding: 1.2em 1.6em;
+    margin: 0.8em auto 0 auto;
+    max-width: 90%; text-align: left;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
   .trace-row {
-    display: grid;
-    grid-template-columns: 1fr 240px 70px;
-    gap: 1.2em;
-    align-items: center;
-    padding: 0.32em 0;
+    display: grid; grid-template-columns: 1fr 220px 70px;
+    gap: 1em; align-items: center;
+    padding: 0.28em 0;
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.55em;
-    color: #d8def0;
+    font-size: 0.55em; color: #d8def0;
   }
   .trace-row .tr-label .indent { color: rgba(255,255,255,0.3); margin-right: 0.4em; }
   .trace-row .tr-label .kind {
-    display: inline-block;
-    font-size: 0.85em;
-    font-weight: 800;
-    padding: 0.05em 0.5em;
-    border-radius: 3px;
-    margin-right: 0.5em;
-    letter-spacing: 0.08em;
+    display: inline-block; font-size: 0.85em; font-weight: 800;
+    padding: 0.05em 0.5em; border-radius: 3px;
+    margin-right: 0.5em; letter-spacing: 0.08em;
   }
   .kind.agent { background: rgba(157,124,255,0.2); color: #c4b3ff; border: 1px solid rgba(157,124,255,0.4); }
   .kind.llm { background: rgba(232,168,56,0.2); color: var(--os-amber-soft); border: 1px solid rgba(232,168,56,0.4); }
   .kind.tool { background: rgba(95,214,224,0.18); color: var(--tool-cyan); border: 1px solid rgba(95,214,224,0.4); }
-  .kind.svc { background: rgba(111,168,214,0.2); color: var(--os-blue-soft); border: 1px solid rgba(111,168,214,0.4); }
+  .kind.retrieval { background: rgba(124,224,160,0.18); color: var(--retrieval-green); border: 1px solid rgba(124,224,160,0.4); }
   .kind.err { background: rgba(255,91,110,0.22); color: var(--crit); border: 1px solid rgba(255,91,110,0.4); }
   .trace-row .tr-name { color: #ffffff; font-weight: 600; }
   .trace-row .tr-bar { position: relative; height: 9px; background: rgba(255,255,255,0.06); border-radius: 3px; }
-  .trace-row .tr-bar .bar-fill { position: absolute; top: 0; bottom: 0; background: var(--os-amber); border-radius: 3px; }
+  .trace-row .tr-bar .bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
   .trace-row .tr-bar .bar-fill.agent { background: var(--agent-purple); }
   .trace-row .tr-bar .bar-fill.llm { background: var(--os-amber); }
   .trace-row .tr-bar .bar-fill.tool { background: var(--tool-cyan); }
-  .trace-row .tr-bar .bar-fill.svc { background: var(--os-blue); }
+  .trace-row .tr-bar .bar-fill.retrieval { background: var(--retrieval-green); }
   .trace-row .tr-bar .bar-fill.err { background: var(--crit); }
   .trace-row .tr-time { font-size: 0.85em; color: var(--os-amber); text-align: right; font-weight: 700; }
   .trace-row.fail .tr-name { color: var(--crit); }
 
-  /* PPL code block */
-  .ppl-block {
-    background: rgba(0, 0, 0, 0.42);
+  /* Code block */
+  .code-block {
+    background: rgba(0, 0, 0, 0.45);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-left: 3px solid var(--os-amber);
-    border-radius: 8px;
-    padding: 1em 1.2em;
-    margin: 0.7em auto 0 auto;
-    max-width: 88%;
-    text-align: left;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
-  }
-  .ppl-block pre {
+    border-radius: 8px; padding: 1em 1.3em;
+    margin: 0.7em auto 0 auto; max-width: 88%;
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.6em;
-    line-height: 1.6;
-    color: #d8def0;
-    margin: 0;
+    font-size: 0.6em; color: #d8def0;
+    line-height: 1.7; text-align: left;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
     white-space: pre-wrap;
   }
-  .ppl-block .kw { color: var(--os-amber); font-weight: 700; }
-  .ppl-block .fn { color: #c4b3ff; }
-  .ppl-block .str { color: #ffd1a0; }
-  .ppl-block .num { color: var(--good); }
-  .ppl-block .com { color: rgba(255,255,255,0.4); font-style: italic; }
+  .code-block .com { color: rgba(255,255,255,0.4); font-style: italic; }
+  .code-block .kw { color: var(--os-amber); font-weight: 700; }
+  .code-block .fn { color: #c4b3ff; }
+  .code-block .str { color: #ffd1a0; }
+  .code-block .num { color: var(--good); }
 
   /* Investigation walkthrough */
   .walk-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.6em;
-    margin-top: 1em;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0.6em; margin-top: 1em;
   }
   .walk-step {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    padding: 0.95em 0.85em;
-    text-align: left;
-    position: relative;
+    border-radius: 10px; padding: 0.95em 0.85em;
+    text-align: left; position: relative;
   }
   .walk-step .ws-num {
-    position: absolute;
-    top: 0.5em;
-    right: 0.7em;
+    position: absolute; top: 0.5em; right: 0.7em;
     font-family: "JetBrains Mono", monospace;
-    color: rgba(255,255,255,0.18);
-    font-weight: 800;
-    font-size: 1.5em;
+    color: rgba(255,255,255,0.18); font-weight: 800; font-size: 1.5em;
   }
   .walk-step .ws-eyebrow {
-    color: var(--os-amber);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.45em;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 0.35em;
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.35em;
   }
   .walk-step .ws-title { color: #ffffff; font-size: 0.78em; font-weight: 800; line-height: 1.25; margin-bottom: 0.3em; }
   .walk-step .ws-desc { color: #c8d2eb; font-size: 0.55em; line-height: 1.5; }
@@ -490,183 +435,182 @@
   .walk-step.s3 { border-top: 3px solid var(--agent-purple); }
   .walk-step.s4 { border-top: 3px solid var(--good); }
 
-  /* Golden path comparison */
-  .golden-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.4em;
-    margin-top: 0.5em;
+  /* Judge result card */
+  .judge-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1.4em; margin-top: 0.4em;
   }
-  .golden-card {
+  .judge-card {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 12px;
-    padding: 1.1em 1.2em;
+    border-radius: 12px; padding: 1.1em 1.2em;
   }
-  .golden-card.gold { border-top: 3px solid var(--good); }
-  .golden-card.live { border-top: 3px solid var(--crit); }
-  .golden-card .gc-eyebrow {
+  .judge-card.gold { border-top: 3px solid var(--good); }
+  .judge-card.live { border-top: 3px solid var(--os-amber); }
+  .judge-card .gc-eyebrow {
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.55em;
-    font-weight: 800;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    font-size: 0.55em; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase;
     margin-bottom: 0.4em;
   }
-  .golden-card.gold .gc-eyebrow { color: var(--good); }
-  .golden-card.live .gc-eyebrow { color: var(--crit); }
-  .golden-card .gc-title { color: #ffffff; font-weight: 800; font-size: 1em; margin-bottom: 0.5em; }
-  .golden-card .gc-trace {
+  .judge-card.gold .gc-eyebrow { color: var(--good); }
+  .judge-card.live .gc-eyebrow { color: var(--os-amber); }
+  .judge-card .gc-title { color: #ffffff; font-weight: 800; font-size: 1em; margin-bottom: 0.5em; }
+  .judge-card .gc-trace {
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.55em;
-    line-height: 1.7;
+    font-size: 0.55em; line-height: 1.7;
     color: #d8def0;
   }
-  .golden-card .gc-trace .ag { color: #c4b3ff; font-weight: 700; }
-  .golden-card .gc-trace .tl { color: var(--tool-cyan); font-weight: 700; }
-  .golden-card .gc-trace .lm { color: var(--os-amber); font-weight: 700; }
-  .golden-card .gc-trace .ng { color: var(--crit); font-weight: 700; }
-  .golden-card .gc-trace .ok { color: var(--good); font-weight: 700; }
-  .golden-card .gc-foot {
-    color: #c8d2eb;
-    font-size: 0.62em;
-    line-height: 1.45;
+  .judge-card .gc-trace .ag { color: #c4b3ff; font-weight: 700; }
+  .judge-card .gc-trace .tl { color: var(--tool-cyan); font-weight: 700; }
+  .judge-card .gc-trace .lm { color: var(--os-amber); font-weight: 700; }
+  .judge-card .gc-trace .rt { color: var(--retrieval-green); font-weight: 700; }
+  .judge-card .gc-trace .ng { color: var(--crit); font-weight: 700; }
+  .judge-card .gc-trace .ok { color: var(--good); font-weight: 700; }
+  .judge-card .gc-foot {
+    color: #c8d2eb; font-size: 0.62em; line-height: 1.45;
     margin-top: 0.7em;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 0.6em;
+    border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.6em;
   }
+  .judge-card .verdict {
+    margin-top: 0.7em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em; font-weight: 800;
+    padding: 0.5em 0.7em; border-radius: 6px;
+    letter-spacing: 0.05em;
+  }
+  .judge-card .verdict.pass { background: rgba(76,209,160,0.16); color: var(--good); border: 1px solid rgba(76,209,160,0.4); }
+  .judge-card .verdict.fail { background: rgba(232,168,56,0.16); color: var(--os-amber); border: 1px solid rgba(232,168,56,0.4); }
+  .judge-card .verdict .verdict-line { display: block; margin-top: 0.3em; color: #d8def0; font-weight: 600; letter-spacing: 0; }
 
   /* Use case grid */
   .uc-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.1em;
-    margin-top: 0.8em;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.1em; margin-top: 0.8em;
   }
   .uc-card {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 10px;
-    padding: 1em;
-    text-align: left;
+    border-radius: 10px; padding: 1em; text-align: left;
   }
   .uc-card .uc-icon {
-    font-family: "JetBrains Mono", monospace;
-    color: var(--os-amber);
-    font-size: 0.55em;
-    letter-spacing: 0.18em;
-    font-weight: 800;
-    margin-bottom: 0.35em;
-    text-transform: uppercase;
+    font-family: "JetBrains Mono", monospace; color: var(--os-amber);
+    font-size: 0.55em; letter-spacing: 0.18em; font-weight: 800;
+    margin-bottom: 0.35em; text-transform: uppercase;
   }
   .uc-card .uc-title { color: #ffffff; font-size: 0.95em; font-weight: 800; margin-bottom: 0.4em; line-height: 1.2; }
   .uc-card .uc-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; margin-bottom: 0.4em; }
   .uc-card .uc-failure {
-    color: var(--crit);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.55em;
-    letter-spacing: 0.04em;
+    color: var(--crit); font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em; letter-spacing: 0.04em;
     border-top: 1px dashed rgba(255,91,110,0.3);
-    padding-top: 0.5em;
-    line-height: 1.4;
+    padding-top: 0.5em; line-height: 1.4;
+  }
+
+  /* Loop diagram */
+  .loop-diagram {
+    display: grid;
+    grid-template-columns: 1fr 30px 1fr 30px 1fr 30px 1fr;
+    align-items: center; gap: 0.4em;
+    margin-top: 1em;
+  }
+  .loop-step {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px; padding: 0.95em 0.7em;
+    text-align: center;
+  }
+  .loop-step .ls-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 800;
+    margin-bottom: 0.3em;
+  }
+  .loop-step .ls-title {
+    color: #ffffff; font-size: 0.85em;
+    font-weight: 800; line-height: 1.2; margin-bottom: 0.3em;
+  }
+  .loop-step .ls-sub {
+    color: #c8d2eb; font-size: 0.55em; line-height: 1.45;
+  }
+  .loop-step.l1 { border-top: 3px solid var(--os-amber); }
+  .loop-step.l2 { border-top: 3px solid var(--agent-purple); }
+  .loop-step.l3 { border-top: 3px solid var(--good); }
+  .loop-step.l4 { border-top: 3px solid var(--os-blue-soft); }
+  .loop-arrow {
+    text-align: center; color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace; font-size: 1.2em; font-weight: 800;
   }
 
   /* CTA */
   .cta-slide { text-align: center; }
   .cta-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2.2em;
-    align-items: center;
-    text-align: left;
-    margin-top: 0.6em;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2.2em; align-items: center;
+    text-align: left; margin-top: 0.6em;
   }
   .cta-text { text-align: left; }
   .cta-text .cta-line {
-    font-size: 1.2em;
-    color: #ffffff;
-    font-weight: 700;
-    line-height: 1.3;
-    margin-bottom: 0.6em;
+    font-size: 1.2em; color: #ffffff;
+    font-weight: 700; line-height: 1.3; margin-bottom: 0.6em;
   }
   .cta-text .cta-line em { color: var(--os-amber); font-style: normal; }
   .cta-text .cta-sub { color: var(--os-blue-soft); font-size: 0.8em; line-height: 1.5; margin-bottom: 1em; }
   .cta-url-line {
     font-family: "JetBrains Mono", monospace;
-    color: var(--os-amber);
-    font-size: 0.95em;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    color: var(--os-amber); font-size: 0.95em;
+    font-weight: 700; letter-spacing: 0.02em;
   }
-  .cta-qr { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cta-qr {
+    text-align: center; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
   .cta-qr img {
-    width: 100%;
-    max-width: 260px;
-    background: #fff;
-    padding: 12px;
-    border-radius: 12px;
+    width: 100%; max-width: 260px; background: #fff;
+    padding: 12px; border-radius: 12px;
     box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
-    display: block;
-    margin: 0 auto 0.5em auto;
+    display: block; margin: 0 auto 0.5em auto;
   }
   .cta-qr-caption {
     color: var(--os-amber);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.6em;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    font-size: 0.6em; font-weight: 800;
+    letter-spacing: 0.18em; text-transform: uppercase;
   }
 
-  /* Try-it-now closing slide */
+  /* Closing slide */
   .try-slide { text-align: left; padding: 0 !important; }
   .try-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 1.6em; align-items: center; }
   .try-text { text-align: left; }
   .try-text h2 em { color: var(--os-amber); font-style: normal; }
   .try-url {
     font-family: "JetBrains Mono", monospace;
-    color: var(--os-amber);
-    font-size: 1.4em;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    margin-bottom: 0.7em;
+    color: var(--os-amber); font-size: 1.4em;
+    font-weight: 800; letter-spacing: 0.01em; margin-bottom: 0.7em;
   }
   .try-foot { color: #d8def0; font-size: 0.65em; letter-spacing: 0.04em; }
   .try-foot strong { color: #ffffff; }
   .try-shot { display: flex; justify-content: center; align-items: center; }
   .try-shot img {
-    max-width: 100%;
-    max-height: 75vh;
-    width: auto;
-    height: auto;
-    border-radius: 10px;
+    max-width: 100%; max-height: 75vh;
+    width: auto; height: auto; border-radius: 10px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .footer {
-    position: fixed;
-    bottom: 14px;
-    left: 30px;
-    right: 30px;
-    display: flex;
-    justify-content: space-between;
+    position: fixed; bottom: 14px; left: 30px; right: 30px;
+    display: flex; justify-content: space-between;
     color: rgba(255, 255, 255, 0.55);
-    font-size: 12px;
-    font-family: "Inter", sans-serif;
+    font-size: 12px; font-family: "Inter", sans-serif;
     letter-spacing: 0.05em;
-    pointer-events: none;
-    opacity: 0.85;
-    z-index: 30;
+    pointer-events: none; opacity: 0.85; z-index: 30;
   }
   .watermark {
-    position: fixed;
-    top: 22px;
-    right: 28px;
-    width: 130px;
-    z-index: 30;
-    pointer-events: none;
-    opacity: 0.85;
+    position: fixed; top: 22px; right: 28px;
+    width: 130px; z-index: 30;
+    pointer-events: none; opacity: 0.85;
   }
   .watermark img { width: 100%; height: auto; display: block; filter: brightness(0) invert(1); }
   body.hide-watermark .watermark { display: none; }
@@ -693,7 +637,7 @@
       <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
       <div class="eyebrow">OpenSearchCon India · 2026</div>
       <h1>Agent Under the Microscope</h1>
-      <div class="subtitle">Monitoring agentic workflows with <strong>OpenSearch</strong> — agent traces, agent health, and the OTel GenAI semantic conventions that make it all queryable.</div>
+      <div class="subtitle">Monitoring agentic workflows with <strong>OpenSearch</strong> — Agent Traces, Agent Health, and the OpenTelemetry GenAI semantic conventions that make it all queryable.</div>
       <div class="speakers-row">
         <div class="sp">
           <strong>Pratik Shenoy</strong>
@@ -711,7 +655,7 @@
       <div class="meta-line">Mon · Jun 15 · 12:40 IST · Room 205 · Analytics + Security + Observability</div>
     </section>
 
-    <!-- ============ 2. STACK OVERVIEW INTRO ============ -->
+    <!-- ============ 2. STACK INTRO ============ -->
     <section class="stack-intro">
       <div class="eyebrow">OpenSearch Observability Stack</div>
       <div class="megaline">From <em>agents</em> to <em>services</em>.<br>One stack.</div>
@@ -728,336 +672,456 @@
     <section class="blind">
       <div class="eyebrow">2026 reality check</div>
       <div class="megaline">Agents are <em>everywhere</em>.<br>And they're breaking <em>everywhere</em>.</div>
-      <p class="sub">Customer support. Code generation. Data pipelines. The agents that ship production traffic now sit in your hottest paths — and you've never had less visibility into a workload.</p>
+      <p class="sub">Customer support. Code generation. Data pipelines. Production agents now sit on your hottest paths — and you've never had less visibility into a workload.</p>
     </section>
 
-    <!-- ============ 3. THE OPACITY PROBLEM ============ -->
+    <!-- ============ 4. THE OPACITY PROBLEM ============ -->
     <section>
       <div class="eyebrow" style="text-align: center;">The core problem</div>
       <h2 style="text-align: center; margin-bottom: 0.4em;">Traditional APM treats an agent as a <em>black box</em>.</h2>
       <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 86%; margin: 0 auto 0.6em auto;">
-        You see one span — <code>/invoke</code>, 14 seconds, 200 OK. Inside that span: <strong>twelve LLM calls, four tools, three retries, and a hallucinated database query.</strong> Your dashboard says it succeeded. Your user disagrees.
+        You see one span — <code>POST /plan</code>, 14 seconds, 200 OK. Inside that span: <strong>twelve LLM calls, four tools, three retries, and a hallucinated answer.</strong> Your dashboard says it succeeded. Your user disagrees.
       </p>
       <div class="reveal-grid">
         <div class="reveal-card">
           <div class="rc-eyebrow">What APM shows</div>
           <div class="rc-title">A single fat span</div>
-          <div class="rc-desc">Latency, throughput, error rate at the request boundary. Useful for services. Useless for agents.</div>
+          <div class="rc-desc">Latency, throughput, error rate at the request boundary. Useful for services. Not enough for agents.</div>
         </div>
         <div class="reveal-card">
           <div class="rc-eyebrow">What's actually happening</div>
           <div class="rc-title">Multi-step reasoning</div>
-          <div class="rc-desc">Plan, call, read, call again, retry, branch. Tool calls. Sub-agents. State you can't see in a single duration metric.</div>
+          <div class="rc-desc">Plan, call, read, call again, retry, branch. Sub-agents. Tools. State that doesn't fit in a single duration metric.</div>
         </div>
         <div class="reveal-card">
           <div class="rc-eyebrow">The gap</div>
           <div class="rc-title">No semantic vocabulary</div>
-          <div class="rc-desc">No standard for input/output, model, tokens, tool inputs. So even when you capture data, no one tool can query across it.</div>
+          <div class="rc-desc">Without standard attributes for model, tokens, prompts, and tool calls, no tool can query across agents and frameworks.</div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 4. THREE FAILURE MODES ============ -->
+    <!-- ============ 5. THREE FAILURE MODES ============ -->
     <section>
       <div class="eyebrow" style="text-align: center;">The failure modes you can't see</div>
-      <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">Three ways your agent is <em>already</em> failing in prod.</h2>
+      <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">Three ways your agent is <em>already</em> failing.</h2>
       <div class="fail-grid">
         <div class="fail-card">
           <div class="f-eyebrow">Failure 01</div>
           <div class="f-title">Hallucinates mid-task</div>
-          <div class="f-desc">Returns a confident, well-formatted, completely wrong answer. The trace looks healthy. The output is fiction. No alert fires.</div>
+          <div class="f-desc">Returns a confident, well-formatted, completely wrong answer. The trace looks healthy. The output is fiction.</div>
         </div>
         <div class="fail-card">
           <div class="f-eyebrow">Failure 02</div>
           <div class="f-title">Silently degrades</div>
-          <div class="f-desc">Quality drops 20% after a model swap or prompt edit. Latency unchanged. Error rate unchanged. You find out from a user complaint a week later.</div>
+          <div class="f-desc">Quality drops 20% after a model swap or prompt edit. Latency unchanged. Error rate unchanged. You find out from a user a week later.</div>
         </div>
         <div class="fail-card">
           <div class="f-eyebrow">Failure 03</div>
           <div class="f-title">Drifts off the path</div>
-          <div class="f-desc">Same input, different tool sequence. Token cost doubles. The "right answer" still arrives — by the wrong route — and you only notice on the AWS bill.</div>
+          <div class="f-desc">Same input, different tool sequence. Token cost doubles. The "right answer" arrives — by the wrong route — and you only notice on the AWS bill.</div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 5. THE REVEAL — TWO PILLARS ============ -->
+    <!-- ============ 6. THE REVEAL — AI OBSERVABILITY ============ -->
     <section>
       <div class="eyebrow" style="text-align: center;">What we built</div>
-      <h1 style="text-align: center; font-size: 2.1em; margin-bottom: 0.25em;">Agent Traces <span style="color: var(--os-blue-soft); font-weight: 400;">+</span> Agent Health</h1>
-      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.88em; max-width: 88%; margin: 0 auto 0.4em auto;">
-        Two surfaces, one substrate. <strong>Traces</strong> answer <em>what happened</em> on a single request. <strong>Health</strong> answers <em>how the fleet is behaving</em>. Both built on OpenTelemetry GenAI semconv. Both native in OpenSearch Dashboards.
+      <h1 style="text-align: center; font-size: 2em; margin-bottom: 0.2em;">AI Observability for OpenSearch</h1>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 86%; margin: 0 auto 0.4em auto;">
+        End-to-end tooling for AI agent observability — <strong>from instrumenting your code to viewing traces, scoring quality, and running evaluations.</strong>
       </p>
-      <div class="reveal-grid" style="grid-template-columns: 1fr 1fr;">
-        <div class="reveal-card" style="border-top-color: var(--agent-purple);">
-          <div class="rc-eyebrow" style="color: var(--agent-purple);">Pillar 01 · per-request</div>
-          <div class="rc-title">Agent Traces</div>
-          <div class="rc-desc">Hierarchical exploration of the agent's reasoning. Every sub-agent, LLM, tool, and downstream service — parented correctly. Inputs, outputs, tokens — inline. Searchable with PPL.</div>
+      <div class="flow-grid">
+        <div class="flow-step s1">
+          <div class="fs-num">01</div>
+          <div class="fs-title">Instrument</div>
+          <div class="fs-sub">GenAI SDK · <code style="font-size: 0.95em;">@observe</code> · auto-instrumentation</div>
         </div>
-        <div class="reveal-card" style="border-top-color: var(--good);">
-          <div class="rc-eyebrow" style="color: var(--good);">Pillar 02 · fleet-wide</div>
-          <div class="rc-title">Agent Health</div>
-          <div class="rc-desc">SLIs and SLOs designed for agents — fault rate, eval pass-rate, golden-path adherence, token-spend per task. Burn-rate alerts that fire on agent-specific failure modes, not just HTTP 500s.</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step s2">
+          <div class="fs-num">02</div>
+          <div class="fs-title">Normalize</div>
+          <div class="fs-sub">OTel Collector · GenAI semconv</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step s3">
+          <div class="fs-num">03</div>
+          <div class="fs-title">Local tooling</div>
+          <div class="fs-sub">Agent Health · debug, score, evaluate</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step s4">
+          <div class="fs-num">04</div>
+          <div class="fs-title">Process</div>
+          <div class="fs-sub">Data Prepper · service maps · correlation</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step s5">
+          <div class="fs-num">05</div>
+          <div class="fs-title">Analyze</div>
+          <div class="fs-sub">OpenSearch Dashboards · Agent Traces · APM</div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 6. SUBSTRATE — OTEL GENAI ============ -->
+    <!-- ============ 7. SUBSTRATE — OTEL GENAI ============ -->
     <section>
       <div class="eyebrow" style="text-align: center;">The shared substrate</div>
       <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">OpenTelemetry GenAI <em>semantic conventions</em>.</h2>
-      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.82em; max-width: 86%; margin: 0 auto 0.6em auto;">
-        Standardized attribute names for the AI stack — so any framework's trace looks the same on the wire. <strong>One vocabulary. Every agent.</strong>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 86%; margin: 0 auto 0.6em auto;">
+        Standardized <code>gen_ai.*</code> attributes for the AI stack — every framework's trace looks the same on the wire. <strong>One vocabulary. Every agent.</strong>
       </p>
-      <div class="ppl-block">
-<pre><span class="com"># A single LLM span — OTel GenAI semconv</span>
-<span class="kw">span.name</span>     <span class="str">"chat anthropic claude-sonnet-4-5"</span>
-<span class="kw">gen_ai.system</span>            <span class="str">"anthropic"</span>
-<span class="kw">gen_ai.request.model</span>     <span class="str">"claude-sonnet-4-5"</span>
-<span class="kw">gen_ai.usage.input_tokens</span>   <span class="num">2,847</span>
-<span class="kw">gen_ai.usage.output_tokens</span>  <span class="num">412</span>
-<span class="kw">gen_ai.response.finish_reason</span> <span class="str">"tool_use"</span>
-<span class="kw">gen_ai.tool.name</span>          <span class="str">"search_tickets"</span>
-<span class="kw">gen_ai.agent.id</span>           <span class="str">"support-triage-v3"</span></pre>
-      </div>
+      <pre class="code-block"><span class="com"># A single LLM span — emitted by the GenAI SDK, normalized by the OTel Collector</span>
+<span class="kw">span.name</span>                       <span class="str">"chat anthropic claude-sonnet-4-5"</span>
+<span class="kw">gen_ai.operation.name</span>           <span class="str">"chat"</span>
+<span class="kw">gen_ai.provider.name</span>            <span class="str">"anthropic"</span>
+<span class="kw">gen_ai.request.model</span>            <span class="str">"claude-sonnet-4-5"</span>
+<span class="kw">gen_ai.usage.input_tokens</span>       <span class="num">2,847</span>
+<span class="kw">gen_ai.usage.output_tokens</span>      <span class="num">412</span>
+<span class="kw">gen_ai.response.finish_reason</span>   <span class="str">"tool_use"</span>
+<span class="kw">gen_ai.agent.name</span>               <span class="str">"weather-agent"</span></pre>
       <p style="text-align: center; color: #c8d2eb; font-size: 0.7em; margin-top: 1em; max-width: 80%; margin-left: auto; margin-right: auto;">
-        LangChain. LangGraph. Strands. Bedrock. Custom Python. <strong>Same fields. Same queries. Same dashboard.</strong>
+        Auto-instrumented for <strong>OpenAI, Anthropic, Bedrock, LangChain</strong> — and 20+ libraries — through the GenAI SDK.
       </p>
+    </section>
+
+    <!-- ============ 8. INSTRUMENT IN THREE LINES ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Stage 01 · Instrument</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.55em;">Three lines. Every span captured.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 84%; margin: 0 auto 0.4em auto;">
+        Drop the GenAI SDK in. Decorate your tools and agent functions with <code>@observe</code>. <code>register()</code> wires up OTel exporter and auto-instrumentation in one call.
+      </p>
+      <pre class="code-block"><span class="com"># pip install opensearch-genai-observability-sdk-py[anthropic]</span>
+<span class="kw">from</span> opensearch_genai_observability_sdk_py <span class="kw">import</span> register, observe, Op, enrich
+
+register(
+  endpoint=<span class="str">"http://localhost:4318/v1/traces"</span>,
+  service_name=<span class="str">"travel-planner"</span>,
+  auto_instrument=<span class="num">True</span>,        <span class="com"># OpenAI · Anthropic · Bedrock · LangChain · 20+</span>
+)
+
+<span class="kw">@</span><span class="fn">observe</span>(op=Op.EXECUTE_TOOL)
+<span class="kw">def</span> <span class="fn">search_flights</span>(origin: str, dest: str) -> list[dict]:
+    enrich(session_id=<span class="str">"travel-42"</span>)        <span class="com"># attach GenAI semconv attributes</span>
+    <span class="kw">return</span> flight_api.search(origin, dest)</pre>
     </section>
 
     <!-- ============ PILLAR 01 DIVIDER ============ -->
     <section class="pillar">
       <div class="pillar-num">— Pillar 01 · Per-request —</div>
       <h2>Agent <em>Traces</em>.</h2>
-      <p class="pillar-sub">When a single request goes wrong, you need to <strong>walk what the agent actually did</strong> — every prompt, every tool, every sub-agent, every retry.</p>
+      <p class="pillar-sub">When a single agent run goes wrong, you need to <strong>walk what the agent actually did</strong> — every prompt, every tool, every sub-agent, every retry — with full visibility into hierarchical traces.</p>
     </section>
 
-    <!-- ============ 7. HIERARCHICAL TRACE TREE (mock) ============ -->
+    <!-- ============ 9. THREE VIEWS ============ -->
     <section>
-      <div class="eyebrow" style="text-align: center;">What the trace actually looks like</div>
-      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.55em;">Hierarchical trace exploration.</h2>
-      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 80%; margin: 0 auto;">
-        One support ticket. <strong>22 spans.</strong> Three agents. Five tool calls. One silent failure.
+      <div class="eyebrow" style="text-align: center;">One trace · three lenses</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em; font-size: 1.5em;">Trace Tree · Trace Map · Timeline.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 86%; margin: 0 auto 0.4em auto;">
+        Each view is built for a different question. Cross-view selection keeps you anchored — click a span anywhere, it lights up everywhere.
       </p>
-      <div class="trace-tree">
-        <div class="trace-row">
-          <div class="tr-label"><span class="kind agent">AGENT</span><span class="tr-name">support_triage.run</span></div>
-          <div class="tr-bar"><div class="bar-fill agent" style="left:0%; width:100%;"></div></div>
-          <div class="tr-time">14.2 s</div>
+      <div class="views-row">
+        <div class="view-card v1">
+          <div class="v-eyebrow">View · Trace Tree</div>
+          <div class="v-title">Hierarchy &amp; parentage</div>
+          <div class="v-desc">Parent-child spans. Expand to descend. The fastest way to ask <em>what did the agent do, in order?</em></div>
         </div>
-        <div class="trace-row">
-          <div class="tr-label"><span class="indent">└</span><span class="kind llm">LLM</span><span class="tr-name">claude-sonnet · plan</span></div>
-          <div class="tr-bar"><div class="bar-fill llm" style="left:1%; width:14%;"></div></div>
-          <div class="tr-time">2.0 s</div>
+        <div class="view-card v2">
+          <div class="v-eyebrow">View · Trace Map (DAG)</div>
+          <div class="v-title">Flow as a graph</div>
+          <div class="v-desc">Dagre-laid DAG. Color-coded by category, sized by duration. Lets you spot fan-outs and dead-ends visually.</div>
         </div>
-        <div class="trace-row">
-          <div class="tr-label"><span class="indent">└</span><span class="kind tool">TOOL</span><span class="tr-name">search_tickets(q="refund")</span></div>
-          <div class="tr-bar"><div class="bar-fill tool" style="left:15%; width:8%;"></div></div>
-          <div class="tr-time">1.1 s</div>
-        </div>
-        <div class="trace-row">
-          <div class="tr-label"><span class="indent">└</span><span class="kind agent">AGENT</span><span class="tr-name">policy_lookup.run (sub-agent)</span></div>
-          <div class="tr-bar"><div class="bar-fill agent" style="left:23%; width:32%;"></div></div>
-          <div class="tr-time">4.6 s</div>
-        </div>
-        <div class="trace-row">
-          <div class="tr-label"><span class="indent">  └</span><span class="kind llm">LLM</span><span class="tr-name">claude-sonnet · classify</span></div>
-          <div class="tr-bar"><div class="bar-fill llm" style="left:24%; width:10%;"></div></div>
-          <div class="tr-time">1.4 s</div>
-        </div>
-        <div class="trace-row">
-          <div class="tr-label"><span class="indent">  └</span><span class="kind tool">TOOL</span><span class="tr-name">vector_search(policies)</span></div>
-          <div class="tr-bar"><div class="bar-fill tool" style="left:35%; width:5%;"></div></div>
-          <div class="tr-time">0.7 s</div>
-        </div>
-        <div class="trace-row fail">
-          <div class="tr-label"><span class="indent">  └</span><span class="kind err">ERR</span><span class="tr-name">db_lookup → 500 (silent retry ×3)</span></div>
-          <div class="tr-bar"><div class="bar-fill err" style="left:41%; width:14%;"></div></div>
-          <div class="tr-time">2.1 s</div>
-        </div>
-        <div class="trace-row">
-          <div class="tr-label"><span class="indent">└</span><span class="kind llm">LLM</span><span class="tr-name">claude-sonnet · synthesize</span></div>
-          <div class="tr-bar"><div class="bar-fill llm" style="left:56%; width:30%;"></div></div>
-          <div class="tr-time">4.2 s</div>
-        </div>
-        <div class="trace-row">
-          <div class="tr-label"><span class="indent">└</span><span class="kind svc">SVC</span><span class="tr-name">notify-service / send_email</span></div>
-          <div class="tr-bar"><div class="bar-fill svc" style="left:87%; width:13%;"></div></div>
-          <div class="tr-time">1.8 s</div>
+        <div class="view-card v3">
+          <div class="v-eyebrow">View · Timeline (Gantt)</div>
+          <div class="v-title">Latency, end-to-end</div>
+          <div class="v-desc">Bar widths proportional to span duration. The right place to ask <em>where is the wall-clock time going?</em></div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 8. AGENT TRACES SCREENSHOT ============ -->
-    <section class="feature-slide">
-      <div class="feature-eyebrow">Agent Trace Analytics · live</div>
-      <h3>Conversation, tool calls, raw OTel</h3>
-      <div class="feature-sub">Every <em>LLM chat span</em>, every tool invocation, every parent — input/output, attributes, raw OTel — in OpenSearch Dashboards.</div>
-      <div class="feature-shot"><img src="assets/shot-05-agent-trace.png" alt="Agent trace with conversation and tool search"></div>
+    <!-- ============ 10. HIERARCHICAL TRACE MOCK ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">What the trace actually looks like</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.5em;">One <code>POST /plan</code>. <em>22 spans.</em></h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.7em; max-width: 78%; margin: 0 auto;">
+        Travel-planner agent. Two sub-agents. Five tools. One silent failure.
+      </p>
+      <div class="trace-tree">
+        <div class="trace-row">
+          <div class="tr-label"><span class="kind agent">AGENT</span><span class="tr-name">invoke_agent · Travel Planner</span></div>
+          <div class="tr-bar"><div class="bar-fill agent" style="left:0%; width:100%;"></div></div>
+          <div class="tr-time">14.20 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">└</span><span class="kind llm">LLM</span><span class="tr-name">chat · planning</span></div>
+          <div class="tr-bar"><div class="bar-fill llm" style="left:1%; width:14%;"></div></div>
+          <div class="tr-time">2.00 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">└</span><span class="kind tool">TOOL</span><span class="tr-name">search_flights(BOM, BLR)</span></div>
+          <div class="tr-bar"><div class="bar-fill tool" style="left:15%; width:8%;"></div></div>
+          <div class="tr-time">1.10 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">└</span><span class="kind agent">AGENT</span><span class="tr-name">invoke_agent · Weather Assistant</span></div>
+          <div class="tr-bar"><div class="bar-fill agent" style="left:23%; width:32%;"></div></div>
+          <div class="tr-time">4.60 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">  └</span><span class="kind llm">LLM</span><span class="tr-name">chat · classify intent</span></div>
+          <div class="tr-bar"><div class="bar-fill llm" style="left:24%; width:10%;"></div></div>
+          <div class="tr-time">1.40 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">  └</span><span class="kind retrieval">RETRIEVAL</span><span class="tr-name">vector_search · destinations</span></div>
+          <div class="tr-bar"><div class="bar-fill retrieval" style="left:35%; width:5%;"></div></div>
+          <div class="tr-time">0.70 s</div>
+        </div>
+        <div class="trace-row fail">
+          <div class="tr-label"><span class="indent">  └</span><span class="kind err">ERR</span><span class="tr-name">tool · fetch_weather → 500 (silent retry ×3)</span></div>
+          <div class="tr-bar"><div class="bar-fill err" style="left:41%; width:14%;"></div></div>
+          <div class="tr-time">2.10 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">└</span><span class="kind llm">LLM</span><span class="tr-name">chat · synthesize itinerary</span></div>
+          <div class="tr-bar"><div class="bar-fill llm" style="left:56%; width:30%;"></div></div>
+          <div class="tr-time">4.20 s</div>
+        </div>
+      </div>
     </section>
 
-    <!-- ============ 9. AGENT MAP ============ -->
+    <!-- ============ 11. TRACE TREE — REAL SCREENSHOT ============ -->
     <section class="feature-slide">
-      <div class="feature-eyebrow">Agent Map</div>
+      <div class="feature-eyebrow">Agent Traces · Trace Tree</div>
+      <h3>Walk the hierarchy in OpenSearch Dashboards</h3>
+      <div class="feature-sub">Every agent invocation, every <em>chat</em> span, every tool call — with input/output, parent spans, and raw OTel attributes.</div>
+      <div class="feature-shot"><img src="assets/trace-with-evals.png" alt="Trace tree timeline view in OpenSearch Dashboards"></div>
+    </section>
+
+    <!-- ============ 12. TRACE MAP — REAL SCREENSHOT ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Traces · Trace Map (DAG)</div>
+      <h3>The flow as a graph</h3>
+      <div class="feature-sub">Color-coded by category, edges showing parent-child execution. <em>Click any node — the side panel updates everywhere.</em></div>
+      <div class="feature-shot"><img src="assets/trace-waterfall.png" alt="Agent Trace Map / DAG with span detail"></div>
+    </section>
+
+    <!-- ============ 13. SPAN CATEGORIES ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">The vocabulary, color-coded</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.5em;">Six span <em>categories</em>.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 84%; margin: 0 auto;">
+        Every span maps to one of six operation types — derived from <code>gen_ai.operation.name</code>. Categories drive color, filtering, and aggregation across all three views.
+      </p>
+      <div class="cats-row">
+        <span class="cat-chip agent">▸ Agent</span>
+        <span class="cat-chip llm">▸ LLM</span>
+        <span class="cat-chip tool">▸ Tool</span>
+        <span class="cat-chip content">▸ Content</span>
+        <span class="cat-chip embed">▸ Embeddings</span>
+        <span class="cat-chip retrieval">▸ Retrieval</span>
+      </div>
+      <p style="text-align: center; color: #c8d2eb; font-size: 0.65em; margin-top: 1.6em; max-width: 78%; margin-left: auto; margin-right: auto; line-height: 1.6;">
+        <strong>Agent</strong> = an autonomous run. <strong>LLM</strong> = a model invocation. <strong>Tool</strong> = an externally-callable function. <strong>Content</strong> = prompt &amp; response payloads. <strong>Embeddings</strong> &amp; <strong>Retrieval</strong> = the RAG hops most APMs miss entirely.
+      </p>
+    </section>
+
+    <!-- ============ 14. AGGREGATE METRICS ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">Aggregate the trace surface</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.5em;">Fleet-level signal, on every search.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 84%; margin: 0 auto;">
+        Filter by service, model, agent, time window — the headline metrics recompute live on top of your trace store.
+      </p>
+      <div class="metric-row">
+        <div class="metric-card">
+          <div class="m-val">169</div>
+          <div class="m-label">Total Traces</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-val">3.5K</div>
+          <div class="m-label">Total Spans</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-val">381K</div>
+          <div class="m-label">Total Tokens</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-val">1.58<span style="font-size: 0.55em; color: #c8d2eb;">s</span></div>
+          <div class="m-label">Latency P50</div>
+        </div>
+        <div class="metric-card">
+          <div class="m-val">7.73<span style="font-size: 0.55em; color: #c8d2eb;">s</span></div>
+          <div class="m-label">Latency P99</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 15. APP MAP ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Application Map</div>
       <h3>Agents and services on one topology</h3>
-      <div class="feature-sub">Where the agent calls into <em>tools</em>, <em>MCP servers</em>, and <em>downstream services</em>. Fault rates, latency, error fan-out — directly on the graph.</div>
+      <div class="feature-sub">Where the agent calls into <em>tools</em>, <em>MCP servers</em>, and <em>downstream services</em>. The same APM topology you already trust — extended to the agentic stack.</div>
       <div class="feature-shot"><img src="assets/shot-04-appmap.png" alt="Unified agent + service application map"></div>
     </section>
 
-    <!-- ============ 10. PPL AGGREGATION ============ -->
+    <!-- ============ 16. PPL AGGREGATION ============ -->
     <section>
-      <div class="eyebrow" style="text-align: center;">Metrics aggregation, on demand</div>
-      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.55em;">PPL across <em>every</em> agent span.</h2>
+      <div class="eyebrow" style="text-align: center;">Ask any question, ad hoc</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.5em;">PPL across <em>every</em> agent span.</h2>
       <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 84%; margin: 0 auto 0.4em auto;">
-        Token spend by model, tool failure rate by agent, p99 latency by sub-agent — composed live, not pre-built.
+        Token spend by model. Tool failure rate by agent. Sub-agent P99. <strong>Composed live</strong> in the same Dashboards surface as your trace tree.
       </p>
-      <div class="ppl-block">
-<pre><span class="com">// Per-agent token cost in the last hour</span>
-<span class="kw">source</span> = otel-traces
-| <span class="kw">where</span> spanKind = <span class="str">"INTERNAL"</span> <span class="kw">and</span> attributes.gen_ai.agent.id <span class="kw">is not null</span>
+      <pre class="code-block"><span class="com">// Token spend by model and agent in the last hour</span>
+<span class="kw">source</span> = otel-v1-apm-span-*
+| <span class="kw">where</span> <span class="kw">isnotnull</span>(attributes.gen_ai.request.model)
 | <span class="kw">stats</span>
     <span class="fn">sum</span>(attributes.gen_ai.usage.input_tokens)  <span class="kw">as</span> in_tokens,
     <span class="fn">sum</span>(attributes.gen_ai.usage.output_tokens) <span class="kw">as</span> out_tokens,
     <span class="fn">count</span>()                                     <span class="kw">as</span> calls
-  <span class="kw">by</span> attributes.gen_ai.agent.id, attributes.gen_ai.request.model
+  <span class="kw">by</span> attributes.gen_ai.agent.name, attributes.gen_ai.request.model
 | <span class="kw">eval</span> est_cost_usd = (in_tokens * <span class="num">0.000003</span>) + (out_tokens * <span class="num">0.000015</span>)
-| <span class="kw">sort</span> -est_cost_usd
-| <span class="kw">head</span> <span class="num">10</span></pre>
-      </div>
+| <span class="kw">sort</span> -est_cost_usd</pre>
     </section>
 
-    <!-- ============ 11. TOKEN ECONOMICS ============ -->
+    <!-- ============ 17. TOKENS BY MODEL ============ -->
     <section class="feature-slide">
-      <div class="feature-eyebrow">Token Economics</div>
-      <h3>Token usage, by model, by agent</h3>
-      <div class="feature-sub">Input vs output tokens across <em>every model your agents touch</em>. The cost of each agent path — visible, attributable, alertable.</div>
-      <div class="feature-shot"><img src="assets/shot-06-tokens.png" alt="Token usage by model"></div>
+      <div class="feature-eyebrow">PPL · Visualization</div>
+      <h3>Token usage, by model</h3>
+      <div class="feature-sub">Input vs. output tokens across <em>every model your agents touch</em> — Claude, Gemini, GPT, Nova, custom. Cost as a first-class metric, on the same trace dataset.</div>
+      <div class="feature-shot"><img src="assets/shot-06-tokens.png" alt="Token usage by model — PPL bar chart"></div>
     </section>
 
     <!-- ============ PILLAR 02 DIVIDER ============ -->
     <section class="pillar">
-      <div class="pillar-num">— Pillar 02 · Fleet-wide —</div>
+      <div class="pillar-num">— Pillar 02 · Quality —</div>
       <h2>Agent <em>Health</em>.</h2>
-      <p class="pillar-sub">Traces tell you what happened on <em>this</em> request. <strong>Health tells you whether the agent is degrading across the fleet</strong> — before the support tickets arrive.</p>
+      <p class="pillar-sub">Traces tell you <em>what happened</em>. Health tells you <strong>whether the agent did the right thing</strong> — graded by an LLM judge against a Golden Path you define.</p>
     </section>
 
-    <!-- ============ AGENT HEALTH SLI GRID ============ -->
+    <!-- ============ 18. WHAT AGENT HEALTH IS ============ -->
     <section>
-      <div class="eyebrow" style="text-align: center;">SLIs designed for agents</div>
-      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.5em;">Six signals you don't get from APM.</h2>
-      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 86%; margin: 0 auto 0.4em auto;">
-        Computed automatically from the GenAI semconv attributes. Every signal is an SLI — wrap a target around it and you have an agent SLO.
+      <div class="eyebrow" style="text-align: center;">What Agent Health is</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em; font-size: 1.55em;">An evaluation framework for agents.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.85em; max-width: 86%; margin: 0 auto 0.6em auto;">
+        Built around <strong>LLM-judge trajectory comparison</strong>. You define the path. The judge grades whether the agent achieved the goal — even if it took a different route.
       </p>
-      <div class="sli-grid">
-        <div class="sli-card s1">
-          <div class="sli-name">Task success rate <code>agent.outcome="success"</code></div>
-          <div class="sli-desc">Fraction of agent runs that completed without error <em>and</em> without an eval failure. Not the HTTP 200 rate. The "did it actually do the job" rate.</div>
+      <div class="reveal-grid">
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Test Cases</div>
+          <div class="rc-title">A scenario, written down</div>
+          <div class="rc-desc">Initial prompt, expected outcomes, context. Versioned in the UI or in code.</div>
         </div>
-        <div class="sli-card s2">
-          <div class="sli-name">Eval pass-rate <code>eval.passed</code></div>
-          <div class="sli-desc">Continuous online evals score the reasoning path. The pass-rate over time is the canonical "is quality drifting?" signal.</div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Experiments</div>
+          <div class="rc-title">Batch runs across agents &amp; models</div>
+          <div class="rc-desc">Compare agent v1 vs v2. Compare Claude vs GPT vs Bedrock. Same test cases. Same judge.</div>
         </div>
-        <div class="sli-card s3">
-          <div class="sli-name">Tool-call fault rate <code>per tool</code></div>
-          <div class="sli-desc">Faults broken down by <code>gen_ai.tool.name</code>. One bad tool poisons every agent that depends on it — surface it directly.</div>
-        </div>
-        <div class="sli-card s4">
-          <div class="sli-name">Golden-path adherence</div>
-          <div class="sli-desc">% of traces that match the designed path within tolerance. Drops when the agent starts re-classifying, retrying, or swapping tools.</div>
-        </div>
-        <div class="sli-card s5">
-          <div class="sli-name">Token-spend per task</div>
-          <div class="sli-desc">Dollar cost as a first-class metric. P50 / P99 per agent and per model. Catches runaway loops before the AWS bill does.</div>
-        </div>
-        <div class="sli-card s6">
-          <div class="sli-name">Hop-count &amp; tail latency</div>
-          <div class="sli-desc">Spans-per-trace and end-to-end latency percentiles. A creeping P99 hop count is often the earliest sign of a regression.</div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">LLM Judge</div>
+          <div class="rc-title">Pass/fail · accuracy · reasoning</div>
+          <div class="rc-desc">A score with pass/fail status, accuracy 0–100%, reasoning, and improvement suggestions — every run.</div>
         </div>
       </div>
     </section>
 
-    <!-- ============ AGENT HEALTH SCREENSHOT ============ -->
+    <!-- ============ 19. TEST CASE — REAL SCREENSHOT ============ -->
     <section class="feature-slide">
-      <div class="feature-eyebrow">Agent Health · live</div>
-      <h3>Burn-rate alerts on agent SLOs</h3>
-      <div class="feature-sub">Multi-window multi-burn-rate alerts on <em>every</em> agent SLI. Same primitives as your service SLOs — error budgets, recommendations, fast/slow burn — applied to <em>agent</em> failure modes.</div>
-      <div class="feature-shot"><img src="assets/shot-10-slo.png" alt="Agent Health SLO with burn-rate alerts"></div>
+      <div class="feature-eyebrow">Agent Health · Test Case</div>
+      <h3>Define the path — once.</h3>
+      <div class="feature-sub">Initial prompt, <em>expected outcomes</em>, context. Run it across runs, traces, evaluations, conversation history, and the LLM judge — all in one view.</div>
+      <div class="feature-shot"><img src="assets/eval-pipeline.png" alt="Agent Health test case with expected behavior and LLM judge tabs"></div>
     </section>
 
-    <!-- ============ 12. ROOT CAUSE WALKTHROUGH ============ -->
+    <!-- ============ 20. EXPERIMENT RUN — REAL SCREENSHOT ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Health · Experiment Run</div>
+      <h3>Compare agents and models, side by side</h3>
+      <div class="feature-sub">Run summary across configurations — <em>pass rate, tokens, cost, average duration</em>. Performance vs. global best. Metrics over time. <strong>The CI loop for agents.</strong></div>
+      <div class="feature-shot"><img src="assets/agent-evals.png" alt="Agent Health experiment run summary with pass rates and metrics"></div>
+    </section>
+
+    <!-- ============ 21. GOLDEN PATH ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">The judge in action</div>
+      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.55em;">Golden Path — <em>not exact match</em>.</h2>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 86%; margin: 0 auto 0.5em auto;">
+        The judge doesn't require the agent to follow the trajectory step-for-step. It assesses whether the agent <strong>reasonably achieved the expected goals</strong>, even via alternative routes — and tells you why.
+      </p>
+      <div class="judge-grid">
+        <div class="judge-card gold">
+          <div class="gc-eyebrow">Golden trajectory · designed</div>
+          <div class="gc-title">The path you'd hope for</div>
+<div class="gc-trace">
+<span class="ag">agent</span> · plan trip<br>
+&nbsp;&nbsp;<span class="lm">llm</span> · classify intent<br>
+&nbsp;&nbsp;<span class="rt">retrieval</span> · destinations<br>
+&nbsp;&nbsp;<span class="tl">tool</span> · search_flights<br>
+&nbsp;&nbsp;<span class="lm">llm</span> · synthesize itinerary<br>
+<span class="ag">agent</span> · respond
+</div>
+          <div class="gc-foot">2,847 input · 412 output · 3.4s · 1 model</div>
+          <div class="verdict pass">PASS · accuracy 96%
+            <span class="verdict-line">"Reached destination plan via expected tools."</span>
+          </div>
+        </div>
+        <div class="judge-card live">
+          <div class="gc-eyebrow">Live trajectory · diverged</div>
+          <div class="gc-title">A different route. Still acceptable?</div>
+<div class="gc-trace">
+<span class="ag">agent</span> · plan trip<br>
+&nbsp;&nbsp;<span class="lm">llm</span> · classify intent<br>
+&nbsp;&nbsp;<span class="lm">llm</span> · re-classify <span class="ng">(extra)</span><br>
+&nbsp;&nbsp;<span class="tl">tool</span> · search_flights<br>
+&nbsp;&nbsp;<span class="rt">retrieval</span> · destinations <span class="ng">(out of order)</span><br>
+&nbsp;&nbsp;<span class="lm">llm</span> · synthesize <span class="ng">(2× tokens)</span><br>
+<span class="ag">agent</span> · respond
+</div>
+          <div class="gc-foot">5,902 input · 781 output · 6.1s · 2 models</div>
+          <div class="verdict fail">PASS · accuracy 71%
+            <span class="verdict-line">"Goal reached, but extra LLM call doubles cost. Suggest: cache intent classification."</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 22. ROOT-CAUSE WALKTHROUGH ============ -->
     <section>
       <div class="eyebrow" style="text-align: center;">Where the two pillars meet</div>
-      <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">Health page → trace → root cause, in <em>four hops</em>.</h2>
+      <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">Eval failure → trace → root cause, in <em>four hops</em>.</h2>
       <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 84%; margin: 0 auto;">
-        From "support agent feels slow" to "tool call timing out" — without leaving Dashboards.
+        Agent Health flags the regression. Agent Traces tell you why. <strong>One Dashboards session.</strong>
       </p>
       <div class="walk-grid">
         <div class="walk-step s1">
           <div class="ws-num">01</div>
           <div class="ws-eyebrow">Symptom</div>
-          <div class="ws-title">Agent health drops</div>
-          <div class="ws-desc">Burn-rate alert fires on <code>support-triage</code>. p99 doubled in 15 min.</div>
+          <div class="ws-title">Pass rate drops in CI</div>
+          <div class="ws-desc">Agent Health experiment shows <code>travel-planner v1.4</code> fails 4 of 12 test cases after the prompt edit.</div>
         </div>
         <div class="walk-step s2">
           <div class="ws-num">02</div>
           <div class="ws-eyebrow">Locate</div>
-          <div class="ws-title">Agent map → hot edge</div>
-          <div class="ws-desc">Edge to <code>policy_lookup</code> sub-agent flashes red. 9% fault rate, climbing.</div>
+          <div class="ws-title">Judge → trace</div>
+          <div class="ws-desc">"Reached wrong destination" — judge reasoning links to <code>traceId 440877…</code>. One click to Agent Traces.</div>
         </div>
         <div class="walk-step s3">
           <div class="ws-num">03</div>
           <div class="ws-eyebrow">Drill in</div>
           <div class="ws-title">Trace tree → silent retry</div>
-          <div class="ws-desc"><code>db_lookup</code> returns 500. Sub-agent retries 3× without surfacing the error.</div>
+          <div class="ws-desc"><code>fetch_weather</code> returns 500. Sub-agent retries 3× without surfacing the error in its output.</div>
         </div>
         <div class="walk-step s4">
           <div class="ws-num">04</div>
           <div class="ws-eyebrow">Resolve</div>
-          <div class="ws-title">Correlate logs &amp; rollback</div>
-          <div class="ws-desc">Logs at <code>db_lookup</code> show schema drift from a 14:02 deploy. Rollback. Burn-rate clears.</div>
+          <div class="ws-title">Fix &amp; re-run experiment</div>
+          <div class="ws-desc">Patch the retry handler to surface tool errors. Re-run the experiment. Pass rate restored to 100%.</div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 13. GOLDEN PATH EVAL ============ -->
-    <section>
-      <div class="eyebrow" style="text-align: center;">Golden-path comparison evaluation</div>
-      <h2 style="text-align: center; margin-bottom: 0.2em; font-size: 1.55em;">Did the agent take the <em>right route</em>?</h2>
-      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 84%; margin: 0 auto 0.6em auto;">
-        Capture the <strong>known-good</strong> trace once. Compare every production trace against it. Any divergence — extra tool call, swapped model, longer chain — surfaces as a regression signal, before it shows up in user feedback.
-      </p>
-      <div class="golden-grid">
-        <div class="golden-card gold">
-          <div class="gc-eyebrow">Golden trace · v1.0 · 6 spans</div>
-          <div class="gc-title">The path you designed</div>
-<div class="gc-trace">
-<span class="ag">agent</span> · plan<br>
-&nbsp;&nbsp;<span class="lm">llm</span> · classify intent<br>
-&nbsp;&nbsp;<span class="tl">tool</span> · vector_search(policy)<br>
-&nbsp;&nbsp;<span class="tl">tool</span> · db_lookup(account)<br>
-&nbsp;&nbsp;<span class="lm">llm</span> · synthesize answer<br>
-<span class="ag">agent</span> · respond <span class="ok">✓ ok</span>
-</div>
-          <div class="gc-foot">2,847 input tokens · 412 output · ~3.4 s · 1 model</div>
-        </div>
-        <div class="golden-card live">
-          <div class="gc-eyebrow">Live trace · 11 spans · diverged</div>
-          <div class="gc-title">What's running in prod</div>
-<div class="gc-trace">
-<span class="ag">agent</span> · plan<br>
-&nbsp;&nbsp;<span class="lm">llm</span> · classify intent<br>
-&nbsp;&nbsp;<span class="tl">tool</span> · vector_search(policy)<br>
-&nbsp;&nbsp;<span class="lm">llm</span> · re-classify <span class="ng">(extra)</span><br>
-&nbsp;&nbsp;<span class="tl">tool</span> · vector_search(policy) <span class="ng">(retry)</span><br>
-&nbsp;&nbsp;<span class="tl">tool</span> · db_lookup(account)<br>
-&nbsp;&nbsp;<span class="lm">llm</span> · synthesize <span class="ng">(2× tokens)</span><br>
-<span class="ag">agent</span> · respond <span class="ng">⚠ drift</span>
-</div>
-          <div class="gc-foot">5,902 input tokens · 781 output · ~6.1 s · 2 models</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ 14. USE CASES ============ -->
+    <!-- ============ 23. USE CASES ============ -->
     <section>
       <div class="eyebrow" style="text-align: center;">Where teams are using this today</div>
       <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">Three workloads, one observability surface.</h2>
@@ -1065,8 +1129,8 @@
         <div class="uc-card">
           <div class="uc-icon">▸ Customer Support</div>
           <div class="uc-title">Triage agents at scale</div>
-          <div class="uc-desc">Hundreds of concurrent conversations. Tool calls into ticketing, CRM, knowledge bases. Sub-agents for policy, billing, escalation.</div>
-          <div class="uc-failure">→ silent hallucination on policy lookup<br>→ surfaces as golden-path divergence</div>
+          <div class="uc-desc">Hundreds of concurrent conversations. Tools into ticketing, CRM, knowledge bases. Sub-agents for policy, billing, escalation.</div>
+          <div class="uc-failure">→ silent hallucination on policy lookup<br>→ surfaces as a Golden-Path eval failure</div>
         </div>
         <div class="uc-card">
           <div class="uc-icon">▸ Code Generation</div>
@@ -1078,50 +1142,87 @@
           <div class="uc-icon">▸ Data Pipelines</div>
           <div class="uc-title">Agentic ETL &amp; enrichment</div>
           <div class="uc-desc">Batch agents transforming, classifying, summarizing. Quality regressions invisible to row-count checks.</div>
-          <div class="uc-failure">→ degraded extraction after model swap<br>→ surfaces as agent-health burn-rate</div>
+          <div class="uc-failure">→ degraded extraction after model swap<br>→ surfaces in Agent Health experiment</div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 16. FOUNDATION ============ -->
+    <!-- ============ 24. THE LOOP ============ -->
+    <section>
+      <div class="eyebrow" style="text-align: center;">The development loop</div>
+      <h2 style="text-align: center; margin-bottom: 0.3em; font-size: 1.55em;">Instrument <em>once</em>. Iterate <em>forever</em>.</h2>
+      <div class="loop-diagram">
+        <div class="loop-step l1">
+          <div class="ls-eyebrow">Stage 01</div>
+          <div class="ls-title">Instrument</div>
+          <div class="ls-sub"><code>@observe</code> · auto-instrument · GenAI semconv</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l2">
+          <div class="ls-eyebrow">Stage 02</div>
+          <div class="ls-title">Trace</div>
+          <div class="ls-sub">Tree · Map · Timeline · PPL aggregation</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l3">
+          <div class="ls-eyebrow">Stage 03</div>
+          <div class="ls-title">Evaluate</div>
+          <div class="ls-sub">Test cases · experiments · LLM judge</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l4">
+          <div class="ls-eyebrow">Stage 04</div>
+          <div class="ls-title">Ship</div>
+          <div class="ls-sub">Pass-rate gates the merge · re-run</div>
+        </div>
+      </div>
+      <p style="text-align: center; color: var(--os-blue-soft); font-size: 0.78em; max-width: 78ch; margin: 1.4em auto 0 auto;">
+        Same OTel data. Same OpenSearch. <strong>Dev-time and production observability share one substrate</strong> — your eval suite and your prod traces are queryable in the same place.
+      </p>
+    </section>
+
+    <!-- ============ 25. FOUNDATION ============ -->
     <section class="image-slide">
       <img src="assets/slide-foundation.png" alt="OpenSearch Software Foundation under the Linux Foundation">
     </section>
 
-    <!-- ============ 17. RECAP ============ -->
+    <!-- ============ 26. RECAP ============ -->
     <section>
       <div class="eyebrow" style="text-align: center;">Three things to take back</div>
       <h2 style="text-align: center; margin-bottom: 0.4em; font-size: 1.55em;">The agent isn't a black box anymore.</h2>
       <div class="reveal-grid">
         <div class="reveal-card" style="border-top-color: var(--agent-purple);">
           <div class="rc-eyebrow" style="color: var(--agent-purple);">Pillar 01</div>
-          <div class="rc-title">Agent Traces — see <em>this</em> request</div>
-          <div class="rc-desc">Walk every agent, sub-agent, LLM call, and tool. Inputs, outputs, tokens. Map the topology. Aggregate with PPL.</div>
+          <div class="rc-title">Agent Traces — what happened</div>
+          <div class="rc-desc">Tree · Map · Timeline · six categories · five aggregate metrics. PPL across every span. Agents on the same map as your services.</div>
         </div>
         <div class="reveal-card" style="border-top-color: var(--good);">
           <div class="rc-eyebrow" style="color: var(--good);">Pillar 02</div>
-          <div class="rc-title">Agent Health — see <em>the fleet</em></div>
-          <div class="rc-desc">Six SLIs designed for agents. SLOs with burn-rate alerts. Golden-path adherence. Catch drift, not just outages.</div>
+          <div class="rc-title">Agent Health — did it do the right thing</div>
+          <div class="rc-desc">Test cases · experiments · LLM judge · Golden Path. Pass/fail with reasoning. The CI loop for agents.</div>
         </div>
         <div class="reveal-card">
           <div class="rc-eyebrow">Substrate</div>
           <div class="rc-title">Open, native, neutral</div>
-          <div class="rc-desc">Apache 2.0. OpenTelemetry GenAI semconv. Self-host anywhere. The agent stack and the observability stack stay yours.</div>
+          <div class="rc-desc">OpenTelemetry GenAI semconv. Apache 2.0. Linux Foundation. Self-host anywhere — the agent stack and the observability stack stay yours.</div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 18. CTA ============ -->
+    <!-- ============ 27. CTA ============ -->
     <section class="cta-slide">
       <div class="eyebrow">Try it</div>
       <h2 style="margin-bottom: 0.2em;">Put your <em>agent under the microscope</em>.</h2>
-      <p style="color: var(--os-blue-soft); font-size: 0.9em; margin-bottom: 0.6em;">Live sandbox, pre-loaded with agentic traces. Bring your own with the OTel Collector.</p>
+      <p style="color: var(--os-blue-soft); font-size: 0.9em; margin-bottom: 0.6em;">Agent Health runs on your laptop in one command. Agent Traces runs in the live sandbox.</p>
       <div class="cta-grid">
         <div class="cta-text">
-          <div class="cta-line">Sandbox running <em>live</em>.</div>
-          <div class="cta-sub">Full agent traces, agent map, PPL, SLOs, token economics — all on Apache 2.0 OpenSearch. Self-host anywhere.</div>
-          <div class="cta-url-line">otel.opensearch.org</div>
-          <div class="cta-url-line" style="font-size: 0.8em; color: var(--os-blue-soft); margin-top: 0.3em;">github.com/opensearch-project/dashboards-observability</div>
+          <div class="cta-line">One command on your laptop:</div>
+          <div class="cta-sub">
+            <code>npx @opensearch-project/agent-health@latest</code> &mdash;
+            opens <code>localhost:4001</code> with the Travel Planner demo. Five test cases. Two experiments. Real traces. Real LLM judge.
+          </div>
+          <div class="cta-url-line">observability.opensearch.org/docs/agent-health/</div>
+          <div class="cta-url-line" style="font-size: 0.8em; color: var(--os-blue-soft); margin-top: 0.3em;">github.com/opensearch-project/agent-health</div>
         </div>
         <div class="cta-qr">
           <img src="assets/playground-qr.png" alt="QR code to the playground">
@@ -1130,7 +1231,7 @@
       </div>
     </section>
 
-    <!-- ============ 19. CLOSING / TRY IT NOW ============ -->
+    <!-- ============ 28. CLOSING ============ -->
     <section class="try-slide">
       <div class="try-grid">
         <div class="try-text">
