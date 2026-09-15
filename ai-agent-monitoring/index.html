@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Monitoring with the OpenSearch Observability Stack</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css">
+
+<style>
+  :root {
+    --os-navy: #0a1f44;
+    --os-navy-soft: #2a3d6b;
+    --os-blue: #2f7ec5;
+    --os-blue-deep: #1b5a96;
+    --os-blue-soft: #6fa8d6;
+    --os-amber: #e8a838;
+    --os-amber-soft: #f0c878;
+    --os-bg-top: #0a1f44;
+    --os-bg-mid: #18365e;
+    --os-bg-bottom: #2f7ec5;
+    --crit: #ff5b6e;
+    --good: #4cd1a0;
+    --agent-purple: #9d7cff;
+    --agent-pink: #ff5b8a;
+    --tool-cyan: #5fd6e0;
+    --content-yellow: #ffd86f;
+    --embed-pink: #ff8fb1;
+    --retrieval-green: #7ce0a0;
+    --prom-orange: #e6522c;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    color: #f0f4ff;
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%);
+  }
+  .reveal-viewport {
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%) !important;
+  }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    margin-bottom: 0.6em;
+  }
+  .reveal h1 { font-size: 2.6em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.7em; line-height: 1.15; }
+  .reveal h3 { font-size: 1.15em; color: var(--os-amber-soft); font-weight: 700; }
+
+  .reveal p, .reveal li { font-size: 0.85em; line-height: 1.55; color: #d8def0; }
+  .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+  .reveal li { margin: 0.4em 0; }
+  .reveal li::marker { color: var(--os-amber); }
+  .reveal strong { color: #ffffff; font-weight: 700; }
+  .reveal em { color: var(--os-amber); font-style: italic; font-weight: 600; }
+
+  .reveal code {
+    font-family: "JetBrains Mono", monospace;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--os-amber-soft);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.95em;
+    font-weight: 600;
+  }
+
+  .reveal section.cover,
+  .reveal section.eyebrow-slide,
+  .reveal section.center-slide { text-align: center; }
+  .reveal section.center-slide ul,
+  .reveal section.center-slide ol { display: inline-block; text-align: left; }
+
+  .eyebrow {
+    color: var(--os-amber);
+    font-size: 0.7em;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+  }
+  /* max-width keeps a long eyebrow clear of the fixed watermark at top-right */
+  .eyebrow-c { text-align: center; max-width: 82%; margin-left: auto; margin-right: auto; }
+
+  /* Cover */
+  .cover h1 { font-size: 1.85em; line-height: 1.1; margin-bottom: 0.35em; }
+  .cover .subtitle {
+    color: var(--os-blue-soft);
+    font-size: 0.76em;
+    margin-bottom: 0.8em;
+    font-weight: 500;
+    max-width: 84%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cover .speakers {
+    color: #d8def0; font-size: 0.66em; letter-spacing: 0.04em; margin-top: 0.5em;
+  }
+  .cover .speakers strong { color: #ffffff; display: block; font-size: 1.2em; letter-spacing: 0; margin-bottom: 0.2em; }
+  .cover .speakers .role { color: var(--os-blue-soft); }
+  .cover .meta-line {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.6em;
+    font-weight: 800;
+  }
+  .cover .eyebrow { margin-bottom: 0.6em; }
+  .cover-logo {
+    width: 180px;
+    margin: 0 auto 0.5em auto;
+    display: block;
+    filter: brightness(0) invert(1);
+  }
+
+  /* Big centered statement */
+  .blind { text-align: center; }
+  .blind .megaline {
+    font-size: 2.4em; font-weight: 800; line-height: 1.1;
+    color: #ffffff; margin-bottom: 0.5em; letter-spacing: -0.02em;
+  }
+  .blind .megaline em { color: var(--os-amber); font-style: normal; }
+  .blind .sub {
+    font-size: 1em; color: var(--os-blue-soft); font-weight: 500;
+    max-width: 80%; margin: 0 auto;
+  }
+
+  /* Stack intro / pills */
+  .stack-intro { text-align: center; }
+  .stack-intro .megaline {
+    font-size: 2.5em; font-weight: 800; line-height: 1.05;
+    color: #ffffff; margin-bottom: 0.5em; letter-spacing: -0.02em;
+  }
+  .stack-intro .megaline em { color: var(--os-amber); font-style: normal; }
+  .stack-intro .stack-sub {
+    color: var(--os-blue-soft); font-size: 0.95em; font-weight: 500;
+    max-width: 76%; margin: 0 auto;
+  }
+  .pill-row {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.6em; margin-top: 1.3em;
+  }
+  .pill {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 800;
+    padding: 0.5em 1em; border-radius: 100px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: var(--os-amber);
+  }
+
+  /* Part dividers */
+  .pillar { text-align: center; }
+  .pillar .pillar-num {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber); font-size: 0.55em;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 1.2em;
+  }
+  .pillar h2 { font-size: 2.9em; line-height: 1.05; margin-bottom: 0.4em; letter-spacing: -0.02em; }
+  .pillar h2 em { color: var(--os-amber); font-style: normal; }
+  .pillar .pillar-sub {
+    color: var(--os-blue-soft); font-size: 1em; font-weight: 500;
+    max-width: 72ch; margin: 0 auto; line-height: 1.5;
+  }
+  .pillar .pillar-sub strong { color: #ffffff; }
+
+  /* Amber callout — carries verbatim doc quotes */
+  .key {
+    display: inline-block; text-align: left;
+    background: rgba(232, 168, 56, 0.10);
+    border-left: 4px solid var(--os-amber);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7em 1.1em;
+    margin: 0.5em auto 0.2em auto;
+    max-width: 88%;
+    color: #e8eeff; font-size: 0.72em; line-height: 1.55;
+  }
+  .key strong { color: #ffffff; }
+  .key .src {
+    display: block; margin-top: 0.45em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78em; color: var(--os-amber); letter-spacing: 0.04em;
+  }
+
+  /* Image-only slide */
+  .image-slide {
+    text-align: center; padding: 0 !important;
+    height: 100%; display: flex !important;
+    align-items: center; justify-content: center;
+  }
+  .image-slide img {
+    max-width: 100%; max-height: 780px;
+    width: auto; height: auto; border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45); object-fit: contain;
+  }
+
+  /* Screenshot slide: eyebrow + title + sub + framed shot + UI-path caption */
+  .feature-slide {
+    display: flex !important; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 0.3em 0 0 0 !important;
+    height: 100%; text-align: center;
+  }
+  .feature-slide .feature-eyebrow {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.25em;
+  }
+  .feature-slide h3 {
+    color: #ffffff; font-size: 1.35em; font-weight: 800;
+    margin-bottom: 0.22em; line-height: 1.15;
+  }
+  .feature-slide .feature-sub {
+    color: var(--os-blue-soft); font-size: 0.68em; font-weight: 500;
+    max-width: 84%; line-height: 1.45; margin-bottom: 0.5em;
+  }
+  .feature-slide .feature-sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
+  /* Heights are px against reveal's 1280x860 coordinate space, never vh —
+     vh resolves against the browser window, which overruns the slide frame. */
+  .feature-shot {
+    flex: 1 1 auto; width: 100%; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  }
+  .feature-shot img {
+    max-width: 92%; max-height: 470px;
+    width: auto; height: auto; border-radius: 8px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45); object-fit: contain;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+  .feature-shot img.wide { max-width: 96%; max-height: 330px; }
+  .feature-shot img.band { max-width: 96%; max-height: 148px; }
+  .feature-shot img.tall { max-height: 430px; max-width: 60%; }
+  .feature-shot img + img { margin-top: 0.5em; }
+  .shot-pair {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.1em; width: 96%;
+  }
+  .shot-pair img {
+    max-height: 300px; min-width: 0; max-width: calc(50% - 0.6em); width: auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 12px 44px rgba(0,0,0,0.45); object-fit: contain;
+  }
+  .shot-caption {
+    margin-top: 0.3em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--os-blue-soft); font-weight: 700;
+  }
+  .preview-badge {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.4em 0.9em; border-radius: 5px;
+    background: rgba(157,124,255,0.16); color: #c4b3ff;
+    border: 1px solid rgba(157,124,255,0.5);
+    margin-bottom: 0.5em;
+  }
+
+  /* Card grids */
+  .reveal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
+  .reveal-grid.g4 { grid-template-columns: repeat(4, 1fr); gap: 0.7em; margin-top: 0.5em; }
+  .reveal-grid.g4 .reveal-card { padding: 0.7em 0.7em; display: flex; flex-direction: column; }
+  .reveal-grid.g4 .rc-title { font-size: 0.72em; margin-bottom: 0.3em; }
+  .reveal-grid.g4 .rc-desc { font-size: 0.5em; line-height: 1.45; }
+  .reveal-grid.g4 .rc-tag { margin-top: auto; }
+  .reveal-card .rc-tag {
+    display: block; margin-top: 0.5em; padding-top: 0.45em;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: "JetBrains Mono", monospace; font-size: 0.52em;
+    letter-spacing: 0.06em; color: var(--os-amber-soft);
+  }
+  .reveal-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 3px solid var(--os-amber);
+    border-radius: 8px; padding: 1em; text-align: left;
+  }
+  .reveal-card .rc-eyebrow {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.4em;
+  }
+  .reveal-card .rc-title { color: #ffffff; font-size: 0.95em; font-weight: 800; line-height: 1.2; margin-bottom: 0.4em; }
+  .reveal-card .rc-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+
+  .fail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
+  .fail-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-top: 3px solid var(--crit);
+    border-radius: 10px; padding: 1em; text-align: left;
+  }
+  .fail-card .f-eyebrow {
+    color: var(--crit); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.4em;
+  }
+  .fail-card .f-title { color: #ffffff; font-size: 1em; font-weight: 800; line-height: 1.2; margin-bottom: 0.4em; }
+  .fail-card .f-desc { color: #c8d2eb; font-size: 0.63em; line-height: 1.5; }
+  .fail-card .f-signal {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.52em; letter-spacing: 0.03em; line-height: 1.45;
+    border-top: 1px dashed rgba(232,168,56,0.35);
+    margin-top: 0.55em; padding-top: 0.5em;
+  }
+
+  /* Numbered mode cards */
+  .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
+  .mode-card {
+    position: relative;
+    display: flex; flex-direction: column;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px; padding: 1.1em 1em; text-align: left;
+  }
+  .mode-card.m1 { border-top: 3px solid var(--prom-orange); }
+  .mode-card.m2 { border-top: 3px solid var(--os-blue-soft); }
+  .mode-card.m3 { border-top: 3px solid var(--agent-purple); }
+  .mode-card .mode-num {
+    position: absolute; top: 0.55em; right: 0.8em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.6em; color: rgba(255,255,255,0.16); font-weight: 800;
+  }
+  .mode-card .mode-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.56em; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 0.35em; color: var(--os-amber);
+    padding-right: 2.8em;   /* never collide with the ghost numeral */
+  }
+  .mode-card.m1 .mode-eyebrow { color: var(--prom-orange); }
+  .mode-card.m3 .mode-eyebrow { color: var(--agent-purple); }
+  .mode-card .mode-title { color: #ffffff; font-size: 1em; font-weight: 800; margin-bottom: 0.4em; line-height: 1.2; }
+  .mode-card .mode-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+  .mode-card .mode-role {
+    display: block; margin-top: auto; padding-top: 0.45em;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: "JetBrains Mono", monospace; font-size: 0.56em;
+    letter-spacing: 0.05em; color: var(--os-amber-soft);
+  }
+
+  /* Hop chain */
+  .hop-flow {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 0.55em; margin: 1em auto 0 auto; max-width: 1080px;
+  }
+  /* hop + its trailing arrow travel together, so no arrow can strand at a row end */
+  .hop-unit { display: inline-flex; align-items: center; gap: 0.55em; white-space: nowrap; }
+  .hop {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58em; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.5em 0.85em; border-radius: 8px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2);
+  }
+  .hop.agent { border-color: rgba(157,124,255,0.55); color: #c8b8ff; background: rgba(157,124,255,0.10); }
+  .hop.llm { border-color: rgba(232,168,56,0.55); color: var(--os-amber-soft); background: rgba(232,168,56,0.10); }
+  .hop.tool { border-color: rgba(95,214,224,0.55); color: var(--tool-cyan); background: rgba(95,214,224,0.10); }
+  .hop.mcp { border-color: rgba(124,224,160,0.55); color: var(--retrieval-green); background: rgba(124,224,160,0.10); }
+  .hop-arrow {
+    font-family: "JetBrains Mono", monospace;
+    color: rgba(255,255,255,0.35); font-size: 0.7em; font-weight: 800;
+  }
+  .hop-stat {
+    margin-top: 1.1em;
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber); font-size: 0.55em;
+    letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800;
+  }
+
+  /* Hero number */
+  .big-stat { text-align: center; }
+  .big-stat .stat {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 4.4em; font-weight: 800; color: var(--os-amber);
+    line-height: 1; letter-spacing: -0.03em;
+  }
+  .big-stat .stat-flow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85em; color: var(--os-blue-soft); font-weight: 700;
+    margin-top: 0.6em; letter-spacing: 0.05em;
+  }
+  .big-stat p { max-width: 74%; margin: 1.1em auto 0 auto; }
+
+  /* Span-category chips */
+  .cats-row {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.7em; margin-top: 1em;
+  }
+  .cat-chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58em; font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 0.55em 0.9em; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: left; line-height: 1.5;
+  }
+  .cat-chip span { display: block; font-size: 0.82em; opacity: 0.75; letter-spacing: 0.02em; text-transform: none; }
+  .cat-chip.agent { color: var(--agent-purple); border-color: rgba(157,124,255,0.5); background: rgba(157,124,255,0.1); }
+  .cat-chip.llm { color: var(--os-amber); border-color: rgba(232,168,56,0.5); background: rgba(232,168,56,0.1); }
+  .cat-chip.tool { color: var(--tool-cyan); border-color: rgba(95,214,224,0.5); background: rgba(95,214,224,0.1); }
+  .cat-chip.content { color: var(--content-yellow); border-color: rgba(255,216,111,0.45); background: rgba(255,216,111,0.08); }
+  .cat-chip.embed { color: var(--embed-pink); border-color: rgba(255,143,177,0.5); background: rgba(255,143,177,0.1); }
+  .cat-chip.retrieval { color: var(--retrieval-green); border-color: rgba(124,224,160,0.5); background: rgba(124,224,160,0.1); }
+
+  /* Architecture flow */
+  .arch {
+    display: grid; align-items: stretch;
+    grid-template-columns: 1fr 26px 1fr 26px 1fr;
+    gap: 0.4em; margin-top: 1.1em;
+  }
+  .arch-node {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px; padding: 0.9em 0.8em; text-align: center;
+  }
+  .arch-node.prom { border-top: 3px solid var(--prom-orange); }
+  .arch-node.os { border-top: 3px solid var(--os-blue-soft); }
+  .arch-node.amber { border-top: 3px solid var(--os-amber); }
+  .arch-node .an-name { color: #ffffff; font-size: 0.78em; font-weight: 800; line-height: 1.25; margin-bottom: 0.3em; }
+  .arch-node .an-desc { color: #c8d2eb; font-size: 0.55em; line-height: 1.45; }
+  .arch-node .an-tag {
+    display: block; margin-top: 0.5em;
+    font-family: "JetBrains Mono", monospace; font-size: 0.5em;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--os-amber);
+  }
+  .arch-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 1em; font-weight: 800;
+  }
+
+  /* Comparison table */
+  table.matrix {
+    width: 92%; margin: 0.8em auto 0 auto;
+    border-collapse: collapse; border-radius: 10px; overflow: hidden;
+    font-size: 0.52em; background: rgba(255,255,255,0.04);
+  }
+  table.matrix th {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85em; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--os-amber); font-weight: 800;
+    padding: 0.7em 0.8em; text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+  }
+  table.matrix td {
+    padding: 0.42em 0.8em; text-align: left;
+    color: #d8def0; line-height: 1.45;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  table.matrix td.feat { color: #ffffff; font-weight: 700; }
+  table.matrix td code { font-size: 0.9em; }
+  table.matrix tr:last-child td { border-bottom: none; }
+
+  /* Two / three column lists */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.8em; text-align: left; align-items: start; margin-top: 0.8em; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4em; text-align: left; align-items: start; margin-top: 0.8em; }
+  .two-col h3, .three-col h3 {
+    font-size: 0.85em; color: var(--os-amber-soft);
+    border-bottom: 1px solid rgba(255,255,255,0.16);
+    padding-bottom: 0.35em; margin-bottom: 0.5em;
+  }
+  .two-col li, .three-col li { font-size: 0.62em; line-height: 1.5; margin: 0.3em 0; }
+  .two-col p, .three-col p { font-size: 0.62em; line-height: 1.5; }
+
+  /* Code block */
+  .code-block {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 3px solid var(--os-amber);
+    border-radius: 8px; padding: 0.9em 1.2em;
+    margin: 0.6em auto 0 auto; max-width: 90%;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em; color: #d8def0;
+    line-height: 1.65; text-align: left;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    white-space: pre-wrap;
+  }
+  .code-block.sm { font-size: 0.49em; line-height: 1.6; }
+  /* nowrap: for queries where a soft wrap would split one expression into
+     what reads like three unrelated statements */
+  .code-block.nowrap { white-space: pre; overflow-x: hidden; font-size: 0.42em; line-height: 1.5; max-width: 96%; }
+  .code-block .com { color: rgba(255,255,255,0.42); font-style: italic; }
+  .code-block .kw { color: var(--os-amber); font-weight: 700; }
+  .code-block .fn { color: #c4b3ff; }
+  .code-block .str { color: #ffd1a0; }
+  .code-block .num { color: var(--good); }
+  .code-block .attr { color: var(--tool-cyan); }
+
+  /* Trace tree mock */
+  .trace-tree {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 1.1em 1.5em;
+    margin: 0.7em auto 0 auto;
+    max-width: 92%; text-align: left;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  .trace-row {
+    display: grid; grid-template-columns: 1fr 210px 78px;
+    gap: 0.9em; align-items: center;
+    padding: 0.24em 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.53em; color: #d8def0;
+  }
+  .trace-row .tr-label .indent { color: rgba(255,255,255,0.3); margin-right: 0.4em; }
+  .trace-row .tr-label .kind {
+    display: inline-block; font-size: 0.85em; font-weight: 800;
+    padding: 0.05em 0.5em; border-radius: 3px;
+    margin-right: 0.5em; letter-spacing: 0.08em;
+  }
+  .kind.agent { background: rgba(157,124,255,0.2); color: #c4b3ff; border: 1px solid rgba(157,124,255,0.4); }
+  .kind.llm { background: rgba(232,168,56,0.2); color: var(--os-amber-soft); border: 1px solid rgba(232,168,56,0.4); }
+  .kind.tool { background: rgba(95,214,224,0.18); color: var(--tool-cyan); border: 1px solid rgba(95,214,224,0.4); }
+  .kind.mcp { background: rgba(124,224,160,0.18); color: var(--retrieval-green); border: 1px solid rgba(124,224,160,0.4); }
+  .trace-row .tr-name { color: #ffffff; font-weight: 600; }
+  .trace-row .tr-bar { position: relative; height: 9px; background: rgba(255,255,255,0.06); border-radius: 3px; }
+  .trace-row .tr-bar .bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+  .trace-row .tr-bar .bar-fill.agent { background: var(--agent-purple); }
+  .trace-row .tr-bar .bar-fill.llm { background: var(--os-amber); }
+  .trace-row .tr-bar .bar-fill.tool { background: var(--tool-cyan); }
+  .trace-row .tr-bar .bar-fill.mcp { background: var(--retrieval-green); }
+  .trace-row .tr-time { font-size: 0.85em; color: var(--os-amber); text-align: right; font-weight: 700; }
+  .trace-foot {
+    margin-top: 0.7em; padding-top: 0.55em;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: "JetBrains Mono", monospace; font-size: 0.5em;
+    color: var(--os-blue-soft); letter-spacing: 0.06em;
+  }
+
+  /* Four-step walkthrough */
+  .walk-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6em; margin-top: 1em; }
+  .walk-step {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 0.95em 0.85em;
+    text-align: left; position: relative;
+  }
+  .walk-step .ws-num {
+    position: absolute; top: 0.5em; right: 0.7em;
+    font-family: "JetBrains Mono", monospace;
+    color: rgba(255,255,255,0.18); font-weight: 800; font-size: 1.5em;
+  }
+  .walk-step .ws-eyebrow {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.35em;
+  }
+  .walk-step .ws-title { color: #ffffff; font-size: 0.78em; font-weight: 800; line-height: 1.25; margin-bottom: 0.3em; }
+  .walk-step .ws-desc { color: #c8d2eb; font-size: 0.55em; line-height: 1.5; }
+  .walk-step.s1 { border-top: 3px solid var(--crit); }
+  .walk-step.s2 { border-top: 3px solid var(--os-amber); }
+  .walk-step.s3 { border-top: 3px solid var(--agent-purple); }
+  .walk-step.s4 { border-top: 3px solid var(--good); }
+
+  /* Loop diagram */
+  .loop-diagram {
+    display: grid;
+    grid-template-columns: 1fr 26px 1fr 26px 1fr 26px 1fr;
+    align-items: center; gap: 0.4em;
+    margin-top: 1em;
+  }
+  .loop-step {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px; padding: 0.9em 0.7em;
+    text-align: center;
+  }
+  .loop-step .ls-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 800;
+    margin-bottom: 0.3em;
+  }
+  .loop-step .ls-title { color: #ffffff; font-size: 0.82em; font-weight: 800; line-height: 1.2; margin-bottom: 0.3em; }
+  .loop-step .ls-sub { color: #c8d2eb; font-size: 0.53em; line-height: 1.45; }
+  .loop-step.l1 { border-top: 3px solid var(--os-amber); }
+  .loop-step.l2 { border-top: 3px solid var(--agent-purple); }
+  .loop-step.l3 { border-top: 3px solid var(--good); }
+  .loop-step.l4 { border-top: 3px solid var(--os-blue-soft); }
+  .loop-arrow {
+    text-align: center; color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace; font-size: 1.1em; font-weight: 800;
+  }
+
+  /* Chat transcript mock */
+  .convo {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px; padding: 0.8em 1.2em;
+    max-width: 84%; margin: 0.35em auto 0 auto; text-align: left;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .convo-line {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em; line-height: 1.55; margin: 0.32em 0;
+    color: #d8def0;
+  }
+  .convo-line.you::before {
+    content: "you  "; color: var(--os-blue-soft); font-weight: 800;
+  }
+  .convo-line.os::before {
+    content: "os   "; color: var(--agent-purple); font-weight: 800;
+  }
+  .convo-line.os { color: #ffffff; }
+  .convo-line .hl { color: var(--os-amber); font-weight: 700; }
+
+  /* Numbered takeaways */
+  .takeaways { max-width: 88%; margin: 0.8em auto 0 auto; text-align: left; }
+  .takeaways ol { list-style: none; margin: 0; padding: 0; counter-reset: tk; }
+  .takeaways li {
+    counter-increment: tk;
+    position: relative; padding-left: 2.4em;
+    margin: 0.42em 0; font-size: 0.64em; line-height: 1.5;
+  }
+  .takeaways li::before {
+    content: counter(tk, decimal-leading-zero);
+    position: absolute; left: 0; top: -0.1em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.5em; font-weight: 800; color: rgba(232,168,56,0.55);
+  }
+  .takeaways li strong { color: #ffffff; }
+
+  /* CTA */
+  .cta-slide { text-align: center; }
+  .cta-grid {
+    display: grid; grid-template-columns: 1.25fr 1fr;
+    gap: 2em; align-items: center;
+    text-align: left; margin-top: 0.6em;
+  }
+  .cta-cards { display: flex; flex-direction: column; gap: 0.28em; }
+  .cta-card {
+    display: grid; grid-template-columns: 120px 1fr;
+    align-items: center; gap: 0.7em;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 8px; padding: 0.38em 0.7em;
+  }
+  .cta-card .cta-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--os-amber); white-space: nowrap;
+    border-right: 1px solid rgba(255,255,255,0.18);
+    padding-right: 0.7em;
+  }
+  .cta-card .cta-title { color: #ffffff; font-size: 0.52em; font-weight: 700; line-height: 1.3; }
+  .cta-card .cta-url {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.44em; color: var(--os-blue-soft); letter-spacing: 0.01em;
+    margin-top: 0.15em; overflow-wrap: anywhere;
+  }
+  .qr-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9em; }
+  .qr-box { text-align: center; }
+  .qr-box img {
+    width: 100%; max-width: 165px; background: #fff;
+    padding: 9px; border-radius: 10px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5);
+    display: block; margin: 0 auto 0.4em auto;
+  }
+  .qr-box .qr-cap {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+
+  .try-cmd {
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 8px; padding: 0.6em 0.85em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.46em; text-align: left;
+    margin: 0.5em auto 0 auto; max-width: 88%;
+    white-space: nowrap; overflow: hidden; color: #d8def0;
+  }
+  .try-cmd .p { color: var(--good); font-weight: 800; margin-right: 0.6em; }
+
+  /* Closing split */
+  .try-slide { text-align: left; padding: 0 !important; }
+  .try-grid { display: grid; grid-template-columns: 1.05fr minmax(440px, 1fr); gap: 1.6em; align-items: center; }
+  .try-text { text-align: left; min-width: 0; }
+  .try-text h2 em { color: var(--os-amber); font-style: normal; }
+  .try-url {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber); font-size: 1.3em;
+    font-weight: 800; letter-spacing: 0.01em; margin-bottom: 0.7em;
+  }
+  .try-foot { color: #d8def0; font-size: 0.65em; letter-spacing: 0.04em; }
+  .try-foot strong { color: #ffffff; }
+  .try-shot { display: flex; justify-content: center; align-items: center; }
+  .try-shot img {
+    max-width: 100%; max-height: 620px;
+    width: auto; height: auto; border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer {
+    position: fixed; bottom: 14px; left: 30px; right: 30px;
+    display: flex; justify-content: space-between;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px; font-family: "Inter", sans-serif;
+    letter-spacing: 0.05em;
+    pointer-events: none; opacity: 0.85; z-index: 30;
+  }
+  .watermark {
+    position: fixed; top: 22px; right: 28px;
+    width: 126px; z-index: 30;
+    pointer-events: none; opacity: 0.85;
+  }
+  .watermark img { width: 100%; height: auto; display: block; filter: brightness(0) invert(1); }
+  body.hide-watermark .watermark { display: none; }
+
+  .reveal .progress { color: var(--os-amber); }
+  .reveal .controls { color: rgba(255, 255, 255, 0.7) !important; }
+</style>
+</head>
+
+<body>
+<div class="watermark" id="watermark">
+  <img src="assets/opensearch-logo-official.svg" alt="OpenSearch">
+</div>
+<div class="footer">
+  <span>AI Agent Monitoring with the OpenSearch Observability Stack · CloudOps Webinar</span>
+  <span>Anirudha Jadhav · OpenSearch · AWS</span>
+</div>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ 01 · COVER ============ -->
+    <section class="cover">
+      <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
+      <div class="eyebrow">CloudOps Webinar · 2026</div>
+      <h1>AI Agent Monitoring with the<br>OpenSearch Observability Stack</h1>
+      <div class="subtitle">Trace an agent's whole reasoning chain, query Prometheus metrics beside OpenSearch logs and traces, and drill from service health to the exact span — on <strong>Amazon Managed Service for Prometheus</strong> and <strong>Amazon OpenSearch Service</strong>.</div>
+      <div class="speakers">
+        <strong>Anirudha Jadhav</strong>
+        <span class="role">Sr. Engineering Manager · OpenSearch · AWS</span>
+      </div>
+      <div class="meta-line">Tue · Sep 15 · 2026 · 08:00–09:00 PDT · NAMER · English</div>
+    </section>
+
+    <!-- ============ 02 · BY THE NUMBERS ============ -->
+    <section class="image-slide">
+      <img src="assets/slide-numbers.png" alt="OpenSearch by the Numbers">
+    </section>
+
+    <!-- ============ 03 · FOUNDATION ============ -->
+    <section class="image-slide">
+      <img src="assets/crop-foundation.png" alt="OpenSearch Software Foundation, a Linux Foundation project">
+    </section>
+
+    <!-- ============ 04 · THE AWS MANAGED STACK ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Managed on AWS</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.45em;">The <em>AWS</em> OpenSearch Observability Stack.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.7em; max-width:88%; margin:0 auto;">
+        The four pieces you would otherwise run become managed services. Same spans, same queries, same interface — <strong>your agent code does not change</strong>, only the endpoint and the auth.
+      </p>
+      <div class="reveal-grid g4">
+        <div class="reveal-card" style="border-top-color: var(--os-blue-soft);">
+          <div class="rc-eyebrow" style="color: var(--os-blue-soft);">Traces · Logs</div>
+          <div class="rc-title">Amazon OpenSearch Service</div>
+          <div class="rc-desc">Agent spans, application logs and the derived service map. Serverless is supported too.</div>
+          <span class="rc-tag">query → PPL</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--prom-orange);">
+          <div class="rc-eyebrow" style="color: var(--prom-orange);">Metrics</div>
+          <div class="rc-title">Amazon Managed Service for Prometheus</div>
+          <div class="rc-desc">RED metrics, token rates and SLO burn-rate rules. Registered as a Prometheus data source using SigV4.</div>
+          <span class="rc-tag">query → PromQL</span>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Pipeline</div>
+          <div class="rc-title">Amazon OpenSearch Ingestion</div>
+          <div class="rc-desc">The managed OTLP ingestion path — it takes the place of the OTel Collector and Data Prepper you run locally.</div>
+          <span class="rc-tag">otlp in</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--agent-purple);">
+          <div class="rc-eyebrow" style="color: var(--agent-purple);">One interface</div>
+          <div class="rc-title">OpenSearch UI</div>
+          <div class="rc-desc">The AWS-managed Dashboards surface: Agent Traces, Application Map, Services, SLOs, Unified Alerts.</div>
+          <span class="rc-tag">one pane</span>
+        </div>
+      </div>
+      <div class="try-cmd" style="margin-top:0.7em;"><span class="p">$</span>npx @opensearch-project/observability-stack<span style="color:rgba(255,255,255,0.4);">   # or CDK · ~15 min · VPC optional · --serverless</span></div>
+    </section>
+
+    <!-- ============ 05 · THE OPEN SUBSTRATE ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">And underneath, nothing proprietary</div>
+      <h2 style="text-align:center; margin-bottom:0.3em; font-size:1.5em;">Three open projects. <em>One stack.</em></h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.78em; max-width:84%; margin:0 auto;">
+        Nothing in this talk asks you to adopt a vendor agent or a proprietary schema. Every layer is a project you can already run yourself.
+      </p>
+      <div class="mode-grid">
+        <div class="mode-card m1">
+          <div class="mode-num">01</div>
+          <div class="mode-eyebrow">Metrics</div>
+          <div class="mode-title">Prometheus</div>
+          <div class="mode-desc">Native PromQL over time series. Recording rules, alerting rules, Alertmanager — untouched.</div>
+          <span class="mode-role">managed as → AMP</span>
+        </div>
+        <div class="mode-card m2">
+          <div class="mode-num">02</div>
+          <div class="mode-eyebrow">Logs &amp; traces</div>
+          <div class="mode-title">OpenSearch</div>
+          <div class="mode-desc">High-cardinality span and log documents, queried with PPL. Trace store, service map, dashboards.</div>
+          <span class="mode-role">managed as → Amazon OpenSearch Service</span>
+        </div>
+        <div class="mode-card m3">
+          <div class="mode-num">03</div>
+          <div class="mode-eyebrow">Instrumentation</div>
+          <div class="mode-title">OpenTelemetry</div>
+          <div class="mode-desc">GenAI semantic conventions on the wire. One vocabulary for every agent framework and model.</div>
+          <span class="mode-role">collector → your choice of backend</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 · BRIDGE ============ -->
+    <section class="eyebrow-slide">
+      <div class="eyebrow">2026 reality check</div>
+      <h1 style="font-size:2.3em; margin-bottom:0.3em;">Your agent is not a <em>microservice</em>.</h1>
+      <p style="color:var(--os-blue-soft); font-size:0.95em; max-width:74%; margin:0 auto;">
+        Same request, different program, every single run. Which is why the dashboard you already trust tells you almost nothing about it.
+      </p>
+    </section>
+
+    <!-- ============ 06 · AGENDA ============ -->
+    <section class="center-slide">
+      <div class="eyebrow">The next 50 minutes</div>
+      <h2 style="margin-bottom:0.5em; font-size:1.5em;">Where we're going</h2>
+      <div class="takeaways">
+        <ol>
+          <li><strong>Why agents break differently</strong> — and the three failure modes RED metrics cannot see</li>
+          <li><strong>The shared vocabulary</strong> — OpenTelemetry GenAI semantic conventions, and the span categories they produce</li>
+          <li><strong>One interface, two stores</strong> — AMP for metrics, Amazon OpenSearch Service for traces and logs</li>
+          <li><strong>Instrument your own agent</strong> — one call, one decorator, twenty-plus libraries</li>
+          <li><strong>Walk a reasoning chain</strong> — root agent span down to the failing tool call</li>
+          <li><strong>From service health to the exact span</strong> — RED, application map, SLOs</li>
+          <li><strong>Grade the agent, not the status code</strong> — evals, golden paths, and closing the loop</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ PART 1 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Part 01 —</div>
+      <h2>Agents break <em>differently</em>.</h2>
+      <p class="pillar-sub">A microservice does the same thing every time and fails loudly. An agent <strong>chooses what to do at runtime</strong> and fails quietly, with a 200 OK and a confident wrong answer.</p>
+    </section>
+
+    <!-- ============ 08 · ONE QUESTION, MANY HOPS ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">What one request actually costs you</div>
+      <h2 style="text-align:center; margin-bottom:0.25em; font-size:1.5em;">One question. <em>Dozens of hops.</em></h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.75em; max-width:80%; margin:0 auto;">
+        A single customer turn in the multi-agent travel-planner example: a root agent plans, delegates to a sub-agent, which calls a tool, which calls an MCP server.
+      </p>
+      <div class="hop-flow">
+        <span class="hop-unit"><span class="hop agent">invoke_agent · Travel&nbsp;Planner</span><span class="hop-arrow">→</span></span>
+        <span class="hop-unit"><span class="hop llm">chat · planning</span><span class="hop-arrow">→</span></span>
+        <span class="hop-unit"><span class="hop agent">invoke_agent · weather-agent</span><span class="hop-arrow">→</span></span>
+        <span class="hop-unit"><span class="hop agent">invoke_agent · Weather&nbsp;Assistant</span><span class="hop-arrow">→</span></span>
+        <span class="hop-unit"><span class="hop tool">execute_tool · get_current_weather</span><span class="hop-arrow">→</span></span>
+        <span class="hop-unit"><span class="hop mcp">tools/call · fetch_weather_api</span><span class="hop-arrow">→</span></span>
+        <span class="hop-unit"><span class="hop mcp">POST · /mcp</span></span>
+      </div>
+      <div class="hop-stat">one POST /plan trace · 37 spans · 2,970 tokens · 1.71 s</div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.68em; max-width:78%; margin:0.7em auto 0 auto;">
+        Traditional APM records the first box and the total duration. Everything that decided the answer lives in the boxes it never opened.
+      </p>
+    </section>
+
+    <!-- ============ 09 · THE BLACK BOX ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The core problem</div>
+      <h2 style="text-align:center; margin-bottom:0.35em; font-size:1.5em;">APM treats the agent as a <em>black box</em>.</h2>
+      <div class="reveal-grid">
+        <div class="reveal-card">
+          <div class="rc-eyebrow">What APM shows</div>
+          <div class="rc-title">One fat span</div>
+          <div class="rc-desc">Rate, errors, duration at the request boundary. Exactly right for a service. Blind for an agent, because the interesting decisions are all inside.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">What actually happened</div>
+          <div class="rc-title">A different program each run</div>
+          <div class="rc-desc">Plan, call, read, re-plan, retry, delegate. Sub-agents. Tools. MCP servers. Token spend that swings by an order of magnitude on identical input.</div>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">The gap</div>
+          <div class="rc-title">No shared vocabulary</div>
+          <div class="rc-desc">Without standard attributes for model, tokens, prompts and tool calls, no tool can query across frameworks — and every vendor invents its own schema.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10 · THREE FAILURE MODES ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The failure modes RED metrics cannot see</div>
+      <h2 style="text-align:center; margin-bottom:0.35em; font-size:1.45em;">Three ways your agent is <em>already</em> failing.</h2>
+      <div class="fail-grid">
+        <div class="fail-card">
+          <div class="f-eyebrow">Failure 01</div>
+          <div class="f-title">Confidently wrong</div>
+          <div class="f-desc">The agent answers from the model instead of calling the tool. Well-formatted, plausible, fiction. Status 200, latency normal.</div>
+          <div class="f-signal">signal → a trace with <em>chat</em> spans and no <em>execute_tool</em> span</div>
+        </div>
+        <div class="fail-card">
+          <div class="f-eyebrow">Failure 02</div>
+          <div class="f-title">Silently degraded</div>
+          <div class="f-desc">A prompt edit or model swap drops answer quality. Error rate unchanged. Latency unchanged. A customer tells you next week.</div>
+          <div class="f-signal">signal → pass rate on a scored dataset, not error rate</div>
+        </div>
+        <div class="fail-card">
+          <div class="f-eyebrow">Failure 03</div>
+          <div class="f-title">Off the golden path</div>
+          <div class="f-desc">Right answer, wrong route. An extra reasoning loop, a redundant tool call, double the tokens. You find it on the bill.</div>
+          <div class="f-signal">signal → tool sequence vs golden path; tokens per trace</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 11 · THE NUMBER ============ -->
+    <section class="big-stat">
+      <div class="eyebrow">Measured on the companion repo's committed eval run</div>
+      <div class="stat">22</div>
+      <div class="stat-flow">spans per single customer question</div>
+      <p style="color:var(--os-blue-soft);">
+        Five support questions produced <strong>110 spans</strong> across 5 traces. Of those 110, exactly <strong>10 carried token usage</strong> — the <code>chat</code> spans.
+      </p>
+      <p style="color:#c8d2eb; font-size:0.7em; max-width:70%;">
+        That ratio is the whole argument for span-level telemetry: cost lives on a tenth of your spans, and correctness lives on the ones next to them.
+      </p>
+    </section>
+
+    <!-- ============ PART 2 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Part 02 —</div>
+      <h2>One <em>vocabulary</em>.<br>Two stores.</h2>
+      <p class="pillar-sub">OpenTelemetry GenAI semantic conventions make every framework's agent look the same on the wire — so <strong>metrics can live in Prometheus and traces in OpenSearch</strong> without you maintaining two mental models.</p>
+    </section>
+
+    <!-- ============ 13 · GENAI SEMCONV ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The shared substrate</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.45em;">Standard <code>gen_ai.*</code> attributes.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:84%; margin:0 auto 0.3em auto;">
+        A real exported tool span from the companion repo — no custom schema, no translation layer.
+      </p>
+      <pre class="code-block">{
+ <span class="attr">"name"</span>: <span class="str">"execute_tool lookup_order"</span>,
+ <span class="attr">"attributes"</span>: {
+  <span class="attr">"gen_ai.operation.name"</span>:     <span class="str">"execute_tool"</span>,
+  <span class="attr">"gen_ai.tool.name"</span>:          <span class="str">"lookup_order"</span>,
+  <span class="attr">"gen_ai.tool.type"</span>:          <span class="str">"function"</span>,
+  <span class="attr">"gen_ai.tool.call.arguments"</span>: <span class="str">"{\"order_id\": \"1007\"}"</span>,
+  <span class="attr">"gen_ai.tool.call.result"</span>:    <span class="str">"{\"status\": \"shipped\", …}"</span>
+ }
+}</pre>
+      <div class="key">
+        <strong>Spans are indexed as-is with <code>gen_ai.*</code> attributes. No custom schema translation is needed.</strong>
+        <span class="src">— Agent Traces documentation</span>
+      </div>
+    </section>
+
+    <!-- ============ 14 · SPAN CATEGORIES ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Derived, not configured</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.45em;">Six categories from <em>one attribute</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.74em; max-width:84%; margin:0 auto;">
+        Agent Traces reads <code>gen_ai.operation.name</code> and maps every span to a category. Categories drive colour, filtering and aggregation across all views — you set the attribute, the UI does the rest.
+      </p>
+      <div class="cats-row">
+        <span class="cat-chip agent">▸ AGENT<span>invoke_agent · create_agent</span></span>
+        <span class="cat-chip llm">▸ LLM<span>chat</span></span>
+        <span class="cat-chip tool">▸ TOOL<span>execute_tool</span></span>
+        <span class="cat-chip content">▸ CONTENT<span>text_completion · generate_content</span></span>
+        <span class="cat-chip embed">▸ EMBEDDINGS<span>embeddings</span></span>
+        <span class="cat-chip retrieval">▸ RETRIEVAL<span>retrieval</span></span>
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.66em; max-width:80%; margin:1.5em auto 0 auto; line-height:1.6;">
+        Anything without a recognised operation name lands in <strong>Other</strong>. The practical consequence: a framework has to emit OpenTelemetry spans <em>with GenAI attributes</em> — not merely spans — to show up as agent telemetry.
+      </p>
+    </section>
+
+    <!-- ============ 15 · ONE INTERFACE, TWO STORES ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The architecture</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.45em;">One interface. <em>Two purpose-built stores.</em></h2>
+      <div class="arch">
+        <div class="arch-node amber">
+          <div class="an-name">Your agent</div>
+          <div class="an-desc">OTel SDK emits spans and GenAI metrics over OTLP</div>
+          <span class="an-tag">otlp :4318</span>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node amber">
+          <div class="an-name">OTel Collector</div>
+          <div class="an-desc">One receiver, two pipelines — traces and metrics diverge here</div>
+          <span class="an-tag">fan-out</span>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node os">
+          <div class="an-name">Two stores</div>
+          <div class="an-desc"><strong>AMP</strong> — time series, PromQL<br><strong>Amazon OpenSearch Service</strong> — spans, logs, service map</div>
+          <span class="an-tag">one UI on top</span>
+        </div>
+      </div>
+      <div class="key">
+        <strong>It combines topology data stored in OpenSearch with time-series RED metrics (Rate, Errors, Duration) stored in Prometheus.</strong>
+        <span class="src">— Application Monitoring documentation</span>
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:82%; margin:0.7em auto 0 auto;">
+        Not a federated query engine: a Prometheus data source for metrics, OpenSearch datasets for traces and logs, joined in the UI by <strong>trace ID and service name</strong>.
+      </p>
+    </section>
+
+    <!-- ============ 16 · WHY TWO STORES ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Why not force one store to do both</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.45em;">Each signal keeps its <em>purpose-built home</em>.</h2>
+      <table class="matrix">
+        <thead>
+          <tr><th>Signal</th><th>Store</th><th>Query</th><th>Why there</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="feat">RED metrics, token rates, SLO burn</td>
+            <td>Amazon Managed Service for Prometheus</td>
+            <td><code>PromQL</code></td>
+            <td>Cheap at high sample rate; recording rules and burn-rate alerts are a solved problem</td>
+          </tr>
+          <tr>
+            <td class="feat">Agent spans, prompts, tool arguments</td>
+            <td>Amazon OpenSearch Service</td>
+            <td><code>PPL</code></td>
+            <td>Unbounded cardinality — a trace ID, a prompt and a tool result are documents, not series</td>
+          </tr>
+          <tr>
+            <td class="feat">Application logs</td>
+            <td>Amazon OpenSearch Service</td>
+            <td><code>PPL</code></td>
+            <td>Full-text search, and correlated to spans by trace ID</td>
+          </tr>
+          <tr>
+            <td class="feat">Service topology</td>
+            <td>Amazon OpenSearch Service</td>
+            <td>Application Map</td>
+            <td>Derived from trace data by the ingestion pipeline, then drawn over Prometheus RED metrics</td>
+          </tr>
+          <tr>
+            <td class="feat">Eval scores</td>
+            <td>Amazon OpenSearch Service</td>
+            <td><code>PPL</code></td>
+            <td>Emitted as spans on the same pipeline, so quality sits next to the run it graded</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ 17 · THE BRIDGE ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The detail that makes per-agent PromQL possible</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">GenAI attributes become <em>Prometheus labels</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:86%; margin:0 auto 0.2em auto;">
+        Metrics are useless for agents unless you can slice them by agent and by model. One collector flag promotes OTel resource attributes into label names — dots become underscores.
+      </p>
+      <pre class="code-block sm"><span class="com"># otel-collector-config.yaml — the metrics pipeline</span>
+<span class="kw">exporters</span>:
+  <span class="kw">prometheus</span>:
+    endpoint: <span class="str">0.0.0.0:8889</span>
+    <span class="kw">resource_to_telemetry_conversion</span>:
+      enabled: <span class="num">true</span>          <span class="com"># ← gen_ai.agent.name → gen_ai_agent_name</span>
+
+<span class="com"># and so this PromQL works, per agent, with no custom metric:</span>
+<span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_count[<span class="num">5m</span>])) <span class="kw">by</span> (gen_ai_agent_name)</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:82%; margin:0.8em auto 0 auto;">
+        The stack's own Prometheus configuration goes further and promotes selected <code>gen_ai.*</code> resource attributes over the native OTLP endpoint, which preserves them rather than flattening them on remote write.
+      </p>
+    </section>
+
+    <!-- ============ PART 3 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Part 03 —</div>
+      <h2>Instrument <em>your</em> agent.</h2>
+      <p class="pillar-sub">One call at startup, one decorator on the entry point. <strong>The agent body is the code you already had</strong> — the framework-specific model and tool calls get traced for you.</p>
+    </section>
+
+    <!-- ============ 19 · ONE-LINE SETUP ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Step 01 · Register</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.45em;">One call wires the whole pipeline.</h2>
+      <pre class="code-block"><span class="com"># pip install "opensearch-genai-observability-sdk-py[bedrock]"</span>
+<span class="kw">from</span> opensearch_genai_observability_sdk_py <span class="kw">import</span> register, observe, enrich, score, Op
+
+register(
+    endpoint=<span class="str">"http://localhost:4318/v1/traces"</span>,
+    service_name=<span class="str">"acme-support-agent"</span>,
+    <span class="com"># auto_instrument=True by default — discovers installed instrumentors</span>
+)</pre>
+      <div class="key">
+        <strong>One-line OTEL setup — <code>register()</code> configures the tracer provider, exporter, and auto-instrumentation in one call.</strong>
+        <span class="src">— Send Data · AI Agents documentation</span>
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:80%; margin:0.7em auto 0 auto;">
+        Pass the endpoint explicitly. Going to production is this line changing — or just setting <code>OTEL_EXPORTER_OTLP_TRACES_ENDPOINT</code>.
+      </p>
+    </section>
+
+    <!-- ============ 20 · DECORATORS ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Step 02 · Decorate</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.45em;">Two decorators. <em>Whole run stitched.</em></h2>
+      <pre class="code-block sm"><span class="com"># the entry point — one invoke_agent root span per turn</span>
+<span class="kw">@</span><span class="fn">observe</span>(op=Op.INVOKE_AGENT, name=<span class="str">"acme-support-agent"</span>)
+<span class="kw">def</span> <span class="fn">handle_support_question</span>(question: str, conversation_id: str = <span class="str">"anonymous"</span>) -> str:
+    enrich(session_id=conversation_id)   <span class="com"># → gen_ai.conversation.id</span>
+    <span class="kw">return</span> run_turn(question)          <span class="com"># your existing agent loop, unchanged</span>
+
+<span class="com"># a tool — arguments and return value captured automatically</span>
+<span class="kw">@</span><span class="fn">observe</span>(op=Op.EXECUTE_TOOL, name=<span class="str">"lookup_order"</span>)
+<span class="kw">def</span> <span class="fn">lookup_order</span>(order_id: str) -> dict:
+    <span class="kw">return</span> _ORDERS.get(order_id) <span class="kw">or</span> {<span class="str">"error"</span>: <span class="str">"order_not_found"</span>}</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.66em; max-width:86%; margin:0.9em auto 0 auto;">
+        <code>name=</code> on an <code>INVOKE_AGENT</code> span sets <code>gen_ai.agent.name</code>; on an <code>EXECUTE_TOOL</code> span it sets <code>gen_ai.tool.name</code>. Arguments land in <code>gen_ai.tool.call.arguments</code>, the return value in <code>gen_ai.tool.call.result</code> — that is the span you saw two slides ago.
+      </p>
+    </section>
+
+    <!-- ============ 21 · COVERAGE ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Step 03 · Auto-instrumentation</div>
+      <h2 style="text-align:center; margin-bottom:0.3em; font-size:1.4em;">Meet the framework you already run.</h2>
+      <div class="two-col">
+        <div>
+          <h3>Opt in with the extra that matches your stack</h3>
+          <ul>
+            <li><code>[bedrock]</code> — Amazon Bedrock <code>converse</code> with <code>toolConfig</code></li>
+            <li><code>[anthropic]</code> — <code>messages.create</code> with tools</li>
+            <li><code>[openai]</code> — chat completions and OpenAI Agents</li>
+            <li><code>[langchain]</code> — LangChain, LangGraph; callback handler auto-registered</li>
+            <li><code>[llamaindex]</code> — ReAct agents and query engines</li>
+            <li><code>[all]</code> — everything, for a multi-framework agent</li>
+          </ul>
+        </div>
+        <div>
+          <h3>And 20+ more libraries, traced automatically</h3>
+          <p>Cohere · Mistral · Groq · Ollama · CrewAI · Agno · MCP · Transformers — plus vector stores Chroma, Pinecone, Qdrant, Weaviate, Milvus.</p>
+          <h3 style="margin-top:1.1em;">Node.js, same shape</h3>
+          <p><code>@opensearch-project/genai-observability-sdk-ts</code> gives you <code>register</code>, <code>observe</code>, <code>enrich</code>, <code>Op</code>. It is a <strong>function wrapper, not a decorator</strong>, and its auto-instrumentation coverage is narrower than Python's today. <strong>Agent Evals scoring is Python-side.</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 22 · SAME CODE, MANY RUNTIMES ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The companion repo, six ways</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Same two lines. <em>Any runtime.</em></h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:86%; margin:0 auto;">
+        One shared core — tools, observability wiring, dataset, golden paths, criteria. The only file that changes is the agent body.
+      </p>
+      <table class="matrix">
+        <thead><tr><th>Variant</th><th>Agent body</th><th>What differs</th></tr></thead>
+        <tbody>
+          <tr><td class="feat">LangGraph</td><td><code>create_react_agent</code></td><td>Provider switch: OpenAI or Bedrock, same graph</td></tr>
+          <tr><td class="feat">Strands Agents</td><td><code>strands.Agent(...)</code></td><td>Strands emits its own OTel spans — you get a nested tree under your root</td></tr>
+          <tr><td class="feat">Bedrock AgentCore</td><td><code>@app.entrypoint</code></td><td><code>register()</code> at cold start → one trace per invocation</td></tr>
+          <tr><td class="feat">OpenAI · Anthropic · Bedrock</td><td>native SDK call + tools</td><td>Only the tool-schema translation and the arguments field</td></tr>
+          <tr><td class="feat">TypeScript</td><td><code>observe({op}, fn)</code></td><td>Function wrapper, not a decorator; <code>await register()</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ PART 4 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Part 04 —</div>
+      <h2>Walk the <em>reasoning chain</em>.</h2>
+      <p class="pillar-sub">From the root agent span down to the failing tool call — with model name, token counts and tool arguments on the spans, because the GenAI conventions put them there.</p>
+    </section>
+
+    <!-- ============ 24 · TRACE TREE MOCK ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">What a real agent trace looks like</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">One <code>POST /plan</code>. <em>37 spans.</em></h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.7em; max-width:80%; margin:0 auto;">
+        The bundled travel-planner example: a root agent, a delegated sub-agent, a tool, and the MCP call underneath it.
+      </p>
+      <div class="trace-tree">
+        <div class="trace-row">
+          <div class="tr-label"><span class="kind agent">AGENT</span><span class="tr-name">POST /plan</span></div>
+          <div class="tr-bar"><div class="bar-fill agent" style="left:0%; width:100%;"></div></div>
+          <div class="tr-time">1.71 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">└</span><span class="kind agent">AGENT</span><span class="tr-name">invoke_agent · Travel Planner</span></div>
+          <div class="tr-bar"><div class="bar-fill agent" style="left:0%; width:100%;"></div></div>
+          <div class="tr-time">1.71 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">&nbsp;&nbsp;└</span><span class="kind llm">LLM</span><span class="tr-name">chat · planning</span></div>
+          <div class="tr-bar"><div class="bar-fill llm" style="left:1%; width:16%;"></div></div>
+          <div class="tr-time">284.50 ms</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">&nbsp;&nbsp;└</span><span class="kind agent">AGENT</span><span class="tr-name">invoke_agent · weather-agent</span></div>
+          <div class="tr-bar"><div class="bar-fill agent" style="left:18%; width:66%;"></div></div>
+          <div class="tr-time">1.14 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">&nbsp;&nbsp;&nbsp;&nbsp;└</span><span class="kind agent">AGENT</span><span class="tr-name">invoke_agent · Weather Assistant</span></div>
+          <div class="tr-bar"><div class="bar-fill agent" style="left:19%; width:65%;"></div></div>
+          <div class="tr-time">1.14 s</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└</span><span class="kind tool">TOOL</span><span class="tr-name">execute_tool · get_current_weather</span></div>
+          <div class="tr-bar"><div class="bar-fill tool" style="left:70%; width:8%;"></div></div>
+          <div class="tr-time">135.91 ms</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└</span><span class="kind mcp">MCP</span><span class="tr-name">tools/call · fetch_weather_api</span></div>
+          <div class="tr-bar"><div class="bar-fill mcp" style="left:70%; width:8%;"></div></div>
+          <div class="tr-time">135.52 ms</div>
+        </div>
+        <div class="trace-row">
+          <div class="tr-label"><span class="indent">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└</span><span class="kind mcp">MCP</span><span class="tr-name">POST /mcp</span></div>
+          <div class="tr-bar"><div class="bar-fill mcp" style="left:71%; width:7%;"></div></div>
+          <div class="tr-time">124.49 ms</div>
+        </div>
+        <div class="trace-foot">37 spans · 2,970 tokens · status success · the tool span and the MCP call underneath it are 0.4 ms apart</div>
+      </div>
+    </section>
+
+    <!-- ============ 25 · AGENT TRACES LIST ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Traces · metrics bar</div>
+      <h3>Fleet-level signal on every search</h3>
+      <div class="feature-sub"><em>169 traces · 3.5K spans · 144 errors · 381K tokens · P50 1.58 s · P99 7.73 s</em> — and every one of those recomputes when you filter by service, model, agent or time window.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-tokens-kpi.png" class="band" alt="Agent Traces metrics bar: traces, spans, errors, tokens, P50 and P99 latency">
+        <div class="shot-caption">Observability Stack → Agent Traces</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.62em; margin-top:0.6em; max-width:78%;">
+        Tokens are a headline metric next to latency, not an afterthought you compute later. That is what having <code>gen_ai.usage.*</code> on the span buys you.
+      </p>
+    </section>
+
+    <!-- ============ 26 · TIMELINE ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Traces · Timeline</div>
+      <h3>Where the wall-clock time actually went</h3>
+      <div class="feature-sub">Agent, LLM, tool and MCP spans on one waterfall. The caller-side tool span <em>and</em> the MCP call underneath it are both visible — which is how you tell "the tool was slow" from "the thing the tool called was slow".</div>
+      <div class="feature-shot">
+        <img src="assets/crop-timeline.png" class="tall" alt="Span waterfall for one agent run">
+        <div class="shot-caption">trace detail → Timeline tab</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.62em; margin-top:0.5em; max-width:80%;">
+        <code>POST /plan</code> 1.71 s nests <code>weather-agent</code> 1.14 s, down to <code>fetch_weather_api</code> at ~123 ms.
+      </p>
+    </section>
+
+    <!-- ============ 27 · TRACE MAP ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Traces · Trace Map</div>
+      <h3>The delegation graph</h3>
+      <div class="feature-sub">One HTTP entry point becomes a named agent, which spends a planning call and then hands the work to a sub-agent. <em>Select a span in any view and it highlights in the others.</em></div>
+      <div class="feature-shot">
+        <img src="assets/crop-trace-map.png" class="wide" alt="Agent trace map showing agent-to-agent delegation">
+        <div class="shot-caption">trace detail → Trace Map (Dagre DAG, rendered with React Flow)</div>
+      </div>
+    </section>
+
+    <!-- ============ 28 · PROMPT AND RESPONSE ON THE SPAN ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Traces · span detail</div>
+      <h3>The prompt and the answer, on the span</h3>
+      <div class="feature-sub">Operation, duration, span ID, parent span — and the actual messages: <em>"What's the weather in Berlin?"</em> in, <em>"…cloudy with a temperature of 70°F."</em> out.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-agent-io.png" class="tall" alt="Span detail panel showing input and output messages">
+        <div class="shot-caption">span detail → Metadata · Input / Output</div>
+      </div>
+    </section>
+
+    <!-- ============ 29 · PPL ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Ask anything, ad hoc</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">PPL across <em>every</em> agent span.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:84%; margin:0 auto 0.2em auto;">
+        The trace store is queryable. Token spend by agent and model, tool failure rate, sub-agent P99 — composed live in the same interface as the trace tree.
+      </p>
+      <pre class="code-block sm"><span class="com">// token spend by agent and model</span>
+<span class="kw">source</span> = otel-v1-apm-span-*
+| <span class="kw">where</span> <span class="kw">isnotnull</span>(attributes.gen_ai.request.model)
+| <span class="kw">stats</span> <span class="fn">sum</span>(attributes.gen_ai.usage.input_tokens)  <span class="kw">as</span> in_tokens,
+        <span class="fn">sum</span>(attributes.gen_ai.usage.output_tokens) <span class="kw">as</span> out_tokens,
+        <span class="fn">count</span>()                                     <span class="kw">as</span> calls
+  <span class="kw">by</span> attributes.gen_ai.agent.name, attributes.gen_ai.request.model
+| <span class="kw">sort</span> - out_tokens
+
+<span class="com">// the "looped and hallucinated" case, made visible</span>
+<span class="kw">source</span> = otel-v1-apm-span-*
+| <span class="kw">where</span> attributes.gen_ai.operation.name = <span class="str">'chat'</span>
+| <span class="kw">stats</span> <span class="fn">count</span>() <span class="kw">as</span> chat_steps <span class="kw">by</span> traceId
+| <span class="kw">where</span> chat_steps &gt; <span class="num">3</span></pre>
+    </section>
+
+    <!-- ============ 30 · TOKENS BY MODEL ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Traces · Visualization</div>
+      <h3>Input vs output tokens, per model</h3>
+      <div class="feature-sub">X-axis <code>attributes.gen_ai.request.model</code>, Y-axis <code>input_tokens</code> and <code>output_tokens</code> — cost by model, no code. <em>The semantic convention is the schema, so the builder needs nothing from you.</em></div>
+      <div class="feature-shot">
+        <img src="assets/crop-tokens-builder.png" class="tall" alt="Visualization builder with GenAI model and token fields selected">
+        <div class="shot-caption">Agent Traces → Visualization tab → builder</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.6em; margin-top:0.5em; max-width:80%;">
+        The same signal on the metrics side is one recording rule: <code>sum(rate(gen_ai_client_token_usage_sum{gen_ai_token_type="output"}[5m])) by (gen_ai_request_model)</code>.
+      </p>
+    </section>
+
+    <!-- ============ PART 5 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Part 05 —</div>
+      <h2>Metrics <em>beside</em> traces.</h2>
+      <p class="pillar-sub">Native PromQL in the same interface as your logs and traces — so you can answer <strong>"is this the application or the infrastructure underneath it?"</strong> without changing tabs or query languages.</p>
+    </section>
+
+    <!-- ============ 32 · METRICS EXPLORER ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Discover · Metrics · Explore mode</div>
+      <h3>Finding a metric shouldn't be archaeology</h3>
+      <div class="feature-sub"><em>2,340 metrics</em> on the Prometheus data source, previewed 40 at a time as sparkline cards with type badges — counter, gauge, histogram, summary. <em>No PromQL required to find out what exists.</em></div>
+      <div class="feature-shot">
+        <img src="assets/crop-metrics-header.png" class="band" alt="Metrics explorer header: All Metrics, 40 of 2,340 metrics, on the Prometheus data source">
+        <img src="assets/crop-metrics-cards.png" class="band" alt="Metric cards with sparklines and counter and histogram type badges">
+        <div class="shot-caption">Observability Stack → Metrics · Explore mode</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.6em; margin-top:0.5em; max-width:80%;">
+        Then Query mode gives you the PromQL editor with autocomplete from the data source, a no-code builder per row, and several queries on one chart.
+      </p>
+    </section>
+
+    <!-- ============ 33 · PROMQL RED ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">RED metrics in native PromQL</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Rate. Errors. Duration. <em>Per agent.</em></h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.7em; max-width:86%; margin:0 auto 0.2em auto;">
+        Real recording rules from the companion repo, over the OpenTelemetry GenAI metric conventions — no bespoke metric names, and <code>gen_ai_agent_name</code> is a label because the collector promoted it.
+      </p>
+      <pre class="code-block nowrap"><span class="com"># rate — invocations per second, per agent</span>
+<span class="kw">record</span>: acme:agent_requests:rate5m
+<span class="kw">expr</span>:   <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_count[<span class="num">5m</span>])) <span class="kw">by</span> (gen_ai_agent_name)
+
+<span class="com"># errors — error ratio, per agent</span>
+<span class="kw">record</span>: acme:agent_errors:ratio5m
+<span class="kw">expr</span>:   <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_count{error_type!=<span class="str">""</span>}[<span class="num">5m</span>])) <span class="kw">by</span> (gen_ai_agent_name)
+      / <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_count[<span class="num">5m</span>]))                    <span class="kw">by</span> (gen_ai_agent_name)
+
+<span class="com"># duration — p95 latency, per agent</span>
+<span class="kw">record</span>: acme:agent_latency:p95_5m
+<span class="kw">expr</span>:   <span class="fn">histogram_quantile</span>(<span class="num">0.95</span>,
+          <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_bucket[<span class="num">5m</span>])) <span class="kw">by</span> (le, gen_ai_agent_name))</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:84%; margin:0.7em auto 0 auto;">
+        Two more rules turn these into a burn-rate alert: p95 above 4 s for 5 minutes, and error ratio above 5% for 10 minutes — both <code>severity: page</code>.
+      </p>
+    </section>
+
+    <!-- ============ 34 · ONE DASHBOARD ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Dashboards · one canvas, both stores</div>
+      <h3>Business KPIs, spans, and agent error logs together</h3>
+      <div class="feature-sub">A 5xx fault-rate series whose legend includes <code>events-agent</code> and <code>travel-planner</code>, above the error logs that explain it — <em>"Agent invocation failed"</em> and <em>"Tool execution failed"</em> on the <code>weather-agent</code>. Metrics from Prometheus, logs from OpenSearch, one time picker.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-dash-faultrate.png" class="band" alt="Dashboard panel: services with high fault rate, legend including events-agent and travel-planner">
+        <img src="assets/crop-dash-agentlogs.png" class="band" alt="Dashboard panel of application error logs showing weather-agent failures">
+        <div class="shot-caption">Observability Stack → Dashboards → Astronomy Shop</div>
+      </div>
+      <aside class="notes">
+        Dashboard variables are populated by a PPL query against your own telemetry, so one dashboard keeps serving every agent you add later.
+      </aside>
+    </section>
+
+    <!-- ============ PART 6 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Part 06 —</div>
+      <h2>Health view → <em>exact span</em>.</h2>
+      <p class="pillar-sub">Your agents are services too. They belong on the same application map, in the same RED catalogue, and behind the same SLOs as everything else you run.</p>
+    </section>
+
+    <!-- ============ 36 · APPLICATION MAP ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Application Monitoring · Application Map</div>
+      <h3>Agents are just nodes on the topology</h3>
+      <div class="feature-sub"><code>weather-agent</code> (7 requests) and <code>events-agent</code> (8) both call <code>mcp-server</code> (28) — discovered automatically, in the same graph as the e-commerce services. <em>Topology from OpenSearch, RED metrics from Prometheus.</em></div>
+      <div class="feature-shot">
+        <img src="assets/crop-appmap-tight.png" class="wide" alt="Application map showing weather-agent and events-agent calling mcp-server">
+        <div class="shot-caption">Observability Stack → Application Map</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.62em; margin-top:0.5em; max-width:80%;">
+        Nobody drew this. The ingestion pipeline derives it from trace data — so a new sub-agent or MCP server appears on the map the first time it serves a request.
+      </p>
+    </section>
+
+    <!-- ============ 37 · SERVICES CATALOG ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Application Monitoring · Services</div>
+      <h3>One flat catalogue, RED per row</h3>
+      <div class="feature-sub">Latency P99, throughput and failure ratio for every service — <em>agents included, same table, same columns</em>. Here <code>checkout</code> is the outlier at 95 ms P99 with a 16.4% failure rate, while <code>events-agent</code> sits at 248 ms. This is your triage entry point.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-services-catalog.png" alt="Service catalogue with RED metrics per service">
+        <div class="shot-caption">Observability Stack → Services</div>
+      </div>
+    </section>
+
+    <!-- ============ 38 · FOUR HOPS ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The path you actually walk at 3 a.m.</div>
+      <h2 style="text-align:center; margin-bottom:0.35em; font-size:1.4em;">Alert to root cause, in <em>four hops</em>.</h2>
+      <div class="walk-grid">
+        <div class="walk-step s1">
+          <div class="ws-num">01</div>
+          <div class="ws-eyebrow">Symptom</div>
+          <div class="ws-title">Burn-rate alert fires</div>
+          <div class="ws-desc">A multi-window burn-rate rule on the agent's availability SLO pages you. The alert name already carries the SLO, the tier and the window pair.</div>
+        </div>
+        <div class="walk-step s2">
+          <div class="ws-num">02</div>
+          <div class="ws-eyebrow">Narrow</div>
+          <div class="ws-title">Services → the failing edge</div>
+          <div class="ws-desc">The catalogue nominates the service by fault rate. The dependency view separates <strong>errors</strong> from <strong>faults</strong> and shows which callee is responsible.</div>
+        </div>
+        <div class="walk-step s3">
+          <div class="ws-num">03</div>
+          <div class="ws-eyebrow">Drill</div>
+          <div class="ws-title">View traces → the span</div>
+          <div class="ws-desc">One click into Agent Traces, filtered to that service. The tree shows the tool span that failed and the retries the agent did without surfacing them.</div>
+        </div>
+        <div class="walk-step s4">
+          <div class="ws-num">04</div>
+          <div class="ws-eyebrow">Confirm</div>
+          <div class="ws-title">Logs on the same trace ID</div>
+          <div class="ws-desc">Correlation gives the span detail a Logs tab — the application log lines matched by trace ID, without you writing a query.</div>
+        </div>
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.66em; max-width:82%; margin:1.1em auto 0 auto;">
+        Two stores, four hops, one interface — joined by <strong>trace ID</strong> and <strong>service name</strong>.
+      </p>
+    </section>
+
+    <!-- ============ 39 · SLOS ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">SLOs · catalogue</div>
+      <h3>Reliability targets your agents are held to</h3>
+      <div class="feature-sub">A declared, owned catalogue — not a pile of dashboards. <code>checkout</code> and <code>mcp-server</code> hold a p95 &lt; 500 ms latency target at 95.0%; <code>frontend</code> and <code>product-catalog</code> hold availability at 99.0%. And the canonical-kind list has a <em>GenAI availability</em> entry.</div>
+      <div class="feature-shot">
+        <div class="shot-pair">
+          <img src="assets/crop-slo-catalog.png" alt="SLO catalogue listing service SLOs with owners and objectives">
+          <img src="assets/crop-slo-kinds.png" alt="Canonical SLI kind filter including GenAI availability">
+        </div>
+        <div class="shot-caption">Observability Stack → SLO/SLI · catalogue and canonical-kind filter</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.6em; margin-top:0.25em; max-width:80%;">
+        Each SLO compiles to recording rules plus multi-window burn-rate alerts.
+      </p>
+    </section>
+
+    <!-- ============ PART 7 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Part 07 —</div>
+      <h2>Grade the <em>agent</em>,<br>not the status code.</h2>
+      <p class="pillar-sub">Traces tell you what happened. Evaluation tells you whether it was <strong>right</strong> — and whether your last prompt change helped or hurt.</p>
+    </section>
+
+    <!-- ============ 41 · AGENT EVALS ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Agent Evals · scores as spans</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Quality lands in the <em>same trace store</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.7em; max-width:86%; margin:0 auto 0.2em auto;">
+        <code>score()</code> attaches a judgment to the live trace. <code>evaluate()</code> runs a dataset. <code>Benchmark</code> uploads results from an eval library you already use. All of it flows through the same OTLP pipeline.
+      </p>
+      <pre class="code-block sm"><span class="com"># the five criteria this agent is graded on</span>
+score(name=<span class="str">"answer_correctness"</span>, value=correctness)
+score(name=<span class="str">"right_tool"</span>,          value=right_tool)
+score(name=<span class="str">"trajectory_match"</span>,    value=trajectory_match)   <span class="com"># golden path</span>
+score(name=<span class="str">"latency_ok"</span>,          value=latency_ok)
+score(name=<span class="str">"no_loops"</span>,            value=no_loops)
+
+<span class="com"># bring your own library — DeepEval, RAGAS, MLflow, pytest</span>
+score(name=<span class="str">"deepeval.answer_relevancy"</span>, value=value, attributes={
+    <span class="str">"gen_ai.evaluation.evaluator.type"</span>:  <span class="str">"llm_judge"</span>,
+    <span class="str">"gen_ai.evaluation.reference_set.id"</span>: <span class="str">"acme-golden-dataset-v1"</span>,
+})</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:84%; margin:0.5em auto 0 auto;">
+        A benchmark nests as <code>test_suite_run → test_case → invoke_agent</code> — so "did v2 regress?" is just another PPL query.
+      </p>
+    </section>
+
+    <!-- ============ 42 · GOLDEN PATH ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">What "correct" means for a non-deterministic program</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Define the <em>golden path</em> once.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.7em; max-width:86%; margin:0 auto 0.2em auto;">
+        The trick that makes agent evals cheap: your hardest test cases are the failures already sitting in your trace store.
+      </p>
+      <pre class="code-block sm"><span class="kw">@</span>dataclass
+<span class="kw">class</span> <span class="fn">EvalCase</span>:
+    question: str
+    expected_tool: str                 <span class="com"># the one tool that should be called</span>
+    expected_answer_substring: str     <span class="com"># what a correct answer must contain</span>
+    golden_trajectory: list[str]       <span class="com"># the expected op/tool sequence</span>
+
+EvalCase(
+    question=<span class="str">"where is my order #1007?"</span>,
+    expected_tool=<span class="str">"lookup_order"</span>,
+    expected_answer_substring=<span class="str">"shipped"</span>,
+    golden_trajectory=[<span class="str">"invoke_agent"</span>, <span class="str">"lookup_order"</span>],
+)</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:84%; margin:0.6em auto 0 auto;">
+        A <code>search_policy</code> detour or an extra <code>chat</code> loop is a <strong>trajectory mismatch</strong> — even when the final answer is right. Three budgets make the rest objective: <code>TOKEN_BUDGET 4000</code>, <code>LATENCY_BUDGET_S 8.0</code>, <code>MAX_CHAT_STEPS 3</code>.
+      </p>
+    </section>
+
+    <!-- ============ 43 · TEST CASE UI ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Health · test case</div>
+      <h3>Assertions in natural language, not status codes</h3>
+      <div class="feature-sub">One prompt, five expected outcomes, graded <em>PASSED</em>. The outcomes are sentences — "check weather forecast for Colorado mountain areas", "find lodge accommodations for 12 with meeting space" — and the tabs link the verdict straight to the <em>Traces</em> and the <em>LLM Judge</em> that produced it.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-testcase.png" alt="Agent Health test case detail with expected outcomes">
+        <div class="shot-caption">Agent Health → Evaluations → Test Cases · displayed as "Use Case" in the UI</div>
+      </div>
+    </section>
+
+    <!-- ============ 44 · BENCHMARK COMPARISON ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Agent Health · run summary</div>
+      <h3>Did the change make the agent better?</h3>
+      <div class="feature-sub">Five runs of the same Travel Planner on <code>claude-sonnet-4.5</code>, one row per signal. Pass rate climbs <em>29% → 71%</em>, accuracy <em>50% → 82%</em> — and tokens go <em>5.7M → 21.6M</em>, cost <em>$17.78 → $65.71</em>.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-benchmarks.png" class="wide" alt="Benchmark run summary comparing pass rate, accuracy, tokens, cost and duration across five runs">
+        <div class="shot-caption">Agent Health → Testing → Benchmarks</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.63em; margin-top:0.4em; max-width:84%;">
+        That is the point of putting quality and cost in one table: here they move <strong>together</strong>. Without both, "we improved the agent" and "we tripled the bill" are two separate conversations.
+      </p>
+    </section>
+
+    <!-- ============ 45 · AGENTIC INVESTIGATION TODAY ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Accelerate MTTR · available today</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Point an agent at your <em>own telemetry</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:86%; margin:0 auto;">
+        The stack ships an investigation path that is itself agentic — and it queries both stores, in both query languages.
+      </p>
+      <div class="two-col">
+        <div>
+          <h3>Claude Code Observability Plugin</h3>
+          <p>Eight Agent Skills that teach the model your stack: <strong>Traces · Logs · Metrics · Stack Health · PPL Reference · Correlation · APM RED · SLO/SLI</strong>. PPL templates for OpenSearch, PromQL templates for Prometheus, and ready-to-run commands. It auto-routes to the right skill from the question.</p>
+          <div class="try-cmd" style="max-width:100%;"><span class="p">/</span>plugin install observability@observability</div>
+        </div>
+        <div>
+          <h3>Built-in MCP server</h3>
+          <p>OpenSearch exposed as MCP tools — index operations, PPL, SQL, cluster info — so any agent you already run can reach your telemetry without a custom integration. Enable with <code>plugins.mcp.enabled: true</code>.</p>
+          <div class="key" style="max-width:100%; margin-left:0; font-size:0.66em;">
+            <strong>Use Claude to go from alert to root cause.</strong>
+            <span class="src">— Claude Code plugin showcase</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 46 · PREVIEW ============ -->
+    <section>
+      <div style="text-align:center;"><span class="preview-badge">Preview · not yet released</span></div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Next: investigation, <em>in the interface</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:84%; margin:0 auto;">
+        A context-aware chatbot that knows which dashboard, service and time range you are looking at — and a hypothesis-driven investigation agent that proposes causes, tests each one against your telemetry, and shows its work.
+      </p>
+      <div class="convo">
+        <div class="convo-line you">why did travel-planner p95 double after 08:10?</div>
+        <div class="convo-line os">Three hypotheses. Testing each against the last 2h.</div>
+        <div class="convo-line os"><span class="hl">H1</span> model latency — <span class="hl">rejected</span>: chat span p95 flat at 284ms.</div>
+        <div class="convo-line os"><span class="hl">H2</span> tool regression — <span class="hl">supported</span>: fetch_weather_api p95 135ms → 1.4s.</div>
+        <div class="convo-line os"><span class="hl">H3</span> retry loop — <span class="hl">supported</span>: chat spans per trace 2 → 5.</div>
+        <div class="convo-line os">Root cause: MCP timeout drove silent retries. Opening 3 traces.</div>
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:76%; margin:0.5em auto 0 auto;">
+        Illustrative of the intended workflow, not a shipped screen. Everything else in this deck is available today.
+      </p>
+    </section>
+
+    <!-- ============ 47 · CLOSE THE LOOP ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The step that separates an audit from a healthy agent</div>
+      <h2 style="text-align:center; margin-bottom:0.3em; font-size:1.4em;">Instrument <em>once</em>. Iterate <em>forever</em>.</h2>
+      <div class="loop-diagram">
+        <div class="loop-step l1">
+          <div class="ls-eyebrow">Stage 01</div>
+          <div class="ls-title">Instrument</div>
+          <div class="ls-sub"><code>register()</code> · <code>@observe</code> · GenAI semconv</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l2">
+          <div class="ls-eyebrow">Stage 02</div>
+          <div class="ls-title">Observe</div>
+          <div class="ls-sub">trace tree · map · timeline · PPL · PromQL</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l3">
+          <div class="ls-eyebrow">Stage 03</div>
+          <div class="ls-title">Evaluate</div>
+          <div class="ls-sub">golden path · LLM judge · <code>score()</code></div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l4">
+          <div class="ls-eyebrow">Stage 04</div>
+          <div class="ls-title">Monitor</div>
+          <div class="ls-sub">RED · token budgets · SLO burn rate</div>
+        </div>
+      </div>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.74em; max-width:80ch; margin:1.3em auto 0 auto;">
+        Then the loop closes: <strong>the surprising production traces from Stage 04 become new rows in the Stage 03 dataset.</strong> Same trace store, same <code>score()</code>, same PPL — so your regression suite gets sharper every week instead of going stale.
+      </p>
+    </section>
+
+    <!-- ============ 48 · PRODUCTION IS A CONFIG CHANGE ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Laptop to production</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">A config change, not a <em>code</em> change.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:86%; margin:0 auto 0.2em auto;">
+        The spans and the queries are identical. Only the endpoint and the auth differ — SigV4 instead of basic auth.
+      </p>
+      <pre class="code-block"><span class="com"># the only change to your agent: point it at the in-VPC collector</span>
+<span class="kw">export</span> OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://otel-collector.internal:4318/v1/traces
+
+<span class="com"># traces on Amazon OpenSearch Service — SigV4, service abbreviation "es"</span>
+curl --aws-sigv4 <span class="str">"aws:amz:$REGION:es"</span> -X POST <span class="str">"https://$DOMAIN.es.amazonaws.com/_plugins/_ppl"</span> \
+  -d <span class="str">'{"query": "source=otel-v1-apm-span-* | head 20"}'</span>
+
+<span class="com"># metrics on Amazon Managed Service for Prometheus — SigV4, "aps"</span>
+curl --aws-sigv4 <span class="str">"aws:amz:$REGION:aps"</span> <span class="str">"https://aps-workspaces.$REGION.amazonaws.com/…/api/v1/query"</span> \
+  --data-urlencode <span class="str">'query=acme:agent_latency:p95_5m'</span></pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:84%; margin:0.8em auto 0 auto;">
+        In OpenSearch UI, AMP is registered as a Prometheus data source with <strong>AWS Signature Version 4</strong>. The managed deployment uses Amazon OpenSearch Ingestion as the OTLP pipeline in place of the collector and Data Prepper.
+      </p>
+    </section>
+
+    <!-- ============ 49 · RECAP ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Five things to take back</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">The agent isn't a black box anymore.</h2>
+      <div class="takeaways">
+        <ol>
+          <li><strong>Agents fail quietly.</strong> Rate, errors and duration will not show you a hallucination, a quality regression, or a doubled token bill. Span-level GenAI telemetry will.</li>
+          <li><strong>One vocabulary buys everything else.</strong> Emit OpenTelemetry spans with <code>gen_ai.*</code> attributes and every framework becomes queryable the same way — no vendor agent, no schema translation.</li>
+          <li><strong>Two stores, one interface.</strong> AMP keeps metrics cheap at high sample rate; Amazon OpenSearch Service keeps unbounded-cardinality spans and logs. They meet on trace ID and service name.</li>
+          <li><strong>Instrumentation is two lines.</strong> <code>register()</code> plus <code>@observe</code> — identical across LangGraph, Strands, AgentCore, Bedrock, OpenAI, Anthropic and Node.</li>
+          <li><strong>Grade the trajectory, not the status code.</strong> Golden paths and scored datasets turn "it returned 200" into "it did the right thing, for the right cost".</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 50 · CTA ============ -->
+    <section class="cta-slide">
+      <div class="eyebrow">Start today</div>
+      <h2 style="margin-bottom:0.3em; font-size:1.4em;">One <code>docker compose up</code> and a <code>register()</code> call.</h2>
+      <div class="cta-grid">
+        <div class="cta-cards">
+          <div class="cta-card">
+            <div class="cta-eyebrow">Tutorial</div>
+            <div>
+              <div class="cta-title">Instrument → verify → observe → evaluate → monitor → close the loop</div>
+              <div class="cta-url">github.com/anirudha/os-agent-observability-evals → blog.md</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Code</div>
+            <div>
+              <div class="cta-title">Runnable Acme agent — 6 frameworks, 5 eval variants, one shared core</div>
+              <div class="cta-url">github.com/anirudha/os-agent-observability-evals</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Docs</div>
+            <div>
+              <div class="cta-title">AI Observability · Agent Traces · Agent Evals</div>
+              <div class="cta-url">observability.opensearch.org/docs/ai-observability/</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Playground</div>
+            <div>
+              <div class="cta-title">Live stack, real agent traces, nothing to install</div>
+              <div class="cta-url">observability.playground.opensearch.org</div>
+            </div>
+          </div>
+        </div>
+        <div class="qr-pair">
+          <div class="qr-box">
+            <img src="assets/qr-blog.png" alt="QR code to the tutorial blog post">
+            <div class="qr-cap">tutorial</div>
+          </div>
+          <div class="qr-box">
+            <img src="assets/qr-playground-live.png" alt="QR code to the live playground">
+            <div class="qr-cap">playground</div>
+          </div>
+          <div class="qr-box">
+            <img src="assets/qr-repo.png" alt="QR code to the sample code repository">
+            <div class="qr-cap">sample code</div>
+          </div>
+          <div class="qr-box">
+            <img src="assets/qr-docs.png" alt="QR code to the AI observability documentation">
+            <div class="qr-cap">docs</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 51 · CLOSING ============ -->
+    <section class="try-slide">
+      <div class="try-grid">
+        <div class="try-text">
+          <div class="eyebrow" style="margin-bottom:0.5em;">AI Agent Monitoring</div>
+          <h2 style="font-size:1.75em; line-height:1.1; margin-bottom:0.4em;">Open instrumentation.<br><em>Purpose-built stores.</em><br>One interface.</h2>
+          <p style="color:var(--os-blue-soft); font-size:0.76em; line-height:1.5; margin-bottom:0.7em; max-width:95%;">
+            Prometheus for metrics. OpenSearch for logs and traces. OpenTelemetry for instrumentation. Apache 2.0, governed by the OpenSearch Software Foundation under the Linux Foundation — and managed on AWS as AMP and Amazon OpenSearch Service.
+          </p>
+          <div class="try-url">observability.opensearch.org</div>
+          <div class="try-foot" style="margin-top:1em;">
+            <strong>Anirudha Jadhav</strong><br>
+            <span style="color:var(--os-blue-soft);">Sr. Engineering Manager · OpenSearch · AWS</span>
+          </div>
+        </div>
+        <div class="try-shot">
+          <img src="assets/crop-hero-diagram.png" alt="OpenSearch Observability Stack architecture diagram">
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    controls: true,
+    progress: true,
+    slideNumber: 'c/t',
+    history: true,
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 860,
+    margin: 0.05,
+    minScale: 0.5,
+    maxScale: 2.5,
+  });
+
+  function updateWatermark() {
+    var current = Reveal.getCurrentSlide();
+    if (!current) return;
+    var hide = current.classList.contains('cover') ||
+               current.classList.contains('image-slide');
+    document.body.classList.toggle('hide-watermark', hide);
+  }
+  Reveal.on('ready', updateWatermark);
+  Reveal.on('slidechanged', updateWatermark);
+</script>
+</body>
+</html>
