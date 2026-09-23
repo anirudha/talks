@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipe Dreams to Pipelines — Observing and Evaluating AI Agents and Services with OTel + OpenSearch</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css">
+
+<style>
+  :root {
+    --os-navy: #0a1f44;
+    --os-navy-soft: #2a3d6b;
+    --os-blue: #2f7ec5;
+    --os-blue-deep: #1b5a96;
+    --os-blue-soft: #6fa8d6;
+    --os-amber: #e8a838;
+    --os-amber-soft: #f0c878;
+    --os-bg-top: #0a1f44;
+    --os-bg-mid: #18365e;
+    --os-bg-bottom: #2f7ec5;
+    --crit: #ff5b6e;
+    --good: #4cd1a0;
+    --agent-purple: #9d7cff;
+    --agent-pink: #ff5b8a;
+    --tool-cyan: #5fd6e0;
+    --content-yellow: #ffd86f;
+    --embed-pink: #ff8fb1;
+    --retrieval-green: #7ce0a0;
+    --prom-orange: #e6522c;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    color: #f0f4ff;
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%);
+  }
+  .reveal-viewport {
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 55%, var(--os-bg-bottom) 100%) !important;
+  }
+
+  .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    margin-bottom: 0.6em;
+  }
+  .reveal h1 { font-size: 2.6em; line-height: 1.05; }
+  .reveal h2 { font-size: 1.7em; line-height: 1.15; }
+  .reveal h3 { font-size: 1.15em; color: var(--os-amber-soft); font-weight: 700; }
+
+  .reveal p, .reveal li { font-size: 0.85em; line-height: 1.55; color: #d8def0; }
+  .reveal ul, .reveal ol { display: block; margin-left: 1.2em; }
+  .reveal li { margin: 0.4em 0; }
+  .reveal li::marker { color: var(--os-amber); }
+  .reveal strong { color: #ffffff; font-weight: 700; }
+  .reveal em { color: var(--os-amber); font-style: italic; font-weight: 600; }
+
+  .reveal code {
+    font-family: "JetBrains Mono", monospace;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--os-amber-soft);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.95em;
+    font-weight: 600;
+  }
+
+  .reveal section.cover,
+  .reveal section.eyebrow-slide,
+  .reveal section.center-slide { text-align: center; }
+  .reveal section.center-slide ul,
+  .reveal section.center-slide ol { display: inline-block; text-align: left; }
+
+  .eyebrow {
+    color: var(--os-amber);
+    font-size: 0.7em;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+  }
+  /* max-width keeps a long eyebrow clear of the fixed watermark at top-right */
+  .eyebrow-c { text-align: center; max-width: 82%; margin-left: auto; margin-right: auto; }
+
+  /* Cover */
+  .cover h1 { font-size: 1.85em; line-height: 1.1; margin-bottom: 0.35em; }
+  .cover .subtitle {
+    color: var(--os-blue-soft);
+    font-size: 0.76em;
+    margin-bottom: 0.8em;
+    font-weight: 500;
+    max-width: 84%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cover .speakers {
+    color: #d8def0; font-size: 0.66em; letter-spacing: 0.04em; margin-top: 0.5em;
+  }
+  .cover .speakers strong { color: #ffffff; display: block; font-size: 1.2em; letter-spacing: 0; margin-bottom: 0.2em; }
+  .cover .speakers .role { color: var(--os-blue-soft); }
+  .cover .meta-line {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.6em;
+    font-weight: 800;
+  }
+  .cover .eyebrow { margin-bottom: 0.6em; }
+  .cover-logo {
+    width: 180px;
+    margin: 0 auto 0.5em auto;
+    display: block;
+    filter: brightness(0) invert(1);
+  }
+
+  /* Big centered statement */
+  .blind { text-align: center; }
+  .blind .megaline {
+    font-size: 2.4em; font-weight: 800; line-height: 1.1;
+    color: #ffffff; margin-bottom: 0.5em; letter-spacing: -0.02em;
+  }
+  .blind .megaline em { color: var(--os-amber); font-style: normal; }
+  .blind .sub {
+    font-size: 1em; color: var(--os-blue-soft); font-weight: 500;
+    max-width: 80%; margin: 0 auto;
+  }
+
+  /* Stack intro / pills */
+  .stack-intro { text-align: center; }
+  .stack-intro .megaline {
+    font-size: 2.5em; font-weight: 800; line-height: 1.05;
+    color: #ffffff; margin-bottom: 0.5em; letter-spacing: -0.02em;
+  }
+  .stack-intro .megaline em { color: var(--os-amber); font-style: normal; }
+  .stack-intro .stack-sub {
+    color: var(--os-blue-soft); font-size: 0.95em; font-weight: 500;
+    max-width: 76%; margin: 0 auto;
+  }
+  .pill-row {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.6em; margin-top: 1.3em;
+  }
+  .pill {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 800;
+    padding: 0.5em 1em; border-radius: 100px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: var(--os-amber);
+  }
+
+  /* Part dividers */
+  .pillar { text-align: center; }
+  .pillar .pillar-num {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber); font-size: 0.55em;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 1.2em;
+  }
+  .pillar h2 { font-size: 2.9em; line-height: 1.05; margin-bottom: 0.4em; letter-spacing: -0.02em; }
+  .pillar h2 em { color: var(--os-amber); font-style: normal; }
+  .pillar .pillar-sub {
+    color: var(--os-blue-soft); font-size: 1em; font-weight: 500;
+    max-width: 72ch; margin: 0 auto; line-height: 1.5;
+  }
+  .pillar .pillar-sub strong { color: #ffffff; }
+
+  /* Amber callout — carries verbatim doc quotes */
+  .key {
+    display: inline-block; text-align: left;
+    background: rgba(232, 168, 56, 0.10);
+    border-left: 4px solid var(--os-amber);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7em 1.1em;
+    margin: 0.5em auto 0.2em auto;
+    max-width: 88%;
+    color: #e8eeff; font-size: 0.72em; line-height: 1.55;
+  }
+  .key strong { color: #ffffff; }
+  .key .src {
+    display: block; margin-top: 0.45em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78em; color: var(--os-amber); letter-spacing: 0.04em;
+  }
+
+  /* Image-only slide */
+  .image-slide {
+    text-align: center; padding: 0 !important;
+    height: 100%; display: flex !important;
+    align-items: center; justify-content: center;
+  }
+  .image-slide img {
+    max-width: 100%; max-height: 780px;
+    width: auto; height: auto; border-radius: 10px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45); object-fit: contain;
+  }
+
+  /* Screenshot slide: eyebrow + title + sub + framed shot + UI-path caption */
+  .feature-slide {
+    display: flex !important; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 0.3em 0 0 0 !important;
+    height: 100%; text-align: center;
+  }
+  .feature-slide .feature-eyebrow {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.25em;
+  }
+  .feature-slide h3 {
+    color: #ffffff; font-size: 1.35em; font-weight: 800;
+    margin-bottom: 0.22em; line-height: 1.15;
+  }
+  .feature-slide .feature-sub {
+    color: var(--os-blue-soft); font-size: 0.68em; font-weight: 500;
+    max-width: 84%; line-height: 1.45; margin-bottom: 0.5em;
+  }
+  .feature-slide .feature-sub em { color: var(--os-amber); font-style: normal; font-weight: 700; }
+  /* Heights are px against reveal's 1280x860 coordinate space, never vh —
+     vh resolves against the browser window, which overruns the slide frame. */
+  .feature-shot {
+    flex: 1 1 auto; width: 100%; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  }
+  .feature-shot img {
+    max-width: 92%; max-height: 470px;
+    width: auto; height: auto; border-radius: 8px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.45); object-fit: contain;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+  .feature-shot img.wide { max-width: 96%; max-height: 330px; }
+  .feature-shot img.band { max-width: 96%; max-height: 148px; }
+  .feature-shot img.tall { max-height: 430px; max-width: 60%; }
+  .feature-shot img + img { margin-top: 0.5em; }
+  .shot-pair {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.1em; width: 96%;
+  }
+  .shot-pair img {
+    max-height: 300px; min-width: 0; max-width: calc(50% - 0.6em); width: auto;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 12px 44px rgba(0,0,0,0.45); object-fit: contain;
+  }
+  .shot-caption {
+    margin-top: 0.3em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--os-blue-soft); font-weight: 700;
+  }
+  .preview-badge {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.4em 0.9em; border-radius: 5px;
+    background: rgba(157,124,255,0.16); color: #c4b3ff;
+    border: 1px solid rgba(157,124,255,0.5);
+    margin-bottom: 0.5em;
+  }
+
+  /* Card grids */
+  .reveal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
+  .reveal-grid.g4 { grid-template-columns: repeat(4, 1fr); gap: 0.7em; margin-top: 0.5em; }
+  .reveal-grid.g4 .reveal-card { padding: 0.7em 0.7em; display: flex; flex-direction: column; }
+  .reveal-grid.g4 .rc-title { font-size: 0.72em; margin-bottom: 0.3em; }
+  .reveal-grid.g4 .rc-desc { font-size: 0.5em; line-height: 1.45; }
+  .reveal-grid.g4 .rc-tag { margin-top: auto; }
+  .reveal-card .rc-tag {
+    display: block; margin-top: 0.5em; padding-top: 0.45em;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: "JetBrains Mono", monospace; font-size: 0.52em;
+    letter-spacing: 0.06em; color: var(--os-amber-soft);
+  }
+  .reveal-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-top: 3px solid var(--os-amber);
+    border-radius: 8px; padding: 1em; text-align: left;
+  }
+  .reveal-card .rc-eyebrow {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.4em;
+  }
+  .reveal-card .rc-title { color: #ffffff; font-size: 0.95em; font-weight: 800; line-height: 1.2; margin-bottom: 0.4em; }
+  .reveal-card .rc-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+
+  .fail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
+  .fail-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-top: 3px solid var(--crit);
+    border-radius: 10px; padding: 1em; text-align: left;
+  }
+  .fail-card .f-eyebrow {
+    color: var(--crit); font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 0.4em;
+  }
+  .fail-card .f-title { color: #ffffff; font-size: 1em; font-weight: 800; line-height: 1.2; margin-bottom: 0.4em; }
+  .fail-card .f-desc { color: #c8d2eb; font-size: 0.63em; line-height: 1.5; }
+  .fail-card .f-signal {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.52em; letter-spacing: 0.03em; line-height: 1.45;
+    border-top: 1px dashed rgba(232,168,56,0.35);
+    margin-top: 0.55em; padding-top: 0.5em;
+  }
+
+  /* Numbered mode cards */
+  .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; margin-top: 1em; }
+  .mode-card {
+    position: relative;
+    display: flex; flex-direction: column;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px; padding: 1.1em 1em; text-align: left;
+  }
+  .mode-card.m1 { border-top: 3px solid var(--prom-orange); }
+  .mode-card.m2 { border-top: 3px solid var(--os-blue-soft); }
+  .mode-card.m3 { border-top: 3px solid var(--agent-purple); }
+  .mode-card .mode-num {
+    position: absolute; top: 0.55em; right: 0.8em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.6em; color: rgba(255,255,255,0.16); font-weight: 800;
+  }
+  .mode-card .mode-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.56em; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 0.35em; color: var(--os-amber);
+    padding-right: 2.8em;   /* never collide with the ghost numeral */
+  }
+  .mode-card.m1 .mode-eyebrow { color: var(--prom-orange); }
+  .mode-card.m3 .mode-eyebrow { color: var(--agent-purple); }
+  .mode-card .mode-title { color: #ffffff; font-size: 1em; font-weight: 800; margin-bottom: 0.4em; line-height: 1.2; }
+  .mode-card .mode-desc { color: #c8d2eb; font-size: 0.6em; line-height: 1.5; }
+  .mode-card .mode-role {
+    display: block; margin-top: auto; padding-top: 0.45em;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: "JetBrains Mono", monospace; font-size: 0.56em;
+    letter-spacing: 0.05em; color: var(--os-amber-soft);
+  }
+
+  /* Hop chain */
+  .hop-flow {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 0.55em; margin: 1em auto 0 auto; max-width: 1080px;
+  }
+  /* hop + its trailing arrow travel together, so no arrow can strand at a row end */
+  .hop-unit { display: inline-flex; align-items: center; gap: 0.55em; white-space: nowrap; }
+  .hop {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58em; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.5em 0.85em; border-radius: 8px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2);
+  }
+  .hop.agent { border-color: rgba(157,124,255,0.55); color: #c8b8ff; background: rgba(157,124,255,0.10); }
+  .hop.llm { border-color: rgba(232,168,56,0.55); color: var(--os-amber-soft); background: rgba(232,168,56,0.10); }
+  .hop.tool { border-color: rgba(95,214,224,0.55); color: var(--tool-cyan); background: rgba(95,214,224,0.10); }
+  .hop.mcp { border-color: rgba(124,224,160,0.55); color: var(--retrieval-green); background: rgba(124,224,160,0.10); }
+  .hop-arrow {
+    font-family: "JetBrains Mono", monospace;
+    color: rgba(255,255,255,0.35); font-size: 0.7em; font-weight: 800;
+  }
+  .hop-stat {
+    margin-top: 1.1em;
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber); font-size: 0.55em;
+    letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800;
+  }
+
+  /* Hero number */
+  .big-stat { text-align: center; }
+  .big-stat .stat {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 4.4em; font-weight: 800; color: var(--os-amber);
+    line-height: 1; letter-spacing: -0.03em;
+  }
+  .big-stat .stat-flow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85em; color: var(--os-blue-soft); font-weight: 700;
+    margin-top: 0.6em; letter-spacing: 0.05em;
+  }
+  .big-stat p { max-width: 74%; margin: 1.1em auto 0 auto; }
+
+  /* Span-category chips */
+  .cats-row {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.7em; margin-top: 1em;
+  }
+  .cat-chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58em; font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 0.55em 0.9em; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: left; line-height: 1.5;
+  }
+  .cat-chip span { display: block; font-size: 0.82em; opacity: 0.75; letter-spacing: 0.02em; text-transform: none; }
+  .cat-chip.agent { color: var(--agent-purple); border-color: rgba(157,124,255,0.5); background: rgba(157,124,255,0.1); }
+  .cat-chip.llm { color: var(--os-amber); border-color: rgba(232,168,56,0.5); background: rgba(232,168,56,0.1); }
+  .cat-chip.tool { color: var(--tool-cyan); border-color: rgba(95,214,224,0.5); background: rgba(95,214,224,0.1); }
+  .cat-chip.content { color: var(--content-yellow); border-color: rgba(255,216,111,0.45); background: rgba(255,216,111,0.08); }
+  .cat-chip.embed { color: var(--embed-pink); border-color: rgba(255,143,177,0.5); background: rgba(255,143,177,0.1); }
+  .cat-chip.retrieval { color: var(--retrieval-green); border-color: rgba(124,224,160,0.5); background: rgba(124,224,160,0.1); }
+
+  /* Architecture flow */
+  .arch {
+    display: grid; align-items: stretch;
+    grid-template-columns: 1fr 26px 1fr 26px 1fr;
+    gap: 0.4em; margin-top: 1.1em;
+  }
+  .arch-node {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px; padding: 0.9em 0.8em; text-align: center;
+  }
+  .arch-node.prom { border-top: 3px solid var(--prom-orange); }
+  .arch-node.os { border-top: 3px solid var(--os-blue-soft); }
+  .arch-node.amber { border-top: 3px solid var(--os-amber); }
+  .arch-node .an-name { color: #ffffff; font-size: 0.78em; font-weight: 800; line-height: 1.25; margin-bottom: 0.3em; }
+  .arch-node .an-desc { color: #c8d2eb; font-size: 0.55em; line-height: 1.45; }
+  .arch-node .an-tag {
+    display: block; margin-top: 0.5em;
+    font-family: "JetBrains Mono", monospace; font-size: 0.5em;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--os-amber);
+  }
+  .arch-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 1em; font-weight: 800;
+  }
+
+  /* Comparison table */
+  table.matrix {
+    width: 92%; margin: 0.8em auto 0 auto;
+    border-collapse: collapse; border-radius: 10px; overflow: hidden;
+    font-size: 0.52em; background: rgba(255,255,255,0.04);
+  }
+  table.matrix th {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85em; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--os-amber); font-weight: 800;
+    padding: 0.7em 0.8em; text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+  }
+  table.matrix td {
+    padding: 0.42em 0.8em; text-align: left;
+    color: #d8def0; line-height: 1.45;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  table.matrix td.feat { color: #ffffff; font-weight: 700; }
+  table.matrix td code { font-size: 0.9em; }
+  table.matrix tr:last-child td { border-bottom: none; }
+
+  /* Two / three column lists */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.8em; text-align: left; align-items: start; margin-top: 0.8em; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4em; text-align: left; align-items: start; margin-top: 0.8em; }
+  .two-col h3, .three-col h3 {
+    font-size: 0.85em; color: var(--os-amber-soft);
+    border-bottom: 1px solid rgba(255,255,255,0.16);
+    padding-bottom: 0.35em; margin-bottom: 0.5em;
+  }
+  .two-col li, .three-col li { font-size: 0.62em; line-height: 1.5; margin: 0.3em 0; }
+  .two-col p, .three-col p { font-size: 0.62em; line-height: 1.5; }
+
+  /* Code block */
+  .code-block {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 3px solid var(--os-amber);
+    border-radius: 8px; padding: 0.9em 1.2em;
+    margin: 0.6em auto 0 auto; max-width: 90%;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em; color: #d8def0;
+    line-height: 1.65; text-align: left;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    white-space: pre-wrap;
+  }
+  .code-block.sm { font-size: 0.49em; line-height: 1.6; }
+  /* nowrap: for queries where a soft wrap would split one expression into
+     what reads like three unrelated statements */
+  .code-block.nowrap { white-space: pre; overflow-x: hidden; font-size: 0.42em; line-height: 1.5; max-width: 96%; }
+  .code-block .com { color: rgba(255,255,255,0.42); font-style: italic; }
+  .code-block .kw { color: var(--os-amber); font-weight: 700; }
+  .code-block .fn { color: #c4b3ff; }
+  .code-block .str { color: #ffd1a0; }
+  .code-block .num { color: var(--good); }
+  .code-block .attr { color: var(--tool-cyan); }
+
+  /* Trace tree mock */
+  .trace-tree {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 1.1em 1.5em;
+    margin: 0.7em auto 0 auto;
+    max-width: 92%; text-align: left;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  .trace-row {
+    display: grid; grid-template-columns: 1fr 210px 78px;
+    gap: 0.9em; align-items: center;
+    padding: 0.24em 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.53em; color: #d8def0;
+  }
+  .trace-row .tr-label .indent { color: rgba(255,255,255,0.3); margin-right: 0.4em; }
+  .trace-row .tr-label .kind {
+    display: inline-block; font-size: 0.85em; font-weight: 800;
+    padding: 0.05em 0.5em; border-radius: 3px;
+    margin-right: 0.5em; letter-spacing: 0.08em;
+  }
+  .kind.agent { background: rgba(157,124,255,0.2); color: #c4b3ff; border: 1px solid rgba(157,124,255,0.4); }
+  .kind.llm { background: rgba(232,168,56,0.2); color: var(--os-amber-soft); border: 1px solid rgba(232,168,56,0.4); }
+  .kind.tool { background: rgba(95,214,224,0.18); color: var(--tool-cyan); border: 1px solid rgba(95,214,224,0.4); }
+  .kind.mcp { background: rgba(124,224,160,0.18); color: var(--retrieval-green); border: 1px solid rgba(124,224,160,0.4); }
+  .trace-row .tr-name { color: #ffffff; font-weight: 600; }
+  .trace-row .tr-bar { position: relative; height: 9px; background: rgba(255,255,255,0.06); border-radius: 3px; }
+  .trace-row .tr-bar .bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+  .trace-row .tr-bar .bar-fill.agent { background: var(--agent-purple); }
+  .trace-row .tr-bar .bar-fill.llm { background: var(--os-amber); }
+  .trace-row .tr-bar .bar-fill.tool { background: var(--tool-cyan); }
+  .trace-row .tr-bar .bar-fill.mcp { background: var(--retrieval-green); }
+  .trace-row .tr-time { font-size: 0.85em; color: var(--os-amber); text-align: right; font-weight: 700; }
+  .trace-foot {
+    margin-top: 0.7em; padding-top: 0.55em;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: "JetBrains Mono", monospace; font-size: 0.5em;
+    color: var(--os-blue-soft); letter-spacing: 0.06em;
+  }
+
+  /* Four-step walkthrough */
+  .walk-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6em; margin-top: 1em; }
+  .walk-step {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 0.95em 0.85em;
+    text-align: left; position: relative;
+  }
+  .walk-step .ws-num {
+    position: absolute; top: 0.5em; right: 0.7em;
+    font-family: "JetBrains Mono", monospace;
+    color: rgba(255,255,255,0.18); font-weight: 800; font-size: 1.5em;
+  }
+  .walk-step .ws-eyebrow {
+    color: var(--os-amber); font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.35em;
+  }
+  .walk-step .ws-title { color: #ffffff; font-size: 0.78em; font-weight: 800; line-height: 1.25; margin-bottom: 0.3em; }
+  .walk-step .ws-desc { color: #c8d2eb; font-size: 0.55em; line-height: 1.5; }
+  .walk-step.s1 { border-top: 3px solid var(--crit); }
+  .walk-step.s2 { border-top: 3px solid var(--os-amber); }
+  .walk-step.s3 { border-top: 3px solid var(--agent-purple); }
+  .walk-step.s4 { border-top: 3px solid var(--good); }
+
+  /* Loop diagram */
+  .loop-diagram {
+    display: grid;
+    grid-template-columns: 1fr 26px 1fr 26px 1fr 26px 1fr;
+    align-items: center; gap: 0.4em;
+    margin-top: 1em;
+  }
+  .loop-step {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px; padding: 0.9em 0.7em;
+    text-align: center;
+  }
+  .loop-step .ls-eyebrow {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 800;
+    margin-bottom: 0.3em;
+  }
+  .loop-step .ls-title { color: #ffffff; font-size: 0.82em; font-weight: 800; line-height: 1.2; margin-bottom: 0.3em; }
+  .loop-step .ls-sub { color: #c8d2eb; font-size: 0.53em; line-height: 1.45; }
+  .loop-step.l1 { border-top: 3px solid var(--os-amber); }
+  .loop-step.l2 { border-top: 3px solid var(--agent-purple); }
+  .loop-step.l3 { border-top: 3px solid var(--good); }
+  .loop-step.l4 { border-top: 3px solid var(--os-blue-soft); }
+  .loop-arrow {
+    text-align: center; color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace; font-size: 1.1em; font-weight: 800;
+  }
+
+  /* Chat transcript mock */
+  .convo {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px; padding: 0.8em 1.2em;
+    max-width: 84%; margin: 0.35em auto 0 auto; text-align: left;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .convo-line {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55em; line-height: 1.55; margin: 0.32em 0;
+    color: #d8def0;
+  }
+  .convo-line.you::before {
+    content: "you  "; color: var(--os-blue-soft); font-weight: 800;
+  }
+  .convo-line.os::before {
+    content: "os   "; color: var(--agent-purple); font-weight: 800;
+  }
+  .convo-line.os { color: #ffffff; }
+  .convo-line .hl { color: var(--os-amber); font-weight: 700; }
+
+  /* Numbered takeaways */
+  .takeaways { max-width: 88%; margin: 0.8em auto 0 auto; text-align: left; }
+  .takeaways ol { list-style: none; margin: 0; padding: 0; counter-reset: tk; }
+  .takeaways li {
+    counter-increment: tk;
+    position: relative; padding-left: 2.4em;
+    margin: 0.42em 0; font-size: 0.64em; line-height: 1.5;
+  }
+  .takeaways li::before {
+    content: counter(tk, decimal-leading-zero);
+    position: absolute; left: 0; top: -0.1em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.5em; font-weight: 800; color: rgba(232,168,56,0.55);
+  }
+  .takeaways li strong { color: #ffffff; }
+
+  /* CTA */
+  .cta-slide { text-align: center; }
+  .cta-grid {
+    display: grid; grid-template-columns: 1.25fr 1fr;
+    gap: 2em; align-items: center;
+    text-align: left; margin-top: 0.6em;
+  }
+  .cta-cards { display: flex; flex-direction: column; gap: 0.28em; }
+  .cta-card {
+    display: grid; grid-template-columns: 120px 1fr;
+    align-items: center; gap: 0.7em;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 8px; padding: 0.38em 0.7em;
+  }
+  .cta-card .cta-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.45em; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--os-amber); white-space: nowrap;
+    border-right: 1px solid rgba(255,255,255,0.18);
+    padding-right: 0.7em;
+  }
+  .cta-card .cta-title { color: #ffffff; font-size: 0.52em; font-weight: 700; line-height: 1.3; }
+  .cta-card .cta-url {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.44em; color: var(--os-blue-soft); letter-spacing: 0.01em;
+    margin-top: 0.15em; overflow-wrap: anywhere;
+  }
+  .qr-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9em; }
+  .qr-box { text-align: center; }
+  .qr-box img {
+    width: 100%; max-width: 165px; background: #fff;
+    padding: 9px; border-radius: 10px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5);
+    display: block; margin: 0 auto 0.4em auto;
+  }
+  .qr-box .qr-cap {
+    color: var(--os-amber);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+
+  .try-cmd {
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 8px; padding: 0.6em 0.85em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.46em; text-align: left;
+    margin: 0.5em auto 0 auto; max-width: 88%;
+    white-space: nowrap; overflow: hidden; color: #d8def0;
+  }
+  .try-cmd .p { color: var(--good); font-weight: 800; margin-right: 0.6em; }
+
+  /* Closing split */
+  .try-slide { text-align: left; padding: 0 !important; }
+  .try-grid { display: grid; grid-template-columns: 1.05fr minmax(440px, 1fr); gap: 1.6em; align-items: center; }
+  .try-text { text-align: left; min-width: 0; }
+  .try-text h2 em { color: var(--os-amber); font-style: normal; }
+  .try-url {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-amber); font-size: 1.3em;
+    font-weight: 800; letter-spacing: 0.01em; margin-bottom: 0.7em;
+  }
+  .try-foot { color: #d8def0; font-size: 0.65em; letter-spacing: 0.04em; }
+  .try-foot strong { color: #ffffff; }
+  .try-shot { display: flex; justify-content: center; align-items: center; }
+  .try-shot img {
+    max-width: 100%; max-height: 620px;
+    width: auto; height: auto; border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer {
+    position: fixed; bottom: 14px; left: 30px; right: 30px;
+    display: flex; justify-content: space-between;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px; font-family: "Inter", sans-serif;
+    letter-spacing: 0.05em;
+    pointer-events: none; opacity: 0.85; z-index: 30;
+  }
+  .watermark {
+    position: fixed; top: 22px; right: 28px;
+    width: 126px; z-index: 30;
+    pointer-events: none; opacity: 0.85;
+  }
+  .watermark img { width: 100%; height: auto; display: block; filter: brightness(0) invert(1); }
+  body.hide-watermark .watermark { display: none; }
+
+  .reveal .progress { color: var(--os-amber); }
+  .reveal .controls { color: rgba(255, 255, 255, 0.7) !important; }
+
+  /* ========== Workshop-only additions ========== */
+
+  /* Lab divider: the clock target is the single most useful thing on a
+     workshop divider — participants self-pace against it. */
+  .pillar .pillar-clock {
+    display: inline-block; margin-top: 1.1em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em; font-weight: 800;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--os-amber);
+    border: 1px solid rgba(232,168,56,0.45);
+    background: rgba(232,168,56,0.10);
+    border-radius: 100px; padding: 0.5em 1.2em;
+  }
+  .pillar .pillar-driver {
+    display: block; margin-top: 0.8em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--os-blue-soft); font-weight: 700;
+  }
+
+  /* Green acceptance box — "you should see this, or raise a hand" */
+  .checkpoint {
+    text-align: left;
+    background: rgba(76, 209, 160, 0.10);
+    border: 1px solid rgba(76, 209, 160, 0.35);
+    border-left: 4px solid var(--good);
+    border-radius: 0 10px 10px 0;
+    padding: 0.8em 1.2em; margin: 0.7em auto 0 auto; max-width: 90%;
+  }
+  .checkpoint .cp-head {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.52em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--good); margin-bottom: 0.5em;
+  }
+  .checkpoint ul { margin: 0 0 0 1.1em; }
+  .checkpoint li { font-size: 0.6em; line-height: 1.55; margin: 0.22em 0; color: #e0e8f8; }
+  .checkpoint li::marker { color: var(--good); }
+  .checkpoint li code { font-size: 0.92em; }
+
+  /* Red escape hatch — what to do when the lab does not come up */
+  .escape {
+    text-align: left;
+    background: rgba(255, 91, 110, 0.09);
+    border: 1px solid rgba(255, 91, 110, 0.32);
+    border-left: 4px solid var(--crit);
+    border-radius: 0 10px 10px 0;
+    padding: 0.7em 1.1em; margin: 0.7em auto 0 auto; max-width: 90%;
+  }
+  .escape .esc-head {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--crit); margin-bottom: 0.4em;
+  }
+  .escape p { font-size: 0.6em; line-height: 1.55; margin: 0.2em 0; color: #e0e8f8; }
+
+  /* Terminal transcript — distinct from .code-block so participants can tell
+     "type this" from "you should see this" at a glance. */
+  .term {
+    background: #05101f;
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 8px; padding: 0.8em 1.1em;
+    margin: 0.55em auto 0 auto; max-width: 92%;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; line-height: 1.6; text-align: left;
+    color: #c8d2eb; white-space: pre-wrap;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5), 0 6px 24px rgba(0,0,0,0.45);
+  }
+  .term.sm { font-size: 0.44em; line-height: 1.55; }
+  .term .p  { color: var(--good); font-weight: 800; }
+  .term .ok { color: var(--good); }
+  .term .warn { color: var(--os-amber); }
+  .term .bad { color: var(--crit); }
+  .term .dim { color: rgba(255,255,255,0.4); }
+
+  /* "LAB 03" chip for non-divider lab slides */
+  .lab-chip {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.48em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 0.35em 0.8em; border-radius: 5px;
+    background: rgba(157,124,255,0.16); color: #c4b3ff;
+    border: 1px solid rgba(157,124,255,0.45);
+    margin-bottom: 0.5em;
+  }
+
+  /* Agenda / run-of-show rail */
+  .agenda { max-width: 94%; margin: 0.7em auto 0 auto; }
+  .agenda-row {
+    display: grid; grid-template-columns: 98px 86px 1fr 128px;
+    gap: 0.9em; align-items: center;
+    padding: 0.34em 0.7em; border-radius: 6px;
+    border-left: 3px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.035);
+    margin-bottom: 0.2em; text-align: left;
+  }
+  .agenda-row.lab { border-left-color: var(--agent-purple); }
+  .agenda-row.talk { border-left-color: var(--os-amber); }
+  .agenda-row .ag-clock {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800; color: var(--os-amber); letter-spacing: 0.06em;
+  }
+  .agenda-row .ag-kind {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.44em; font-weight: 800;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--os-blue-soft);
+  }
+  .agenda-row .ag-title { color: #ffffff; font-size: 0.58em; font-weight: 700; line-height: 1.3; }
+  .agenda-row .ag-out {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.44em; color: var(--os-amber-soft); letter-spacing: 0.04em; text-align: right;
+  }
+
+  /* Two stacked blocks with a labelled divider between them */
+  .stack-two { display: grid; grid-template-columns: 1fr; gap: 0.1em; }
+  .block-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.46em; font-weight: 800;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--os-blue-soft); text-align: left;
+    max-width: 92%; margin: 0.55em auto 0 auto;
+  }
+
+  /* Prereq tick list */
+  .prereq { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em 1.6em; max-width: 92%; margin: 0.8em auto 0 auto; text-align: left; }
+  .prereq-item {
+    display: grid; grid-template-columns: 22px 1fr; gap: 0.6em; align-items: start;
+    font-size: 0.6em; line-height: 1.5; color: #d8def0;
+  }
+  .prereq-item .tick { color: var(--good); font-weight: 800; font-family: "JetBrains Mono", monospace; }
+  .prereq-item strong { color: #ffffff; }
+  .prereq-item.opt .tick { color: var(--os-amber); }
+
+  .hand-row {
+    display: flex; justify-content: center; gap: 1.1em; margin-top: 1.1em; flex-wrap: wrap;
+  }
+  .hand {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.52em; font-weight: 800; letter-spacing: 0.1em;
+    padding: 0.6em 1em; border-radius: 8px; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05);
+  }
+  .hand .swatch { display: inline-block; width: 0.75em; height: 0.75em; border-radius: 2px; margin-right: 0.6em; vertical-align: -0.05em; }
+
+  /* ---------- Density pass ----------
+     A workshop deck carries more per slide than a talk deck: commands,
+     expected output, and an acceptance box, all on one screen. These
+     overrides buy back the vertical room. The floor is ~0.44em (≈18px in
+     the 1280×860 coordinate space), which still reads from the back row —
+     and every one of these blocks is also in LAB.md on the participant's
+     own screen. */
+  .reveal h2 { margin-bottom: 0.45em; }
+  .reveal .eyebrow { margin-bottom: 0.7em; }
+
+  table.matrix { font-size: 0.47em; }
+  table.matrix th { padding: 0.55em 0.75em; }
+  table.matrix td { padding: 0.34em 0.75em; }
+
+  .two-col, .three-col { gap: 1.3em; margin-top: 0.6em; }
+  .two-col h3, .three-col h3 { font-size: 0.76em; margin-bottom: 0.4em; padding-bottom: 0.3em; }
+  .two-col li, .three-col li { font-size: 0.55em; line-height: 1.45; margin: 0.22em 0; }
+  .two-col p,  .three-col p  { font-size: 0.55em; line-height: 1.45; margin: 0.3em 0; }
+
+  .code-block { font-size: 0.5em; line-height: 1.55; padding: 0.75em 1.1em; }
+  .code-block.sm { font-size: 0.45em; line-height: 1.5; }
+
+  .term { font-size: 0.46em; line-height: 1.5; padding: 0.7em 1em; }
+  .term.sm { font-size: 0.41em; line-height: 1.45; }
+
+  .checkpoint { padding: 0.6em 1.1em; margin-top: 0.55em; }
+  .checkpoint li { font-size: 0.54em; line-height: 1.45; margin: 0.16em 0; }
+  .escape { padding: 0.55em 1em; margin-top: 0.55em; }
+  .escape p { font-size: 0.54em; line-height: 1.45; }
+  .key { font-size: 0.62em; line-height: 1.45; padding: 0.6em 1em; }
+
+  .mode-grid, .fail-grid, .reveal-grid { margin-top: 0.7em; gap: 0.9em; }
+  .mode-card { padding: 0.85em 0.85em; }
+  .mode-card .mode-title { font-size: 0.88em; margin-bottom: 0.3em; }
+  .mode-card .mode-desc { font-size: 0.54em; line-height: 1.45; }
+  .fail-card .f-title { font-size: 0.9em; }
+  .fail-card .f-desc { font-size: 0.56em; line-height: 1.45; }
+  .fail-card .f-signal { font-size: 0.48em; }
+  .reveal-card .rc-desc { font-size: 0.55em; line-height: 1.45; }
+  .reveal-grid.g4 .rc-desc { font-size: 0.47em; line-height: 1.4; }
+
+  .agenda-row { padding: 0.26em 0.7em; margin-bottom: 0.14em; }
+  .agenda-row .ag-title { font-size: 0.54em; line-height: 1.25; }
+
+  .walk-grid { margin-top: 0.7em; }
+  .walk-step { padding: 0.8em 0.75em; }
+  .walk-step .ws-desc { font-size: 0.5em; line-height: 1.45; }
+  .loop-diagram { margin-top: 0.7em; }
+  .loop-step { padding: 0.75em 0.6em; }
+  .loop-step .ls-sub { font-size: 0.48em; line-height: 1.4; }
+
+  .takeaways li { font-size: 0.58em; line-height: 1.45; margin: 0.3em 0; }
+  .prereq { gap: 0.4em 1.4em; margin-top: 0.6em; }
+  .prereq-item { font-size: 0.55em; line-height: 1.45; }
+  .arch { margin-top: 0.8em; }
+  .arch-node { padding: 0.75em 0.7em; }
+  .arch-node .an-desc { font-size: 0.5em; line-height: 1.4; }
+
+  /* ---------- Overflow fixes found in visual review ----------
+     1. The ghost numerals are absolutely positioned decoration. The source
+        deck only reserved space on the eyebrow; workshop card titles are
+        longer, so they ran under the numeral. Reserve on the title too. */
+  .mode-card .mode-title { padding-right: 2.6em; }
+  .walk-step .ws-eyebrow { padding-right: 2.4em; }
+  .walk-step .ws-title { padding-right: 0.2em; }
+
+  /* 3. Closing slide: the URL is one long unbreakable token and the image
+        column was greedy, so the URL slid under the diagram. */
+  .try-grid { grid-template-columns: 1.3fr minmax(0, 0.85fr); gap: 1.3em; }
+  .try-url { font-size: 0.92em; white-space: nowrap; }
+  .try-shot { min-width: 0; }
+  .try-shot img { max-height: 520px; }
+</style>
+</head>
+
+<body>
+<div class="watermark" id="watermark">
+  <img src="assets/opensearch-logo-official.svg" alt="OpenSearch">
+</div>
+<div class="footer">
+  <span>Pipe Dreams to Pipelines · Workshop · OpenSearchCon North America 2026</span>
+  <span>Anirudha Jadhav · AWS &nbsp;·&nbsp; Wolfgang Theilmann · SAP</span>
+</div>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ 01 · COVER ============ -->
+    <section class="cover">
+      <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
+      <div class="eyebrow">OpenSearchCon North America · Workshop</div>
+      <h1>Pipe Dreams to Pipelines</h1>
+      <div class="subtitle">Observing and evaluating AI agents and services with <strong>OpenTelemetry + OpenSearch</strong>. In 100 minutes you will instrument an agent, push its traces through Data Prepper, aggregate its metrics through Prometheus, reconstruct its reasoning in PPL, and grade it against a golden path.</div>
+      <div class="speakers">
+        <strong>Anirudha Jadhav</strong>
+        <span class="role">Sr. Engineering Manager · OpenSearch · AWS</span>
+        <strong style="margin-top:0.5em;">Wolfgang Theilmann</strong>
+        <span class="role">SAP</span>
+      </div>
+      <div class="meta-line">Thu · Sep 24 · 2026 · 10:40–12:20 · Hands-on · Bring a laptop</div>
+    </section>
+
+    <!-- ============ 02 · TITLE, UNPACKED ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The title is not just a pun</div>
+      <h2 style="text-align:center; margin-bottom:0.25em; font-size:1.45em;">Three <em>pipes</em>. One workshop.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.72em; max-width:86%; margin:0 auto;">
+        Everyone wants agent observability. Almost nobody has wired it. The gap between the wish and the working system is three concrete pipes — and you will build all three today.
+      </p>
+      <div class="mode-grid">
+        <div class="mode-card m1">
+          <div class="mode-num">01</div>
+          <div class="mode-eyebrow">The pipe dream</div>
+          <div class="mode-title">"We'll add observability later"</div>
+          <div class="mode-desc">The agent ships, it returns 200s, and nobody can answer why it took eleven model calls to look up one order. This is the state we are leaving behind.</div>
+          <span class="mode-role">before → 09:00</span>
+        </div>
+        <div class="mode-card m2">
+          <div class="mode-num">02</div>
+          <div class="mode-eyebrow">The data pipeline</div>
+          <div class="mode-title">Collector → Data&nbsp;Prepper → OpenSearch</div>
+          <div class="mode-desc">Real YAML pipelines. <code>otel_traces</code> for spans, <code>service_map</code> for topology, a Prometheus scrape for the metrics side.</div>
+          <span class="mode-role">labs → 00 · 02</span>
+        </div>
+        <div class="mode-card m3">
+          <div class="mode-num">03</div>
+          <div class="mode-eyebrow">The PPL pipe</div>
+          <div class="mode-title"><code>source = …&nbsp;| where&nbsp;…</code></div>
+          <div class="mode-desc">Piped Processing Language over every agent span. This is how you reconstruct a reasoning chain that nobody thought to log.</div>
+          <span class="mode-role">labs → 04 · 05</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 · WHAT YOU LEAVE WITH ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">By 12:20 on your own laptop</div>
+      <h2 style="text-align:center; margin-bottom:0.3em; font-size:1.45em;">Six things, all running.</h2>
+      <div class="reveal-grid g4" style="grid-template-columns: repeat(3, 1fr); gap: 0.6em;">
+        <div class="reveal-card" style="border-top-color: var(--agent-purple);">
+          <div class="rc-eyebrow" style="color: var(--agent-purple);">Lab 00 + 01</div>
+          <div class="rc-title">An instrumented agent</div>
+          <div class="rc-desc">Three deterministic tools, one model-call loop, OTel GenAI spans coming out.</div>
+          <span class="rc-tag">register() + @observe</span>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Lab 02</div>
+          <div class="rc-title">A trace pipeline you can read</div>
+          <div class="rc-desc">Collector fan-out, Data Prepper's three pipelines, two index patterns, one Prometheus scrape.</div>
+          <span class="rc-tag">otel-v1-apm-*</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--os-blue-soft);">
+          <div class="rc-eyebrow" style="color: var(--os-blue-soft);">Lab 03</div>
+          <div class="rc-title">A service map nobody drew</div>
+          <div class="rc-desc">Your agent as a node beside your services, with RED metrics per row.</div>
+          <span class="rc-tag">topology + RED</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--os-amber);">
+          <div class="rc-eyebrow">Lab 04</div>
+          <div class="rc-title">Four PPL queries you'll reuse</div>
+          <div class="rc-desc">Trajectory replay, token spend by model, tool failure rate, loop detector.</div>
+          <span class="rc-tag">PPL</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--good);">
+          <div class="rc-eyebrow" style="color: var(--good);">Lab 05</div>
+          <div class="rc-title">A golden-path eval</div>
+          <div class="rc-desc">Expected tool sequence, scored run, pass/fail and accuracy — not a status code.</div>
+          <span class="rc-tag">score() · Benchmark</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--crit);">
+          <div class="rc-eyebrow" style="color: var(--crit);">Lab 06</div>
+          <div class="rc-title">A closed loop</div>
+          <div class="rc-desc">A bad production trace promoted into a regression test, gating the next change.</div>
+          <span class="rc-tag">prod → dataset</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 · RUN OF SHOW ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">100 minutes · 10:40 → 12:20</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Run of show. <em>Clock on the wall.</em></h2>
+      <div class="agenda">
+        <div class="agenda-row talk">
+          <div class="ag-clock">10:40</div><div class="ag-kind">Talk</div>
+          <div class="ag-title">Why agents break differently — and why RED alone can't see it</div>
+          <div class="ag-out">8 min</div>
+        </div>
+        <div class="agenda-row lab">
+          <div class="ag-clock">10:48</div><div class="ag-kind">Lab 00</div>
+          <div class="ag-title">Stack up — clone, <code>docker compose up</code>, confirm five ports</div>
+          <div class="ag-out">10 min</div>
+        </div>
+        <div class="agenda-row lab">
+          <div class="ag-clock">10:58</div><div class="ag-kind">Lab 01</div>
+          <div class="ag-title">Instrument the agent — <code>register()</code>, <code>@observe</code>, <code>enrich()</code></div>
+          <div class="ag-out">14 min</div>
+        </div>
+        <div class="agenda-row lab">
+          <div class="ag-clock">11:12</div><div class="ag-kind">Lab 02</div>
+          <div class="ag-title">The pipelines — Collector fan-out, Data Prepper, Prometheus scrape</div>
+          <div class="ag-out">13 min</div>
+        </div>
+        <div class="agenda-row lab">
+          <div class="ag-clock">11:25</div><div class="ag-kind">Lab 03</div>
+          <div class="ag-title">Service map + RED — your agent in the topology and the catalogue</div>
+          <div class="ag-out">12 min</div>
+        </div>
+        <div class="agenda-row lab">
+          <div class="ag-clock">11:37</div><div class="ag-kind">Lab 04</div>
+          <div class="ag-title">Reconstruct the reasoning — four PPL queries, then write your own</div>
+          <div class="ag-out">15 min</div>
+        </div>
+        <div class="agenda-row lab">
+          <div class="ag-clock">11:52</div><div class="ag-kind">Lab 05</div>
+          <div class="ag-title">Grade it — golden paths, <code>score()</code>, pass/fail and accuracy</div>
+          <div class="ag-out">16 min</div>
+        </div>
+        <div class="agenda-row lab">
+          <div class="ag-clock">12:08</div><div class="ag-kind">Lab 06</div>
+          <div class="ag-title">Close the loop — a production trace becomes a regression test</div>
+          <div class="ag-out">8 min</div>
+        </div>
+        <div class="agenda-row talk">
+          <div class="ag-clock">12:16</div><div class="ag-kind">Wrap</div>
+          <div class="ag-title">Recap, where this goes in production, and how to contribute</div>
+          <div class="ag-out">4 min</div>
+        </div>
+      </div>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.58em; margin-top:0.6em;">
+        Every lab ends on a green checkpoint slide. If your screen doesn't match it, put up a red sticky — we come to you.
+      </p>
+    </section>
+
+    <!-- ============ 05 · PREREQS ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Do this now, not at 10:48</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Prerequisites.</h2>
+      <div class="prereq">
+        <div class="prereq-item"><span class="tick">✓</span><span><strong>Docker Desktop or Podman</strong>, running, with <strong>8 GB</strong> of memory allocated to the VM. Six containers, one of them a JVM.</span></div>
+        <div class="prereq-item"><span class="tick">✓</span><span><strong>Python 3.10+</strong> and <code>pip</code>. <code>uv</code> if you have it — the lab guide gives both commands.</span></div>
+        <div class="prereq-item"><span class="tick">✓</span><span><strong>Ports free:</strong> <code>4317</code> <code>4318</code> <code>5601</code> <code>9090</code> <code>9200</code> <code>21890</code>. <code>lsof -i :5601</code> settles arguments.</span></div>
+        <div class="prereq-item"><span class="tick">✓</span><span><strong>~4 GB of disk</strong> for images. Pull them before the room fills — the venue wifi is the bottleneck, not your laptop.</span></div>
+        <div class="prereq-item opt"><span class="tick">◆</span><span><strong>A model, one of:</strong> an <code>ANTHROPIC_API_KEY</code>, an <code>OPENAI_API_KEY</code>, or AWS credentials with Bedrock access in <code>us-west-2</code>.</span></div>
+        <div class="prereq-item opt"><span class="tick">◆</span><span><strong>No key? Fine.</strong> <code>--replay</code> runs the same agent against recorded model responses. Every lab still works.</span></div>
+      </div>
+      <div class="term"><span class="p">$</span> git clone https://github.com/anirudha/os-agent-observability-evals
+<span class="p">$</span> cd os-agent-observability-evals &amp;&amp; docker compose pull   <span class="dim"># do this first — it is the long pole</span></div>
+      <div class="escape">
+        <div class="esc-head">If Docker is not an option</div>
+        <p>Open <strong>observability.playground.opensearch.org</strong>. It is the same stack with live agent traces already flowing. You will be able to follow Labs 03–05 read-only, and the PPL in Lab 04 works verbatim.</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 · GROUND RULES ============ -->
+    <section class="center-slide">
+      <div class="eyebrow eyebrow-c">How we run the room</div>
+      <h2 style="margin-bottom:0.3em; font-size:1.4em;">Sticky notes beat raised hands.</h2>
+      <div class="hand-row">
+        <div class="hand"><span class="swatch" style="background:var(--good);"></span>Green · I'm at the checkpoint</div>
+        <div class="hand"><span class="swatch" style="background:var(--crit);"></span>Red · I'm stuck, come here</div>
+        <div class="hand"><span class="swatch" style="background:var(--os-amber);"></span>Amber · Question for the wrap</div>
+      </div>
+      <div class="two-col" style="margin-top:1.4em;">
+        <div>
+          <h3>Three things that will save you</h3>
+          <ul>
+            <li><strong>Pair up.</strong> One laptop between two beats two half-working laptops. The person not typing reads the checkpoint out loud.</li>
+            <li><strong>Don't type from the slides.</strong> Everything is in the lab guide, copy-pasteable. Slides show the shape; the guide has the exact text.</li>
+            <li><strong>Skipping is allowed.</strong> Every lab has a <code>make lab-NN</code> that jumps to its starting state. Falling behind on Lab 02 must not cost you Lab 05.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>The one URL for the next 100 minutes</h3>
+          <p style="font-family:'JetBrains Mono',monospace; color:var(--os-amber); font-size:0.78em; font-weight:800; letter-spacing:0.02em;">anirudha.github.io/talks/<br>pipe-dreams-to-pipelines/</p>
+          <p>Deck, lab guide, every command and PPL query. Open it now, before the wifi gives up.</p>
+          <h3 style="margin-top:1.1em;">Two of us, one room</h3>
+          <p>Ani drives Labs 00–01 and 04–06. Wolfgang drives Labs 02–03 and the "what happens at 100 agents" questions. Whoever is not presenting walks the aisles.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 07 · NOT A MICROSERVICE ============ -->
+    <section class="blind">
+      <div class="megaline">Your agent is not<br>a <em>microservice</em>.</div>
+      <p class="sub">A microservice does one thing and reports one outcome. An agent decides what to do, at runtime, differently every time — and then reports <strong>200 OK</strong> either way.</p>
+    </section>
+
+    <!-- ============ 08 · THREE FAILURE MODES ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">What RED metrics will never tell you</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">Three failures with a <em>healthy dashboard</em>.</h2>
+      <div class="fail-grid">
+        <div class="fail-card">
+          <div class="f-eyebrow">Failure 01</div>
+          <div class="f-title">It answered wrongly</div>
+          <div class="f-desc">The tool returned <code>order_not_found</code>; the model narrated a delivery date anyway. Latency normal, status 200.</div>
+          <div class="f-signal">needs → the tool result <em>and</em> the output text on the same trace</div>
+        </div>
+        <div class="fail-card">
+          <div class="f-eyebrow">Failure 02</div>
+          <div class="f-title">It took the long way round</div>
+          <div class="f-desc">Eleven model calls where two would do, because a tool description changed and the agent kept re-planning. P50 barely moves. The bill triples.</div>
+          <div class="f-signal">needs → span count and <code>gen_ai.usage.*</code> per trace</div>
+        </div>
+        <div class="fail-card">
+          <div class="f-eyebrow">Failure 03</div>
+          <div class="f-title">It got quietly worse</div>
+          <div class="f-desc">A prompt tweak drops tool-selection accuracy from 82% to 64%. Nothing errors, nothing alerts. You hear it from a support ticket.</div>
+          <div class="f-signal">needs → a graded dataset run on every change</div>
+        </div>
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; margin-top:1em; max-width:84%; margin-left:auto; margin-right:auto;">
+        None of these are new observability problems. They are <strong>the same problems one level down</strong> — at the span, not the request. The tools you already run can see them, once the spans carry the right attributes.
+      </p>
+    </section>
+
+    <!-- ============ 09 · ONE TURN IS A DISTRIBUTED TRACE ============ -->
+    <section class="big-stat">
+      <div class="eyebrow eyebrow-c">One question. One trace.</div>
+      <div class="stat">22</div>
+      <div class="stat-flow">spans per turn · 5 questions → 110 spans</div>
+      <p>
+        A single user question fans out into a plan, a delegated sub-agent, three tool calls, two MCP round trips, and a synthesis step. That is a distributed system inside one HTTP request — and <strong>only 2 of those 22 spans carry token usage</strong>, because only the model calls do.
+      </p>
+      <p style="color:var(--os-blue-soft); font-size:0.7em;">
+        Which is the whole argument for tracing rather than logging: you cannot reconstruct a 22-span decision tree from print statements, and you should not try.
+      </p>
+    </section>
+
+    <!-- ============ 10 · ONE VOCABULARY ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">The thing that makes all of this portable</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.4em;">OTel <em>GenAI</em> semantic conventions.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.7em; max-width:88%; margin:0 auto;">
+        Not an OpenSearch schema — an OpenTelemetry one. Any framework emitting spans <em>with these attributes</em> becomes queryable the same way, and that is the only thing we ask of your agent today. The condition is worth saying out loud: the Agent Traces view surfaces spans carrying <code>gen_ai.operation.name</code>.
+      </p>
+      <table class="matrix">
+        <thead><tr><th>Attribute</th><th>Carries</th><th>What it unlocks downstream</th></tr></thead>
+        <tbody>
+          <tr><td class="feat"><code>gen_ai.operation.name</code></td><td><code>chat</code> · <code>invoke_agent</code> · <code>execute_tool</code> · <code>embeddings</code></td><td>Span category. This is the attribute the Agent Traces list filters on.</td></tr>
+          <tr><td class="feat"><code>gen_ai.agent.name</code></td><td>Which agent or sub-agent ran this step</td><td>Per-agent RED once the collector promotes it to a label.</td></tr>
+          <tr><td class="feat"><code>gen_ai.request.model</code></td><td>The model actually called</td><td>Cost and quality attribution by model, no bespoke metric.</td></tr>
+          <tr><td class="feat"><code>gen_ai.usage.input_tokens</code> <span style="color:rgba(255,255,255,0.4);">/</span> <code>output_tokens</code></td><td>Token counts, per model call</td><td>Token spend as a first-class signal beside latency.</td></tr>
+          <tr><td class="feat"><code>gen_ai.tool.name</code> <span style="color:rgba(255,255,255,0.4);">+</span> <code>.call.arguments</code> <span style="color:rgba(255,255,255,0.4);">/</span> <code>.result</code></td><td>What the agent called and what came back</td><td>"The tool said no and the model said yes" — visible on one span.</td></tr>
+          <tr><td class="feat"><code>gen_ai.conversation.id</code></td><td>Session, across turns</td><td>Stitch a multi-turn conversation out of separate traces.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ LAB 00 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Lab 00 —</div>
+      <h2>Stack <em>up</em>.</h2>
+      <p class="pillar-sub">One clone, one <code>docker compose up</code>. Six containers: the agent, an OTel Collector, Data Prepper, OpenSearch, OpenSearch Dashboards, Prometheus.</p>
+      <div class="pillar-clock">10:48 → 10:58 · 10 min</div>
+      <span class="pillar-driver">driving · Ani</span>
+    </section>
+
+    <!-- ============ 12 · THE COMMANDS ============ -->
+    <section>
+      <div class="lab-chip">Lab 00 · commands</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Four lines.</h2>
+      <div class="term"><span class="p">$</span> git clone https://github.com/anirudha/os-agent-observability-evals
+<span class="p">$</span> cd os-agent-observability-evals
+<span class="p">$</span> cp .env.example .env          <span class="dim"># then add ONE model key — or leave it empty and use --replay</span>
+<span class="p">$</span> docker compose up -d
+
+<span class="dim">[+] Running 6/6</span>
+ <span class="ok">✔</span> Container opensearch            <span class="ok">Healthy</span>   <span class="dim">28.4s</span>
+ <span class="ok">✔</span> Container opensearch-dashboards <span class="ok">Healthy</span>   <span class="dim">41.1s</span>
+ <span class="ok">✔</span> Container data-prepper          <span class="ok">Started</span>   <span class="dim">12.7s</span>
+ <span class="ok">✔</span> Container otel-collector        <span class="ok">Started</span>    <span class="dim">2.2s</span>
+ <span class="ok">✔</span> Container prometheus            <span class="ok">Started</span>    <span class="dim">1.9s</span>
+ <span class="ok">✔</span> Container support-agent         <span class="ok">Started</span>    <span class="dim">3.4s</span></div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:84%; margin:0.7em auto 0 auto;">
+        Dashboards is the slow one and it is normal — it optimises bundles on first boot. Start it now and it will be ready by the time Lab 01 produces a trace. If a port is taken, <code>PORT_PREFIX</code> in <code>.env</code> shifts all six.
+      </p>
+    </section>
+
+    <!-- ============ 13 · WHAT JUST STARTED ============ -->
+    <section>
+      <div class="lab-chip">Lab 00 · the shape of it</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Two destinations. <em>One emitter.</em></h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.68em; max-width:88%; margin:0 auto;">
+        Your agent talks OTLP to exactly one place — the Collector. The Collector is what fans traces and metrics out to stores that are good at different things.
+      </p>
+      <div class="arch">
+        <div class="arch-node amber">
+          <div class="an-name">Your agent</div>
+          <div class="an-desc">OTel SDK. GenAI spans on the entry point, the model calls and the tools.</div>
+          <span class="an-tag">otlp :4318</span>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node amber">
+          <div class="an-name">OTel Collector</div>
+          <div class="an-desc">One receiver, two pipelines. Batches, promotes attributes to labels, fans out.</div>
+          <span class="an-tag">fan-out</span>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <div class="an-name" style="font-size:0.72em;">Data Prepper&nbsp;→&nbsp;OpenSearch<br><span style="color:var(--prom-orange);">Prometheus scrape</span></div>
+          <div class="an-desc">Spans and derived topology into OpenSearch; <code>gen_ai_*</code> metric families into Prometheus.</div>
+          <span class="an-tag">two stores</span>
+        </div>
+      </div>
+      <div class="two-col" style="margin-top:1.1em;">
+        <div>
+          <h3>Why two stores and not one</h3>
+          <p>Spans have unbounded cardinality — every trace ID, tool argument and session is unique. That is a search-engine workload. RED metrics are small, dense and queried over long windows: a TSDB workload.</p>
+        </div>
+        <div>
+          <h3>How they meet</h3>
+          <p>Not a federated query engine — nothing joins a Prometheus series to an OpenSearch document in one query. The UI routes per signal and correlates on <strong>trace ID</strong> and <strong>service name</strong> — enough to walk a spike to the exact span.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 14 · CHECKPOINT 0 ============ -->
+    <section>
+      <div class="lab-chip">Lab 00 · checkpoint</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Five tabs open, all answering.</h2>
+      <table class="matrix">
+        <thead><tr><th>Open this</th><th>You should see</th></tr></thead>
+        <tbody>
+          <tr><td class="feat"><code>localhost:5601</code></td><td>OpenSearch Dashboards home. The left nav has an <strong>Observability Stack</strong> section.</td></tr>
+          <tr><td class="feat"><code>localhost:9090/targets</code></td><td>The <code>otel-collector</code> scrape target, state <strong>UP</strong>.</td></tr>
+          <tr><td class="feat"><code>localhost:9200/_cat/indices?v</code></td><td>Green or yellow cluster. <code>otel-v1-apm-*</code> is not there yet — that is correct, nothing has been traced.</td></tr>
+          <tr><td class="feat"><code>localhost:8080/healthz</code></td><td>The agent says <code>{"ok":true,"model":"…"}</code> or <code>{"ok":true,"mode":"replay"}</code>.</td></tr>
+          <tr><td class="feat"><code>docker compose logs data-prepper</code></td><td><code>Started Data Prepper with 3 pipelines</code>. No stack trace.</td></tr>
+        </tbody>
+      </table>
+      <div class="checkpoint">
+        <div class="cp-head">Green sticky when</div>
+        <ul>
+          <li>Dashboards loads and <strong>Observability Stack → Agent Traces</strong> opens, even if empty.</li>
+          <li>The Prometheus target is <code>UP</code>. An empty metric list is fine; a down target is not.</li>
+        </ul>
+      </div>
+      <div class="escape">
+        <div class="esc-head">Common two</div>
+        <p><strong>Dashboards stuck on "optimizing bundles"</strong> — give it 90 seconds, it is single-threaded. <strong>OpenSearch exits code 137</strong> — the Docker VM is under 8 GB; raise it and <code>docker compose up -d</code> again.</p>
+      </div>
+    </section>
+
+    <!-- ============ LAB 01 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Lab 01 —</div>
+      <h2>Instrument <em>the agent</em>.</h2>
+      <p class="pillar-sub">One call at startup, one decorator on the entry point, one on each tool. <strong>The agent body does not change.</strong></p>
+      <div class="pillar-clock">10:58 → 11:12 · 14 min</div>
+      <span class="pillar-driver">driving · Ani</span>
+    </section>
+
+    <!-- ============ 16 · THE AGENT BEFORE ============ -->
+    <section>
+      <div class="lab-chip">Lab 01 · step 0 · the starting point</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">The agent you are handed.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.68em; max-width:86%; margin:0 auto 0.2em auto;">
+        <code>agent/core.py</code> — a support agent with three deterministic tools. No observability at all. This is deliberately the least interesting file in the repo.
+      </p>
+      <pre class="code-block sm"><span class="kw">def</span> <span class="fn">lookup_order</span>(order_id: str) -&gt; dict:
+    <span class="kw">return</span> _ORDERS.get(order_id) <span class="kw">or</span> {<span class="str">"error"</span>: <span class="str">"order_not_found"</span>}
+
+<span class="kw">def</span> <span class="fn">check_inventory</span>(sku: str) -&gt; dict: ...
+<span class="kw">def</span> <span class="fn">search_policy</span>(query: str) -&gt; dict: ...
+
+<span class="kw">def</span> <span class="fn">handle_support_question</span>(question: str, conversation_id: str = <span class="str">"anonymous"</span>) -&gt; str:
+    <span class="com"># plan → call tools → synthesise. A normal while-loop over a model client.</span>
+    <span class="kw">return</span> run_turn(question)</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:86%; margin:0.8em auto 0 auto;">
+        Deterministic tools on purpose: when the eval in Lab 05 fails, you want to know the <strong>agent</strong> was wrong, not that a third-party API was flaky. Save the flakiness for production.
+      </p>
+    </section>
+
+    <!-- ============ 17 · REGISTER ============ -->
+    <section>
+      <div class="lab-chip">Lab 01 · step 1 · register</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">One call wires the whole pipeline.</h2>
+      <pre class="code-block"><span class="com"># pip install "opensearch-genai-observability-sdk-py[anthropic]"</span>
+<span class="kw">from</span> opensearch_genai_observability_sdk_py <span class="kw">import</span> register, observe, enrich, Op
+
+register(
+    endpoint=<span class="str">"http://localhost:4318/v1/traces"</span>,
+    service_name=<span class="str">"acme-support-agent"</span>,
+    <span class="com"># auto_instrument=True by default — it discovers installed instrumentors</span>
+)</pre>
+      <div class="key">
+        <strong><code>register()</code> configures the tracer provider, the OTLP exporter and auto-instrumentation in one call.</strong> Everything after this line is either a decorator or a label.
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:84%; margin:0.7em auto 0 auto;">
+        Pass the endpoint explicitly in the lab so you can see it. In production this line does not change — you set <code>OTEL_EXPORTER_OTLP_TRACES_ENDPOINT</code> and let the environment decide.
+      </p>
+    </section>
+
+    <!-- ============ 18 · DECORATE ============ -->
+    <section>
+      <div class="lab-chip">Lab 01 · step 2 · decorate</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Two decorators. <em>Whole run stitched.</em></h2>
+      <pre class="code-block sm"><span class="com"># the entry point — one invoke_agent root span per turn</span>
+<span class="kw">@</span><span class="fn">observe</span>(op=Op.INVOKE_AGENT, name=<span class="str">"acme-support-agent"</span>)
+<span class="kw">def</span> <span class="fn">handle_support_question</span>(question: str, conversation_id: str = <span class="str">"anonymous"</span>) -&gt; str:
+    enrich(session_id=conversation_id)   <span class="com"># → gen_ai.conversation.id</span>
+    <span class="kw">return</span> run_turn(question)          <span class="com"># your existing loop, untouched</span>
+
+<span class="com"># a tool — arguments and return value captured for you</span>
+<span class="kw">@</span><span class="fn">observe</span>(op=Op.EXECUTE_TOOL, name=<span class="str">"lookup_order"</span>)
+<span class="kw">def</span> <span class="fn">lookup_order</span>(order_id: str) -&gt; dict:
+    <span class="kw">return</span> _ORDERS.get(order_id) <span class="kw">or</span> {<span class="str">"error"</span>: <span class="str">"order_not_found"</span>}</pre>
+      <table class="matrix" style="margin-top:0.8em;">
+        <thead><tr><th>You write</th><th>The span carries</th></tr></thead>
+        <tbody>
+          <tr><td class="feat"><code>name=</code> on an <code>INVOKE_AGENT</code></td><td><code>gen_ai.agent.name</code></td></tr>
+          <tr><td class="feat"><code>name=</code> on an <code>EXECUTE_TOOL</code></td><td><code>gen_ai.tool.name</code></td></tr>
+          <tr><td class="feat">nothing — the arguments</td><td><code>gen_ai.tool.call.arguments</code></td></tr>
+          <tr><td class="feat">nothing — the return value</td><td><code>gen_ai.tool.call.result</code></td></tr>
+          <tr><td class="feat"><code>enrich(session_id=…)</code></td><td><code>gen_ai.conversation.id</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ 19 · WHAT YOU DID NOT WRITE ============ -->
+    <section>
+      <div class="lab-chip">Lab 01 · step 3 · auto-instrumentation</div>
+      <h2 style="text-align:center; margin-bottom:0.3em; font-size:1.35em;">The model calls traced themselves.</h2>
+      <div class="two-col">
+        <div>
+          <h3>You decorated two functions. You got a tree.</h3>
+          <p>Nothing in Lab 01 wrapped a model call — and yet every <code>chat</code> span, its model name, its token counts and its stop reason are on the trace. That is the instrumentor for whichever client library you installed, picked up by <code>register()</code>.</p>
+          <h3 style="margin-top:1.1em;">Opt in with the extra that matches your stack</h3>
+          <ul>
+            <li><code>[bedrock]</code> — Bedrock <code>converse</code> with <code>toolConfig</code></li>
+            <li><code>[anthropic]</code> — <code>messages.create</code> with tools</li>
+            <li><code>[openai]</code> — chat completions and the OpenAI Agents SDK</li>
+            <li><code>[langchain]</code> — LangChain and LangGraph, callback handler auto-registered</li>
+            <li><code>[all]</code> — a multi-framework agent</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Two honest caveats, so you are not surprised later</h3>
+          <p><strong>Auto-instrumentation is opt-in and Python-first.</strong> You install the extra; nothing is magic about the base package.</p>
+          <p><strong>The TypeScript SDK is a function wrapper, not a decorator</strong> — <code>observe({op}, fn)</code>, with <code>await register()</code> — and its coverage is narrower than Python's today. Instrumentation in Node is fine; the <em>scoring</em> side in Lab 05 is Python.</p>
+          <h3 style="margin-top:1.1em;">If you brought your own agent</h3>
+          <p>Do that instead. Add <code>register()</code> and one <code>@observe(op=Op.INVOKE_AGENT)</code> on your entry point, point it at <code>localhost:4318</code>, and rejoin at Lab 02. Everything downstream is attribute-driven, so it does not care whose agent it is.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 20 · RUN IT ============ -->
+    <section>
+      <div class="lab-chip">Lab 01 · step 4 · make it emit</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Three questions. <em>One of them fails.</em></h2>
+      <div class="term"><span class="p">$</span> python -m agent.cli ask <span class="str">"where is order A-1042?"</span>
+<span class="ok">✔</span> trace 4f2c9ab… <span class="dim">·</span> 6 spans <span class="dim">·</span> 1.24s <span class="dim">·</span> 1,180 tokens <span class="dim">·</span> tools: lookup_order
+
+<span class="p">$</span> python -m agent.cli ask <span class="str">"can I return a SKU-77 after 40 days?"</span>
+<span class="ok">✔</span> trace 8b71ee0… <span class="dim">·</span> 9 spans <span class="dim">·</span> 2.02s <span class="dim">·</span> 2,410 tokens <span class="dim">·</span> tools: search_policy, check_inventory
+
+<span class="p">$</span> python -m agent.cli ask <span class="str">"where is order A-9999?"</span>       <span class="dim"># this order does not exist</span>
+<span class="warn">⚠</span> trace c30d4f1… <span class="dim">·</span> 14 spans <span class="dim">·</span> 3.87s <span class="dim">·</span> 5,620 tokens <span class="dim">·</span> tools: lookup_order ×4
+<span class="dim">  answer:</span> <span class="bad">"Your order shipped Tuesday and should arrive Friday."</span>
+
+<span class="p">$</span> python -m agent.cli seed --questions 12   <span class="dim"># background traffic for Lab 03</span></div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:86%; margin:0.8em auto 0 auto;">
+        Keep that third trace ID. <strong>It is the specimen for the rest of the workshop</strong> — Lab 04 reconstructs what it did, Lab 05 grades it, Lab 06 turns it into a regression test. The tool returned <code>order_not_found</code> four times and the model invented a delivery date anyway.
+      </p>
+    </section>
+
+    <!-- ============ 21 · CHECKPOINT 1 ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Lab 01 · checkpoint</div>
+      <h3>The span carries the argument and the answer</h3>
+      <div class="feature-sub"><strong>Agent Traces</strong> → newest trace → the <code>execute_tool</code> span. <em>Input and output are on the span.</em></div>
+      <div class="feature-shot">
+        <img src="assets/crop-agent-io.png" style="max-height:400px;" alt="Span detail showing GenAI input and output on an agent span">
+        <div class="shot-caption">Agent Traces → span detail → Input / Output</div>
+      </div>
+      <div class="checkpoint" style="max-width:84%;">
+        <div class="cp-head">Green sticky when</div>
+        <ul>
+          <li>The <code>execute_tool</code> span shows <code>order_not_found</code> — and the root span's output text contradicts it.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ LAB 02 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Lab 02 —</div>
+      <h2>The <em>pipelines</em>.</h2>
+      <p class="pillar-sub">The part everyone skips in a demo and then fights in production. Collector fan-out, Data Prepper's three pipelines, and the attribute-to-label bridge that makes per-agent PromQL possible.</p>
+      <div class="pillar-clock">11:12 → 11:25 · 13 min</div>
+      <span class="pillar-driver">driving · Wolfgang</span>
+    </section>
+
+    <!-- ============ 23 · COLLECTOR CONFIG ============ -->
+    <section>
+      <div class="lab-chip">Lab 02 · step 1 · the Collector</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">One receiver. <em>Two pipelines.</em></h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.66em; max-width:88%; margin:0 auto 0.2em auto;">
+        <code>otel/collector.yaml</code> — open it and read it now, because this is the file you will edit in your own stack.
+      </p>
+      <pre class="code-block sm"><span class="attr">receivers</span>:
+  <span class="attr">otlp</span>:
+    <span class="attr">protocols</span>: { <span class="attr">grpc</span>: { <span class="attr">endpoint</span>: <span class="str">0.0.0.0:4317</span> }, <span class="attr">http</span>: { <span class="attr">endpoint</span>: <span class="str">0.0.0.0:4318</span> } }
+
+<span class="attr">exporters</span>:
+  <span class="attr">otlp/dataprepper</span>:                       <span class="com"># traces → Data Prepper → OpenSearch</span>
+    <span class="attr">endpoint</span>: <span class="str">data-prepper:21890</span>
+    <span class="attr">tls</span>: { <span class="attr">insecure</span>: <span class="kw">true</span> }
+  <span class="attr">prometheus</span>:                             <span class="com"># metrics → scraped by Prometheus</span>
+    <span class="attr">endpoint</span>: <span class="str">0.0.0.0:8889</span>
+    <span class="attr">resource_to_telemetry_conversion</span>: { <span class="attr">enabled</span>: <span class="kw">true</span> }
+
+<span class="attr">service</span>:
+  <span class="attr">pipelines</span>:
+    <span class="attr">traces</span>:  { <span class="attr">receivers</span>: [otlp], <span class="attr">processors</span>: [batch], <span class="attr">exporters</span>: [otlp/dataprepper] }
+    <span class="attr">metrics</span>: { <span class="attr">receivers</span>: [otlp], <span class="attr">processors</span>: [batch], <span class="attr">exporters</span>: [prometheus] }</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.6em; max-width:88%; margin:0.7em auto 0 auto;">
+        <code>resource_to_telemetry_conversion</code> matters most and gets the least attention — it turns resource attributes into Prometheus labels, which is what makes <code>by (service_name)</code> work.
+      </p>
+    </section>
+
+    <!-- ============ 24 · DATA PREPPER ============ -->
+    <section>
+      <div class="lab-chip">Lab 02 · step 2 · Data Prepper</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">One entry. <em>Two sinks.</em> Two index patterns.</h2>
+      <pre class="code-block sm"><span class="attr">entry-pipeline</span>:
+  <span class="attr">source</span>: { <span class="attr">otel_trace_source</span>: { <span class="attr">ssl</span>: <span class="kw">false</span> } }        <span class="com"># :21890</span>
+  <span class="attr">sink</span>:
+    - <span class="attr">pipeline</span>: { <span class="attr">name</span>: <span class="str">raw-pipeline</span> }
+    - <span class="attr">pipeline</span>: { <span class="attr">name</span>: <span class="str">service-map-pipeline</span> }               <span class="com"># same spans, twice</span>
+
+<span class="attr">raw-pipeline</span>:                                   <span class="com"># the spans you query in Lab 04</span>
+  <span class="attr">source</span>: { <span class="attr">pipeline</span>: { <span class="attr">name</span>: <span class="str">entry-pipeline</span> } }
+  <span class="attr">processor</span>: [ { <span class="attr">otel_traces</span>: } ]
+  <span class="attr">sink</span>: [ { <span class="attr">opensearch</span>: { <span class="attr">hosts</span>: [<span class="str">https://opensearch:9200</span>],
+                     <span class="attr">index_type</span>: <span class="str">trace-analytics-raw</span> } } ]
+
+<span class="attr">service-map-pipeline</span>:                           <span class="com"># the topology in Lab 03</span>
+  <span class="attr">source</span>: { <span class="attr">pipeline</span>: { <span class="attr">name</span>: <span class="str">entry-pipeline</span> } }
+  <span class="attr">processor</span>: [ { <span class="attr">service_map</span>: } ]
+  <span class="attr">sink</span>: [ { <span class="attr">opensearch</span>: { <span class="attr">hosts</span>: [<span class="str">https://opensearch:9200</span>],
+                     <span class="attr">index_type</span>: <span class="str">trace-analytics-service-map</span> } } ]</pre>
+      <div class="key" style="margin-top:0.6em;">
+        <strong>This is the answer to "who drew the service map?"</strong> — nobody did. <code>service_map</code> derives caller/callee edges from parent-child span relationships and writes them as their own documents. A sub-agent you add tomorrow appears the first time it serves a request.
+      </div>
+    </section>
+
+    <!-- ============ 25 · THE INDICES ============ -->
+    <section>
+      <div class="lab-chip">Lab 02 · step 3 · what landed</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Two index patterns, different jobs.</h2>
+      <div class="term"><span class="p">$</span> curl -s <span class="str">"localhost:9200/_cat/indices/otel-v1-*?v&amp;h=index,docs.count,store.size"</span>
+
+index                              docs.count  store.size
+<span class="ok">otel-v1-apm-span-000001</span>                   347      1.1mb
+<span class="ok">otel-v1-apm-service-map</span>                    9     48.4kb</div>
+      <table class="matrix" style="margin-top:0.8em;">
+        <thead><tr><th>Index pattern</th><th>One document is</th><th>You use it for</th></tr></thead>
+        <tbody>
+          <tr><td class="feat"><code>otel-v1-apm-span-*</code></td><td>One span — with all its <code>gen_ai.*</code> attributes, its <code>traceId</code> and its <code>parentSpanId</code></td><td>Trace trees, PPL over reasoning, token attribution, span-level evals</td></tr>
+          <tr><td class="feat"><code>otel-v1-apm-service-map</code></td><td>One caller→callee edge, with hashed IDs and the target resource</td><td>The Application Map, and the dependency view that separates errors from faults</td></tr>
+        </tbody>
+      </table>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:88%; margin:0.8em auto 0 auto;">
+        Note the ratio: <strong>347 spans produced 9 edges.</strong> Topology is tiny and slow-changing; spans are large and fast-growing. That asymmetry is why they are separate indices with separate retention — and the first knob you will turn when the bill arrives.
+      </p>
+    </section>
+
+    <!-- ============ 26 · LABEL PROMOTION ============ -->
+    <section>
+      <div class="lab-chip">Lab 02 · step 4 · the bridge</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Span attribute → <em>Prometheus label</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.68em; max-width:88%; margin:0 auto 0.2em auto;">
+        This single rename is why you can write <code>by (gen_ai_agent_name)</code> in PromQL and <code>by attributes.gen_ai.agent.name</code> in PPL and mean the same thing.
+      </p>
+      <table class="matrix">
+        <thead><tr><th>On the span (OTel)</th><th>In Prometheus</th><th>Why the rename</th></tr></thead>
+        <tbody>
+          <tr><td class="feat"><code>gen_ai.agent.name</code></td><td><code>gen_ai_agent_name</code></td><td>Dots are illegal in Prometheus label names, so the exporter maps them to underscores.</td></tr>
+          <tr><td class="feat"><code>gen_ai.request.model</code></td><td><code>gen_ai_request_model</code></td><td>Same rule. This is a convention, not an OpenSearch choice.</td></tr>
+          <tr><td class="feat"><code>service.name</code> (resource)</td><td><code>service_name</code></td><td>Only present because <code>resource_to_telemetry_conversion</code> is enabled.</td></tr>
+          <tr><td class="feat"><code>gen_ai.conversation.id</code></td><td><em>deliberately not promoted</em></td><td>Unbounded cardinality. It belongs on a span, never on a time series.</td></tr>
+        </tbody>
+      </table>
+      <div class="escape" style="margin-top:0.8em;">
+        <div class="esc-head">The trap Wolfgang will make you look at</div>
+        <p>Promoting one high-cardinality attribute to a label is how a Prometheus instance falls over. <code>agent name</code> and <code>model</code> are bounded — tens of values. <code>conversation id</code>, <code>user id</code>, <code>order id</code> and <code>tool arguments</code> are not. Put those on spans, where unbounded cardinality is the storage engine's entire job.</p>
+      </div>
+    </section>
+
+    <!-- ============ 27 · METRICS THROUGH PROMETHEUS ============ -->
+    <section>
+      <div class="lab-chip">Lab 02 · step 5 · the metrics side</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">The GenAI metric families, for free.</h2>
+      <div class="term"><span class="p">$</span> curl -s localhost:9090/api/v1/label/__name__/values | jq -r <span class="str">'.data[]'</span> | grep gen_ai
+
+<span class="ok">gen_ai_client_operation_duration_bucket</span>
+<span class="ok">gen_ai_client_operation_duration_count</span>
+<span class="ok">gen_ai_client_operation_duration_sum</span>
+<span class="ok">gen_ai_client_token_usage_bucket</span>
+<span class="ok">gen_ai_client_token_usage_count</span>
+<span class="ok">gen_ai_client_token_usage_sum</span></div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:88%; margin:0.7em auto 0 auto;">
+        You did not define these. They are OpenTelemetry GenAI metric conventions, emitted by the same instrumentors that produced your spans, aggregated by Prometheus. <strong>No bespoke metric names, which means no dashboard rewrite when you swap frameworks.</strong>
+      </p>
+      <div class="checkpoint">
+        <div class="cp-head">Green sticky when</div>
+        <ul>
+          <li><code>_cat/indices/otel-v1-*</code> shows both <code>otel-v1-apm-span-*</code> and <code>otel-v1-apm-service-map</code> with non-zero counts.</li>
+          <li>The <code>gen_ai_*</code> families are present in Prometheus.</li>
+          <li>You can say, out loud, which of the three Data Prepper pipelines produced which index.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ LAB 03 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Lab 03 —</div>
+      <h2>Agents are <em>services too</em>.</h2>
+      <p class="pillar-sub">Same map, same RED catalogue, same SLOs as everything else you run. The interesting part is not that it works — it is that <strong>nobody configured it</strong>.</p>
+      <div class="pillar-clock">11:25 → 11:37 · 12 min</div>
+      <span class="pillar-driver">driving · Wolfgang</span>
+    </section>
+
+    <!-- ============ 29 · APPLICATION MAP ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Lab 03 · step 1 · Application Map</div>
+      <h3>Your agent, as a node</h3>
+      <div class="feature-sub"><code>weather-agent</code> (7 requests) and <code>events-agent</code> (8) both calling <code>mcp-server</code> (28) — in the same graph as the e-commerce services. <em>Topology out of OpenSearch, RED metrics out of Prometheus, one view.</em></div>
+      <div class="feature-shot">
+        <img src="assets/crop-appmap-tight.png" class="wide" alt="Application map showing weather-agent and events-agent calling mcp-server">
+        <div class="shot-caption">Observability Stack → Application Map</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.6em; margin-top:0.5em; max-width:82%;">
+        In your own stack you will see <code>acme-support-agent</code> plus whatever your model client resolves to. Fewer nodes, same shape. Click one — the side panel gives you its RED numbers and a <strong>View traces</strong> link.
+      </p>
+    </section>
+
+    <!-- ============ 30 · SERVICES CATALOGUE ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Lab 03 · step 2 · Services</div>
+      <h3>One flat catalogue, RED per row</h3>
+      <div class="feature-sub">P99 latency, throughput and failure ratio for every service — <em>agents in the same table, same columns, no special case</em>. Here <code>checkout</code> is the outlier at 95 ms P99 with a <strong>16.4% failure rate</strong>, while <code>events-agent</code> sits at 248 ms. This is the triage entry point.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-services-catalog.png" alt="Service catalogue with RED metrics per service">
+        <div class="shot-caption">Observability Stack → Services</div>
+      </div>
+    </section>
+
+    <!-- ============ 31 · PROMQL RED ============ -->
+    <section>
+      <div class="lab-chip">Lab 03 · step 3 · RED in native PromQL</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Rate. Errors. Duration. <em>Per agent.</em></h2>
+      <pre class="code-block nowrap"><span class="com"># rate — invocations per second, per agent</span>
+<span class="kw">record</span>: acme:agent_requests:rate5m
+<span class="kw">expr</span>:   <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_count[<span class="num">5m</span>])) <span class="kw">by</span> (gen_ai_agent_name)
+
+<span class="com"># errors — error ratio, per agent</span>
+<span class="kw">record</span>: acme:agent_errors:ratio5m
+<span class="kw">expr</span>:   <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_count{error_type!=<span class="str">""</span>}[<span class="num">5m</span>]))
+        <span class="kw">by</span> (gen_ai_agent_name)
+      / <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_count[<span class="num">5m</span>]))
+        <span class="kw">by</span> (gen_ai_agent_name)
+
+<span class="com"># duration — p95 latency, per agent</span>
+<span class="kw">record</span>: acme:agent_latency:p95_5m
+<span class="kw">expr</span>:   <span class="fn">histogram_quantile</span>(<span class="num">0.95</span>,
+          <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_operation_duration_bucket[<span class="num">5m</span>])) <span class="kw">by</span> (le, gen_ai_agent_name))
+
+<span class="com"># and the one RED never had — cost, per agent, per model</span>
+<span class="kw">record</span>: acme:agent_output_tokens:rate5m
+<span class="kw">expr</span>:   <span class="fn">sum</span>(<span class="fn">rate</span>(gen_ai_client_token_usage_sum{gen_ai_token_type=<span class="str">"output"</span>}[<span class="num">5m</span>]))
+        <span class="kw">by</span> (gen_ai_agent_name, gen_ai_request_model)</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.6em; max-width:86%; margin:0.6em auto 0 auto;">
+        Two more rules make these page: p95 over 4 s for 5 minutes, error ratio over 5% for 10 minutes. Paste them in at <code>localhost:9090</code> and watch them evaluate against your own traffic.
+      </p>
+    </section>
+
+    <!-- ============ 32 · FOUR HOPS ============ -->
+    <section>
+      <div class="lab-chip">Lab 03 · step 4 · the path you actually walk</div>
+      <h2 style="text-align:center; margin-bottom:0.35em; font-size:1.35em;">Alert to root cause, in <em>four hops</em>.</h2>
+      <div class="walk-grid">
+        <div class="walk-step s1">
+          <div class="ws-num">01</div>
+          <div class="ws-eyebrow">Symptom</div>
+          <div class="ws-title">A burn-rate alert fires</div>
+          <div class="ws-desc">Multi-window burn rate on the agent's availability SLO. The alert name carries the SLO, the tier and the window pair — blast radius before you click.</div>
+        </div>
+        <div class="walk-step s2">
+          <div class="ws-num">02</div>
+          <div class="ws-eyebrow">Narrow</div>
+          <div class="ws-title">Services → the failing edge</div>
+          <div class="ws-desc">The catalogue nominates the service by fault rate. The dependency view separates <strong>errors</strong> (the caller's) from <strong>faults</strong> (the callee's).</div>
+        </div>
+        <div class="walk-step s3">
+          <div class="ws-num">03</div>
+          <div class="ws-eyebrow">Drill</div>
+          <div class="ws-title">View traces → the span</div>
+          <div class="ws-desc">One click into Agent Traces, pre-filtered to that service and window. The tree shows the tool span that failed — and the retries nobody surfaced.</div>
+        </div>
+        <div class="walk-step s4">
+          <div class="ws-num">04</div>
+          <div class="ws-eyebrow">Confirm</div>
+          <div class="ws-title">Logs on the same trace ID</div>
+          <div class="ws-desc">The span detail has a Logs tab: application log lines matched by trace ID. You wrote no query to get here.</div>
+        </div>
+      </div>
+      <div class="checkpoint">
+        <div class="cp-head">Green sticky when</div>
+        <ul>
+          <li><code>acme-support-agent</code> is on the Application Map and in the Services catalogue, and <strong>View traces</strong> lands you on a filtered trace list.</li>
+          <li>One <code>acme:</code> recording rule returns data in Prometheus.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 33 · SCALE ASIDE (Wolfgang) ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">A word from someone who runs this at scale</div>
+      <h2 style="text-align:center; margin-bottom:0.25em; font-size:1.35em;">What changes at <em>a hundred agents</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.64em; max-width:90%; margin:0 auto;">
+        Six containers on a laptop hide three problems that arrive the moment this is real. All three are <strong>Collector-side</strong> decisions — one config, not a hundred agent redeploys.
+      </p>
+      <div class="mode-grid">
+        <div class="mode-card m1">
+          <div class="mode-num">01</div>
+          <div class="mode-eyebrow">Volume</div>
+          <div class="mode-title">22 spans per turn is a multiplier</div>
+          <div class="mode-desc">A request that was one span is now twenty. Sample at the <em>trace</em> level, never the span level — a half-sampled chain reads as a complete one that made no sense.</div>
+          <span class="mode-role">knob → tail sampling</span>
+        </div>
+        <div class="mode-card m2">
+          <div class="mode-num">02</div>
+          <div class="mode-eyebrow">Cardinality</div>
+          <div class="mode-title">Labels are a budget, not a feature</div>
+          <div class="mode-desc">Every promoted attribute multiplies series. Bound the set deliberately — agent, model, operation, service. User, session and order IDs stay on the span.</div>
+          <span class="mode-role">knob → label allowlist</span>
+        </div>
+        <div class="mode-card m3">
+          <div class="mode-num">03</div>
+          <div class="mode-eyebrow">Content</div>
+          <div class="mode-title">Prompts are payloads</div>
+          <div class="mode-desc">Tool arguments and model output are the fields most likely to carry customer data. Decide capture policy <em>before</em> you turn it on.</div>
+          <span class="mode-role">knob → redaction processor</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LAB 04 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Lab 04 —</div>
+      <h2>Reconstruct the <em>reasoning</em>.</h2>
+      <p class="pillar-sub">The third pipe. Four PPL queries that answer questions nobody instrumented for — because the semantic convention already put the fields where you need them.</p>
+      <div class="pillar-clock">11:37 → 11:52 · 15 min</div>
+      <span class="pillar-driver">driving · Ani</span>
+    </section>
+
+    <!-- ============ 35 · PPL ANATOMY ============ -->
+    <section>
+      <div class="lab-chip">Lab 04 · step 0 · the shape of every query</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Four verbs. <em>That is the language.</em></h2>
+      <pre class="code-block"><span class="kw">source</span> = otel-v1-apm-span-*        <span class="com">// where to read</span>
+| <span class="kw">where</span>  …                          <span class="com">// narrow</span>
+| <span class="kw">stats</span>  … <span class="kw">by</span> …                     <span class="com">// aggregate</span>
+| <span class="kw">sort</span>   - …                        <span class="com">// order</span></pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:86%; margin:0.8em auto 0 auto;">
+        If you have written a shell pipeline you already know this. The reason it matters here: <strong>agent questions are ad hoc by nature.</strong> You will not have a dashboard for "did any trace call the same tool more than three times" until the day you need it, and then you need the answer in thirty seconds.
+      </p>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.62em; max-width:86%; margin:0.6em auto 0 auto;">
+        Run these in <strong>Observability Stack → Logs</strong>, or on the Agent Traces page. Both give you the same editor over the same index.
+      </p>
+    </section>
+
+    <!-- ============ 36 · QUERY 1 · TRAJECTORY ============ -->
+    <section>
+      <div class="lab-chip">Lab 04 · query 1 of 4</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Replay one turn's <em>trajectory</em>.</h2>
+      <pre class="code-block sm"><span class="kw">source</span> = otel-v1-apm-span-*
+| <span class="kw">where</span> traceId = <span class="str">'c30d4f1…'</span>
+| <span class="kw">fields</span> startTime, attributes.gen_ai.operation.name,
+         attributes.gen_ai.tool.name,
+         attributes.gen_ai.usage.output_tokens, durationInNanos
+| <span class="kw">sort</span> startTime</pre>
+      <div class="term sm" style="margin-top:0.6em;">startTime      operation       tool           out_tok     ms
+10:58:14.201   invoke_agent    <span class="dim">—</span>                    <span class="dim">—</span>   3870
+10:58:14.310   chat            <span class="dim">—</span>                  420    640
+10:58:14.955   execute_tool    lookup_order         <span class="dim">—</span>     12
+10:58:14.970   chat            <span class="dim">—</span>                  380    590
+10:58:15.565   execute_tool    lookup_order         <span class="dim">—</span>     11
+10:58:15.580   chat            <span class="dim">—</span>                  395    610
+10:58:16.195   execute_tool    lookup_order         <span class="dim">—</span>     11
+10:58:16.210   chat            <span class="dim">—</span>                  410    620
+10:58:16.835   execute_tool    lookup_order         <span class="dim">—</span>     13
+10:58:16.850   chat            <span class="dim">—</span>                 <span class="bad">1240</span>    980</div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:86%; margin:0.7em auto 0 auto;">
+        <strong>The same tool, four times, 12 ms each — and five model calls around them.</strong> The tool was never slow. The agent would not accept the answer. That is a prompt bug, and no latency dashboard points at it.
+      </p>
+    </section>
+
+    <!-- ============ 37 · QUERY 2 · TOKENS ============ -->
+    <section>
+      <div class="lab-chip">Lab 04 · query 2 of 4</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Where the <em>money</em> goes.</h2>
+      <pre class="code-block sm"><span class="com">// token spend by agent and model</span>
+<span class="kw">source</span> = otel-v1-apm-span-*
+| <span class="kw">where</span> <span class="kw">isnotnull</span>(attributes.gen_ai.request.model)
+| <span class="kw">stats</span> <span class="fn">sum</span>(attributes.gen_ai.usage.input_tokens)  <span class="kw">as</span> in_tokens,
+        <span class="fn">sum</span>(attributes.gen_ai.usage.output_tokens) <span class="kw">as</span> out_tokens,
+        <span class="fn">count</span>()                                     <span class="kw">as</span> calls
+  <span class="kw">by</span> attributes.gen_ai.agent.name, attributes.gen_ai.request.model
+| <span class="kw">sort</span> - out_tokens</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:86%; margin:0.8em auto 0 auto;">
+        <code>isnotnull</code> on the model field is doing real work — it is what selects <strong>only the model-call spans</strong> out of the 22. Tool and agent spans have no token usage, and summing over them would silently divide your averages by ten.
+      </p>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.6em; max-width:88%; margin:0.5em auto 0 auto;">
+        Same question on the metrics side: <code>sum(rate(gen_ai_client_token_usage_sum{gen_ai_token_type="output"}[5m])) by (gen_ai_request_model)</code>. PPL finds <em>which trace</em>; PromQL watches the trend.
+      </p>
+    </section>
+
+    <!-- ============ 38 · QUERY 3 · TOOL FAILURES ============ -->
+    <section>
+      <div class="lab-chip">Lab 04 · query 3 of 4</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Which tool is <em>letting you down</em>.</h2>
+      <pre class="code-block sm"><span class="com">// failure rate per tool — the number no service dashboard has</span>
+<span class="kw">source</span> = otel-v1-apm-span-*
+| <span class="kw">where</span> attributes.gen_ai.operation.name = <span class="str">'execute_tool'</span>
+| <span class="kw">eval</span> failed = <span class="kw">if</span>(status.code = <span class="num">2</span>, <span class="num">1</span>, <span class="num">0</span>)
+| <span class="kw">stats</span> <span class="fn">count</span>()      <span class="kw">as</span> calls,
+        <span class="fn">sum</span>(failed) <span class="kw">as</span> failures,
+        <span class="fn">avg</span>(durationInNanos) / <span class="num">1000000</span> <span class="kw">as</span> avg_ms
+  <span class="kw">by</span> attributes.gen_ai.tool.name
+| <span class="kw">eval</span> failure_pct = <span class="fn">round</span>(failures * <span class="num">100.0</span> / calls, <span class="num">1</span>)
+| <span class="kw">sort</span> - failure_pct</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:88%; margin:0.8em auto 0 auto;">
+        A tool that fails 30% of the time is not necessarily broken — it may be getting bad arguments from the model. <code>gen_ai.tool.call.arguments</code> is on the same span, so the next query writes itself: filter to the failures and read what the agent actually passed.
+      </p>
+    </section>
+
+    <!-- ============ 39 · QUERY 4 · LOOP DETECTOR ============ -->
+    <section>
+      <div class="lab-chip">Lab 04 · query 4 of 4</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">The <em>loop detector</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.66em; max-width:86%; margin:0 auto 0.2em auto;">
+        Fourteen lines of PPL that catch the failure mode that costs the most and alerts the least.
+      </p>
+      <pre class="code-block sm"><span class="com">// traces where the agent kept re-planning</span>
+<span class="kw">source</span> = otel-v1-apm-span-*
+| <span class="kw">where</span> attributes.gen_ai.operation.name = <span class="str">'chat'</span>
+| <span class="kw">stats</span> <span class="fn">count</span>() <span class="kw">as</span> chat_steps,
+        <span class="fn">sum</span>(attributes.gen_ai.usage.output_tokens) <span class="kw">as</span> out_tokens
+  <span class="kw">by</span> traceId
+| <span class="kw">where</span> chat_steps &gt; <span class="num">3</span>
+| <span class="kw">sort</span> - chat_steps</pre>
+      <div class="term sm" style="margin-top:0.6em;">traceId      chat_steps   out_tokens
+<span class="bad">c30d4f1…</span>              <span class="bad">5</span>        <span class="bad">2845</span>
+8b71ee0…              2         740
+4f2c9ab…              1         420</div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:88%; margin:0.7em auto 0 auto;">
+        Your specimen trace is at the top. <strong>Five model calls and 2,845 output tokens to fail at answering one question</strong> — roughly four times the cost of the two that succeeded. Save this query. It is the cheapest agent alert you will ever write.
+      </p>
+    </section>
+
+    <!-- ============ 40 · YOUR TURN ============ -->
+    <section>
+      <div class="lab-chip">Lab 04 · your turn · 5 minutes</div>
+      <h2 style="text-align:center; margin-bottom:0.25em; font-size:1.35em;">Write one. <em>Pick any.</em></h2>
+      <div class="two-col">
+        <div>
+          <h3>Starters, easiest first</h3>
+          <ul>
+            <li>Which <strong>session</strong> spent the most tokens? <span style="color:var(--os-blue-soft);">(group by <code>gen_ai.conversation.id</code>)</span></li>
+            <li>What is the <strong>P99</strong> of <code>execute_tool</code> spans, per tool?</li>
+            <li>How many traces called <strong>zero</strong> tools? <span style="color:var(--os-blue-soft);">(a pure-model answer)</span></li>
+            <li>Of the failed tool calls, <strong>what arguments</strong> did the model pass?</li>
+            <li>Which model gives the most <strong>output tokens per call</strong> — and is that better or worse?</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Three things that will trip you</h3>
+          <p><strong>Field names keep their dots in PPL.</strong> <code>attributes.gen_ai.usage.output_tokens</code>, not underscores. The underscore form is the Prometheus side.</p>
+          <p><strong>Duration is <code>durationInNanos</code>.</strong> Divide by 1,000,000 in an <code>eval</code> so the column header stays readable.</p>
+          <p><strong>Status code 2 means error</strong> in OTel, not 500. <code>status.code = 2</code> is your failure predicate.</p>
+        </div>
+      </div>
+      <div class="checkpoint" style="margin-top:0.5em;">
+        <div class="cp-head">Green sticky when</div>
+        <ul>
+          <li>You ran the loop detector and your worst trace came back at the top.</li>
+          <li>You wrote one query of your own that returned rows. Any query. Wrong answers count — a syntax error does not.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ LAB 05 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Lab 05 —</div>
+      <h2>Grade the <em>trajectory</em>.</h2>
+      <p class="pillar-sub">Observability tells you what happened. Evaluation tells you whether it was any good. <strong>Same spans, same pipeline, same interface</strong> — a score is just another attribute.</p>
+      <div class="pillar-clock">11:52 → 12:08 · 16 min</div>
+      <span class="pillar-driver">driving · Ani</span>
+    </section>
+
+    <!-- ============ 42 · 200 OK IS NOT A GRADE ============ -->
+    <section class="blind">
+      <div class="megaline"><em>200 OK</em> is not<br>a grade.</div>
+      <p class="sub">Your specimen trace returned 200. It also called the same tool four times, ignored <code>order_not_found</code>, invented a delivery date, and cost four times as much as a correct answer. <strong>Every SLO you own says that request was fine.</strong></p>
+    </section>
+
+    <!-- ============ 43 · GOLDEN PATH ============ -->
+    <section>
+      <div class="lab-chip">Lab 05 · step 1 · define the golden path</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">What <em>should</em> have happened.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.66em; max-width:88%; margin:0 auto 0.2em auto;">
+        <code>evals/dataset.py</code> — a golden path is not an expected string. It is the <strong>expected sequence of decisions</strong>, plus a budget.
+      </p>
+      <pre class="code-block sm">CASES = [
+    {
+        <span class="str">"id"</span>:             <span class="str">"order-missing"</span>,
+        <span class="str">"question"</span>:       <span class="str">"where is order A-9999?"</span>,
+        <span class="str">"golden_tools"</span>:   [<span class="str">"lookup_order"</span>],          <span class="com"># once. not four times.</span>
+        <span class="str">"must_contain"</span>:   [<span class="str">"could not find"</span>, <span class="str">"check the order number"</span>],
+        <span class="str">"must_not_contain"</span>:[<span class="str">"shipped"</span>, <span class="str">"arrive"</span>, <span class="str">"delivery"</span>],  <span class="com"># no invented facts</span>
+        <span class="str">"max_chat_steps"</span>: <span class="num">2</span>,
+        <span class="str">"max_output_tokens"</span>: <span class="num">600</span>,
+    },
+    ...
+]</pre>
+      <div class="key" style="margin-top:0.6em;">
+        <strong>Four criteria, four different kinds of wrong.</strong> <code>golden_tools</code> catches bad tool selection. <code>must_not_contain</code> catches confabulation. <code>max_chat_steps</code> catches looping. <code>max_output_tokens</code> catches the cost regression that nobody notices until the invoice.
+      </div>
+    </section>
+
+    <!-- ============ 44 · SCORE IT ============ -->
+    <section>
+      <div class="lab-chip">Lab 05 · step 2 · score, in the same trace</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">A score is <em>another span attribute</em>.</h2>
+      <pre class="code-block sm"><span class="kw">from</span> opensearch_genai_observability_sdk_py <span class="kw">import</span> observe, score, Op
+
+<span class="kw">@</span><span class="fn">observe</span>(op=Op.INVOKE_AGENT, name=<span class="str">"acme-support-agent"</span>)
+<span class="kw">def</span> <span class="fn">run_case</span>(case: dict) -&gt; str:
+    answer = handle_support_question(case[<span class="str">"question"</span>])
+    trace  = collect_trace()                 <span class="com"># spans from this run</span>
+
+    score(name=<span class="str">"tool_path_match"</span>,  value=path_match(trace, case[<span class="str">"golden_tools"</span>]))
+    score(name=<span class="str">"no_confabulation"</span>, value=absent(answer, case[<span class="str">"must_not_contain"</span>]))
+    score(name=<span class="str">"step_budget"</span>,      value=chat_steps(trace) &lt;= case[<span class="str">"max_chat_steps"</span>])
+    <span class="kw">return</span> answer</pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:88%; margin:0.8em auto 0 auto;">
+        The scores ride the <strong>same OTLP pipeline</strong> from Lab 02 and land on the <strong>same spans</strong> from Lab 04. No second datastore, no eval warehouse, no CSV export — so "why did this case fail?" and "what did the agent do?" are one click apart, not one team apart.
+      </p>
+      <div class="escape">
+        <div class="esc-head">Name it correctly, it will save you an argument</div>
+        <p><strong>Agent Evals</strong> is the SDK side — <code>score()</code>, <code>evaluate()</code>, <code>Benchmark</code> — and <code>score(value=…)</code> is an unbounded float, so there is <strong>no pass/fail primitive</strong> here. <strong>Agent Health</strong> is a separate product on <code>localhost:4001</code>; pass/fail and accuracy are its. Two products, not a rename.</p>
+      </div>
+    </section>
+
+    <!-- ============ 45 · TEST CASE VIEW ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Lab 05 · step 3 · Agent Health</div>
+      <h3>Pass, fail, and how close it got</h3>
+      <div class="feature-sub"><code>npx @opensearch-project/agent-health@latest</code> → <code>localhost:4001</code>. Per-case criteria with a judge verdict on each — <em>the UI calls a case a "Use Case" and a run a "Benchmark", so match whichever surface is on your screen.</em></div>
+      <div class="feature-shot">
+        <img src="assets/crop-testcase.png" class="tall" alt="Agent Health test case view with per-criterion pass and fail verdicts">
+        <div class="shot-caption">Agent Health → Use Case → criteria</div>
+      </div>
+      <p style="color:#c8d2eb; font-size:0.58em; margin-top:0.4em; max-width:86%;">
+        The judge runs on AWS Bedrock. No Bedrock access? The deterministic criteria — tool path, step budget, substring checks — still fail your specimen case, which is all Lab 06 needs.
+      </p>
+    </section>
+
+    <!-- ============ 46 · BENCHMARKS ============ -->
+    <section class="feature-slide">
+      <div class="feature-eyebrow">Lab 05 · step 4 · five runs, one table</div>
+      <h3>Quality and cost move together</h3>
+      <div class="feature-sub">Same agent, same dataset, five configurations on <code>claude-sonnet-4.5</code>. Pass rate falls <em>71% → 29%</em> as cost falls <em>$65.71 → $17.78</em>. <em>The best run is also the most expensive one</em> — which is exactly why these columns belong in one table and not in two teams' dashboards.</div>
+      <div class="feature-shot">
+        <img src="assets/crop-benchmarks.png" alt="Benchmark comparison table across five runs with pass rate, accuracy, tokens and cost">
+        <div class="shot-caption">Agent Health → Benchmarks</div>
+      </div>
+    </section>
+
+    <!-- ============ 47 · CHECKPOINT 5 ============ -->
+    <section>
+      <div class="lab-chip">Lab 05 · checkpoint</div>
+      <h2 style="text-align:center; margin-bottom:0.25em; font-size:1.35em;">The failure is now a <em>number</em>.</h2>
+      <div class="term"><span class="p">$</span> python -m evals.run --dataset evals/dataset.py
+
+<span class="ok">✔</span> order-lookup        tool_path_match <span class="ok">1.0</span>   no_confabulation <span class="ok">1.0</span>   step_budget <span class="ok">1.0</span>
+<span class="ok">✔</span> return-policy       tool_path_match <span class="ok">1.0</span>   no_confabulation <span class="ok">1.0</span>   step_budget <span class="ok">1.0</span>
+<span class="bad">✘</span> order-missing       tool_path_match <span class="bad">0.25</span>  no_confabulation <span class="bad">0.0</span>   step_budget <span class="bad">0.0</span>
+<span class="ok">✔</span> inventory-check     tool_path_match <span class="ok">1.0</span>   no_confabulation <span class="ok">1.0</span>   step_budget <span class="ok">1.0</span>
+
+  4 cases <span class="dim">·</span> <span class="ok">3 passed</span> <span class="dim">·</span> <span class="bad">1 failed</span> <span class="dim">·</span> scores emitted as spans <span class="dim">·</span> trace 1a77c9b…</div>
+      <div class="checkpoint">
+        <div class="cp-head">Green sticky when</div>
+        <ul>
+          <li><code>order-missing</code> fails, and the other three pass.</li>
+          <li>You can open the eval run in Agent Traces and see the <code>score</code> attributes on the spans.</li>
+          <li><code>tool_path_match</code> is <code>0.25</code> and you can say why — one expected call, four actual.</li>
+        </ul>
+      </div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.62em; max-width:86%; margin:0.7em auto 0 auto;">
+        That <code>0.25</code> is the whole workshop in one number. Twenty minutes ago this was a 200 OK.
+      </p>
+    </section>
+
+    <!-- ============ LAB 06 DIVIDER ============ -->
+    <section class="pillar">
+      <div class="pillar-num">— Lab 06 —</div>
+      <h2>Close the <em>loop</em>.</h2>
+      <p class="pillar-sub">The reason all of this shares one pipeline: a bad trace in production should become a test case <strong>without anyone rewriting it by hand</strong>.</p>
+      <div class="pillar-clock">12:08 → 12:16 · 8 min</div>
+      <span class="pillar-driver">driving · Ani</span>
+    </section>
+
+    <!-- ============ 49 · THE LOOP ============ -->
+    <section>
+      <div class="lab-chip">Lab 06 · the mechanism</div>
+      <h2 style="text-align:center; margin-bottom:0.25em; font-size:1.35em;">Production trace → <em>regression test</em>.</h2>
+      <div class="loop-diagram">
+        <div class="loop-step l1">
+          <div class="ls-eyebrow">Observe</div>
+          <div class="ls-title">A trace looks wrong</div>
+          <div class="ls-sub">Found by the loop detector, a burn-rate alert, or a support ticket with a trace ID on it.</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l2">
+          <div class="ls-eyebrow">Promote</div>
+          <div class="ls-title">Trace becomes a case</div>
+          <div class="ls-sub">The question comes off the root span; the correct tool path comes from you.</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l3">
+          <div class="ls-eyebrow">Grade</div>
+          <div class="ls-title">It fails, loudly</div>
+          <div class="ls-sub">A failing case is a bug with a number on it — and the fix now has an acceptance test.</div>
+        </div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step l4">
+          <div class="ls-eyebrow">Gate</div>
+          <div class="ls-title">CI keeps it fixed</div>
+          <div class="ls-sub">The dataset runs on every change. The regression you shipped once cannot ship twice.</div>
+        </div>
+      </div>
+      <div class="term" style="margin-top:1em;"><span class="p">$</span> python -m evals.promote --trace c30d4f1… --id order-missing-regression
+<span class="ok">✔</span> question       <span class="dim">←</span> root span gen_ai.input.messages
+<span class="ok">✔</span> observed_tools <span class="dim">←</span> [lookup_order ×4]
+<span class="warn">…</span> golden_tools   <span class="dim">←</span> you decide: [lookup_order]
+<span class="ok">✔</span> wrote evals/dataset.py  <span class="dim">(+1 case, now 5)</span></div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.6em; max-width:88%; margin:0.7em auto 0 auto;">
+        The one field a machine cannot fill is <code>golden_tools</code> — correct behaviour is a product decision. Everything else is already on the span. That is the payoff for Lab 01.
+      </p>
+    </section>
+
+    <!-- ============ 50 · CI GATE ============ -->
+    <section>
+      <div class="lab-chip">Lab 06 · where it lives</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Twelve lines of CI. <em>That is the gate.</em></h2>
+      <pre class="code-block sm"><span class="com"># .github/workflows/evals.yml</span>
+<span class="attr">on</span>: { <span class="attr">pull_request</span>: { <span class="attr">paths</span>: [<span class="str">"agent/**"</span>, <span class="str">"prompts/**"</span>, <span class="str">"evals/**"</span>] }
+<span class="attr">jobs</span>:
+  <span class="attr">evals</span>:
+    <span class="attr">runs-on</span>: ubuntu-latest
+    <span class="attr">steps</span>:
+      - <span class="attr">uses</span>: actions/checkout@v4
+      - <span class="attr">run</span>: pip install -e <span class="str">".[evals]"</span>
+      - <span class="attr">run</span>: python -m evals.run --dataset evals/dataset.py --fail-under <span class="num">0.9</span>
+        <span class="attr">env</span>:
+          <span class="attr">OTEL_EXPORTER_OTLP_TRACES_ENDPOINT</span>: <span class="str">${{ secrets.OTLP_ENDPOINT }}</span></pre>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.64em; max-width:88%; margin:0.8em auto 0 auto;">
+        Note the <code>paths</code> filter: <strong>prompt changes trigger the eval suite.</strong> Most teams gate code and wave prompts through on a text diff — which is how the 82%-to-64% regression ships.
+      </p>
+      <div class="checkpoint">
+        <div class="cp-head">Green sticky when</div>
+        <ul>
+          <li>Your dataset has five cases and the promoted one fails.</li>
+          <li><span style="color:var(--os-blue-soft);">Bonus, if the clock allows:</span> you fixed it — a prompt line telling the agent to trust <code>order_not_found</code> — and re-ran green.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 51 · RECAP ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">Six things you take back</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">From pipe dream to pipeline.</h2>
+      <div class="takeaways">
+        <ol>
+          <li><strong>Agents fail quietly.</strong> Rate, errors and duration will not show you a confabulation, a quality regression, or a doubled token bill. Span-level GenAI telemetry will.</li>
+          <li><strong>One vocabulary buys everything downstream.</strong> Emit OTel spans with <code>gen_ai.*</code> attributes and the trace tree, the service map, the PPL queries and the evals all work — no vendor agent, no schema translation.</li>
+          <li><strong>Instrumentation is two lines.</strong> <code>register()</code> plus <code>@observe</code>. The agent body you brought in the door is the agent body you leave with.</li>
+          <li><strong>The pipeline is the unglamorous half, and where the leverage is.</strong> Sampling, cardinality and redaction are all decided in the Collector — once, not per agent.</li>
+          <li><strong>PPL answers the questions you did not plan for.</strong> Four verbs, and the loop detector that finds your most expensive failure is seven lines.</li>
+          <li><strong>Grade the trajectory, not the status code.</strong> Golden paths turn "it returned 200" into "it did the right thing, for the right cost".</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 52 · NAMING CARD ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">So you can search the docs tonight without getting lost</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">Call things by their <em>real</em> names.</h2>
+      <table class="matrix">
+        <thead><tr><th>Say this</th><th>It is</th><th>Not to be confused with</th></tr></thead>
+        <tbody>
+          <tr><td class="feat">Agent Traces</td><td>The plugin and the page you used in Labs 01–04</td><td>"Agent Tracing" — only a sidebar label</td></tr>
+          <tr><td class="feat">Agent Evals</td><td>The SDK: <code>score()</code>, <code>evaluate()</code>, <code>Benchmark</code>. Scoring is Python-side.</td><td>Agent Health — a separate product, own repo, own UI on <code>:4001</code></td></tr>
+          <tr><td class="feat">Agent Health</td><td>Where Pass/Fail and the 0–100% accuracy figure live. Judge runs on AWS Bedrock.</td><td>Agent Evals — which has no pass/fail primitive at all</td></tr>
+          <tr><td class="feat">Application Map</td><td>The UI label for the topology view</td><td>the doc slug is <code>/docs/apm/service-map/</code> — both are live</td></tr>
+          <tr><td class="feat">OpenSearch Dashboards / OpenSearch UI</td><td>OSS surface / the Amazon OpenSearch Service surface</td><td>using them interchangeably</td></tr>
+          <tr><td class="feat">"one interface, two stores"</td><td>What actually happens: per-signal routing, correlated on trace ID and service name</td><td>"federated queries" — nothing joins a Prometheus series to an OpenSearch doc in one query</td></tr>
+        </tbody>
+      </table>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.58em; margin-top:0.5em;">
+        Four third-party eval libraries are documented: <strong>DeepEval, RAGAS, MLflow, pytest</strong>.
+      </p>
+    </section>
+
+    <!-- ============ 53 · TO PRODUCTION ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">What changes when you leave the laptop</div>
+      <h2 style="text-align:center; margin-bottom:0.2em; font-size:1.35em;">The same stack, <em>managed</em>.</h2>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.68em; max-width:88%; margin:0 auto;">
+        Your agent code does not change. The endpoint and the auth do. Everything you learned in the last ninety minutes transfers verbatim.
+      </p>
+      <div class="reveal-grid g4">
+        <div class="reveal-card" style="border-top-color: var(--os-blue-soft);">
+          <div class="rc-eyebrow" style="color: var(--os-blue-soft);">Traces · Logs</div>
+          <div class="rc-title">Amazon OpenSearch Service</div>
+          <div class="rc-desc">Your <code>otel-v1-apm-*</code> indices, the derived service map, and the same PPL. Serverless is supported.</div>
+          <span class="rc-tag">was → container</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--prom-orange);">
+          <div class="rc-eyebrow" style="color: var(--prom-orange);">Metrics</div>
+          <div class="rc-title">Amazon Managed Service for Prometheus</div>
+          <div class="rc-desc">Your recording rules and burn-rate alerts. Registered as a Prometheus data source with SigV4.</div>
+          <span class="rc-tag">was → prometheus</span>
+        </div>
+        <div class="reveal-card">
+          <div class="rc-eyebrow">Pipeline</div>
+          <div class="rc-title">Amazon OpenSearch Ingestion</div>
+          <div class="rc-desc">The managed OTLP path — it takes the place of the Collector and Data Prepper containers you ran in Lab 02.</div>
+          <span class="rc-tag">was → two containers</span>
+        </div>
+        <div class="reveal-card" style="border-top-color: var(--agent-purple);">
+          <div class="rc-eyebrow" style="color: var(--agent-purple);">One interface</div>
+          <div class="rc-title">OpenSearch UI</div>
+          <div class="rc-desc">Agent Traces, Application Map, Services, SLOs, Unified Alerts — the pages you used today.</div>
+          <span class="rc-tag">was → :5601</span>
+        </div>
+      </div>
+      <div class="try-cmd" style="margin-top:0.7em;"><span class="p">$</span>npx @opensearch-project/observability-stack<span style="color:rgba(255,255,255,0.4);">   # or CDK · ~15 min · VPC optional · --serverless</span></div>
+      <p style="text-align:center; color:#c8d2eb; font-size:0.58em; max-width:88%; margin:0.45em auto 0 auto;">
+        Underneath, still nothing proprietary: <strong>Prometheus</strong>, <strong>OpenSearch</strong>, <strong>OpenTelemetry</strong>. Apache 2.0, under the OpenSearch Software Foundation.
+      </p>
+    </section>
+
+    <!-- ============ 54 · TAKE IT FURTHER ============ -->
+    <section>
+      <div class="eyebrow eyebrow-c">If today was fun, these are the next three evenings</div>
+      <h2 style="text-align:center; margin-bottom:0.3em; font-size:1.35em;">Homework, in increasing order of ambition.</h2>
+      <div class="three-col">
+        <div>
+          <h3>Tonight</h3>
+          <ul>
+            <li>Point <code>register()</code> at <strong>your own agent</strong> and see how much of Lab 03 and 04 works with zero further changes.</li>
+            <li>Write the loop detector against your traffic. Be ready to be annoyed by the answer.</li>
+            <li>Add <code>paths: ["prompts/**"]</code> to a CI workflow you already own.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>This month</h3>
+          <ul>
+            <li>Promote three real bad traces into a dataset. Three is enough to catch a prompt regression.</li>
+            <li>Put an <strong>SLO on an agent</strong> — the canonical-kind filter includes GenAI availability.</li>
+            <li>Decide your label budget and your redaction policy in the Collector <em>before</em> the next agent ships.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>If you want to build on it</h3>
+          <ul>
+            <li>The <strong>Claude Code Observability Plugin</strong> ships eight Agent Skills — Traces, Logs, Metrics, Stack Health, PPL Reference, Correlation, APM RED, SLO/SLI — over the built-in MCP server.</li>
+            <li>The MCP server needs <strong>OpenSearch 2.19+</strong>.</li>
+            <li>All of it is Apache 2.0. Issues and PRs are the fastest way to change what ships next.</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center; color:var(--os-blue-soft); font-size:0.58em; margin-top:0.6em; max-width:88%; margin-left:auto; margin-right:auto;">
+        Documented integrations: Strands, LangGraph, CrewAI, OpenAI Agents SDK, Bedrock. If yours is missing and it emits GenAI spans it will still show up — tell us what broke.
+      </p>
+    </section>
+
+    <!-- ============ 55 · CTA ============ -->
+    <section class="cta-slide">
+      <div class="eyebrow">Take it with you</div>
+      <h2 style="margin-bottom:0.3em; font-size:1.35em;">Everything from today, four links.</h2>
+      <div class="cta-grid">
+        <div class="cta-cards">
+          <div class="cta-card">
+            <div class="cta-eyebrow">Lab guide</div>
+            <div>
+              <div class="cta-title">All six labs, every command and PPL query, copy-pasteable</div>
+              <div class="cta-url">anirudha.github.io/talks/pipe-dreams-to-pipelines/ → LAB.md</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Code</div>
+            <div>
+              <div class="cta-title">The runnable Acme agent — 6 frameworks, 5 eval variants, one shared core</div>
+              <div class="cta-url">github.com/anirudha/os-agent-observability-evals</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Docs</div>
+            <div>
+              <div class="cta-title">AI Observability · Agent Traces · Agent Evals · PPL reference</div>
+              <div class="cta-url">observability.opensearch.org/docs/ai-observability/</div>
+            </div>
+          </div>
+          <div class="cta-card">
+            <div class="cta-eyebrow">Playground</div>
+            <div>
+              <div class="cta-title">The live stack with real agent traces — nothing to install</div>
+              <div class="cta-url">observability.playground.opensearch.org</div>
+            </div>
+          </div>
+        </div>
+        <div class="qr-pair">
+          <div class="qr-box">
+            <img src="assets/qr-lab.png" alt="QR code to the workshop lab guide">
+            <div class="qr-cap">lab guide</div>
+          </div>
+          <div class="qr-box">
+            <img src="assets/qr-repo.png" alt="QR code to the sample code repository">
+            <div class="qr-cap">sample code</div>
+          </div>
+          <div class="qr-box">
+            <img src="assets/qr-docs.png" alt="QR code to the AI observability documentation">
+            <div class="qr-cap">docs</div>
+          </div>
+          <div class="qr-box">
+            <img src="assets/qr-playground-live.png" alt="QR code to the live playground">
+            <div class="qr-cap">playground</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 56 · CLOSING ============ -->
+    <section class="try-slide">
+      <div class="try-grid">
+        <div class="try-text">
+          <div class="eyebrow" style="margin-bottom:0.5em;">Pipe Dreams to Pipelines</div>
+          <h2 style="font-size:1.6em; line-height:1.1; margin-bottom:0.4em;">You instrumented it.<br>You piped it.<br><em>You graded it.</em></h2>
+          <p style="color:var(--os-blue-soft); font-size:0.74em; line-height:1.5; margin-bottom:0.7em; max-width:95%;">
+            An agent that was a black box at 10:40 now emits spans you can walk, metrics you can alert on, and a score you can regress against. Open instrumentation, purpose-built stores, one interface.
+          </p>
+          <div class="try-url">observability.opensearch.org</div>
+          <div class="try-foot" style="margin-top:1em;">
+            <strong>Anirudha Jadhav</strong> <span style="color:var(--os-blue-soft);">· OpenSearch · AWS</span><br>
+            <strong>Wolfgang Theilmann</strong> <span style="color:var(--os-blue-soft);">· SAP</span>
+          </div>
+        </div>
+        <div class="try-shot">
+          <img src="assets/crop-hero-diagram.png" alt="OpenSearch Observability Stack architecture diagram">
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    controls: true,
+    progress: true,
+    slideNumber: 'c/t',
+    history: true,
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 860,
+    margin: 0.05,
+    minScale: 0.5,
+    maxScale: 2.5,
+  });
+
+  function updateWatermark() {
+    var current = Reveal.getCurrentSlide();
+    if (!current) return;
+    var hide = current.classList.contains('cover') ||
+               current.classList.contains('image-slide');
+    document.body.classList.toggle('hide-watermark', hide);
+  }
+  Reveal.on('ready', updateWatermark);
+  Reveal.on('slidechanged', updateWatermark);
+</script>
+</body>
+</html>
