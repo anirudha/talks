@@ -9,6 +9,7 @@ Public presentations by Anirudha Jadhav.
 
 | Talk | Event | Slides |
 |---|---|---|
+| **Pipe Dreams to Pipelines** — Hands-on workshop: instrument an agent with OTel, pipe traces through Data Prepper into OpenSearch, aggregate metrics through Prometheus, reconstruct reasoning in PPL, grade against golden paths | OpenSearchCon North America 2026 · Thu Sep 24 · 10:40–12:20 · with Wolfgang Theilmann (SAP) | [`pipe-dreams-to-pipelines/`](./pipe-dreams-to-pipelines/) · [view live →](https://anirudha.github.io/talks/pipe-dreams-to-pipelines/) · [lab guide](./pipe-dreams-to-pipelines/LAB.md) |
 | **AI Agent Monitoring with the OpenSearch Observability Stack** — Agent traces, PromQL beside logs and traces, RED-to-span drill-down, and agent evals on AMP + Amazon OpenSearch Service | CloudOps Webinar 2026 · Tue Sep 15 · 08:00 PDT | [`ai-agent-monitoring/`](./ai-agent-monitoring/) · [view live →](https://anirudha.github.io/talks/ai-agent-monitoring/) |
 | **Agent Under the Microscope** — Monitoring agentic workflows with OpenSearch (Agent Traces + Agent Health, OTel GenAI semconv, golden-path eval) | OpenSearchCon India 2026 · Mon Jun 15 · 12:40 IST | [`agent-microscope/`](./agent-microscope/) · [view live →](https://anirudha.github.io/talks/agent-microscope/) |
 | **Quality In, Value Out** — Benchmarking instrumentation for OpenSearch Observability with the Instrumentation Score | OpenSearch Observability Webinar 2026 | [`quality-in-value-out/`](./quality-in-value-out/) · [view live →](https://anirudha.github.io/talks/quality-in-value-out/) |
