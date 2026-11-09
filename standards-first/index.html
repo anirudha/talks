@@ -140,7 +140,7 @@
     border: 1px solid var(--os-card-line);
     border-top: 3px solid var(--os-blue);
     border-radius: 10px;
-    padding: 0.9em 0.7em;
+    padding: 0.75em 0.8em;
     box-shadow: 0 3px 14px rgba(10, 31, 68, 0.08);
     display: flex; flex-direction: column; justify-content: center;
   }
@@ -162,16 +162,27 @@
     font-size: 1.3em; font-weight: 800; flex: 0 0 30px;
   }
   .flow.even { align-items: stretch; }
-  .flow-stack { display: flex; flex-direction: column; gap: 0.45em; flex: 1.4 1 0; min-width: 0; }
+  .flow-stack { display: flex; flex-direction: column; gap: 0.4em; flex: 1.4 1 0; min-width: 0; }
   /* what each store actually gives you, inside the node */
-  .fn-feats {
-    margin-top: 0.5em; padding-top: 0.45em;
+  /* one capability per line, so the node reads as a list and not a paragraph */
+  .reveal ul.fn-feats {
+    list-style: none; margin: 0.45em 0 0 0; padding: 0.4em 0 0 0;
     border-top: 1px solid var(--os-card-line);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.37em; line-height: 1.6; letter-spacing: 0.01em;
-    color: var(--os-text); text-align: left;
+    text-align: left;
   }
-  .fn-feats b { color: var(--os-navy); font-weight: 800; }
+  .reveal ul.fn-feats li {
+    list-style: none; margin: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.36em; line-height: 1.55; letter-spacing: 0.01em;
+    color: var(--os-navy); font-weight: 600;
+    padding-left: 1em; position: relative; white-space: nowrap;
+  }
+  .reveal ul.fn-feats li::marker { content: ""; }
+  .reveal ul.fn-feats li::before {
+    content: "+"; position: absolute; left: 0;
+    color: var(--os-blue); font-weight: 800;
+  }
+  .flow-node.prom ul.fn-feats li::before { color: var(--prom-orange); }
   .flow-stack .flow-node { flex: 0 0 auto; }
 
   /* Small chips: shippers, frameworks, extras */
@@ -474,8 +485,8 @@
     <!-- ============ 03 · INGESTION ============ -->
     <section>
       <div class="eyebrow">Ingestion</div>
-      <h2>Five front doors. <em>Now one.</em></h2>
-      <div class="chips">
+      <h2 style="font-size:1.7em;">Five front doors. <em>Now one.</em></h2>
+      <div class="chips" style="margin-top:0.6em;">
         <span class="chip-label">was</span>
         <span class="chip dim">Fluent Bit</span>
         <span class="chip dim">Fluentd</span>
@@ -483,7 +494,7 @@
         <span class="chip dim">Collector</span>
         <span class="chip dim">remote write</span>
       </div>
-      <div class="flow">
+      <div class="flow" style="margin-top:0.7em;">
         <div class="flow-node violet">
           <div class="fn-name">Apps &amp; agents</div>
           <div class="fn-sub">otel sdk</div>
@@ -498,23 +509,27 @@
           <div class="flow-node">
             <div class="fn-name">OpenSearch</div>
             <div class="fn-sub">spans &amp; logs &middot; ppl</div>
-            <div class="fn-feats">
-              log patterns &middot; log storage &middot; <b>RED metrics</b><br>
-              default dashboards &middot; APM views &amp; workflows
-            </div>
+            <ul class="fn-feats">
+              <li>log patterns</li>
+              <li>log storage</li>
+              <li>RED metrics</li>
+              <li>default dashboards</li>
+              <li>APM views &amp; workflows</li>
+            </ul>
           </div>
           <div class="flow-node prom">
             <div class="fn-name">Prometheus</div>
             <div class="fn-sub">time series &middot; promql</div>
-            <div class="fn-feats">
-              metrics explorer &middot; <b>PromQL builder</b><br>
-              unified dashboards view<br>
-              <b>multi-cluster datasources</b>
-            </div>
+            <ul class="fn-feats">
+              <li>metrics explorer</li>
+              <li>PromQL builder</li>
+              <li>unified dashboards</li>
+              <li>multi-cluster datasources</li>
+            </ul>
           </div>
         </div>
       </div>
-      <div class="resolve">
+      <div class="resolve" style="margin-top:0.6em;">
         <span class="was">kubernetes.labels.app</span>
         <span class="was">app_name</span>
         <span class="was">service</span>
