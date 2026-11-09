@@ -131,7 +131,7 @@
 
   /* Horizontal flow of boxes */
   .flow {
-    display: flex; align-items: stretch; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     gap: 0.5em; margin: 1.2em auto 0 auto; max-width: 1120px;
   }
   .flow-node {
@@ -144,7 +144,7 @@
     box-shadow: 0 3px 14px rgba(10, 31, 68, 0.08);
     display: flex; flex-direction: column; justify-content: center;
   }
-  .flow-node .fn-name { color: var(--os-navy); font-size: 0.72em; font-weight: 800; line-height: 1.2; }
+  .flow-node .fn-name { color: var(--os-navy); font-size: 0.66em; font-weight: 800; line-height: 1.2; }
   .flow-node .fn-sub {
     color: var(--os-muted); font-family: "JetBrains Mono", monospace;
     font-size: 0.42em; letter-spacing: 0.08em; text-transform: uppercase;
@@ -161,8 +161,18 @@
     color: var(--os-blue-deep); font-family: "JetBrains Mono", monospace;
     font-size: 1.3em; font-weight: 800; flex: 0 0 30px;
   }
-  .flow-stack { display: flex; flex-direction: column; gap: 0.5em; flex: 1 1 0; min-width: 0; }
-  .flow-stack .flow-node { flex: 1 1 auto; }
+  .flow.even { align-items: stretch; }
+  .flow-stack { display: flex; flex-direction: column; gap: 0.45em; flex: 1.4 1 0; min-width: 0; }
+  /* what each store actually gives you, inside the node */
+  .fn-feats {
+    margin-top: 0.5em; padding-top: 0.45em;
+    border-top: 1px solid var(--os-card-line);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.37em; line-height: 1.6; letter-spacing: 0.01em;
+    color: var(--os-text); text-align: left;
+  }
+  .fn-feats b { color: var(--os-navy); font-weight: 800; }
+  .flow-stack .flow-node { flex: 0 0 auto; }
 
   /* Small chips: shippers, frameworks, extras */
   .chips {
@@ -213,12 +223,13 @@
 
   /* Datasource picker mock */
   .ds-picker {
-    display: inline-flex; align-items: center; gap: 0.55em;
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    align-items: center; gap: 0.45em; max-width: 92%;
     background: var(--os-card); border: 1px solid var(--os-card-line);
     border-radius: 10px; padding: 0.6em 1em;
     box-shadow: 0 4px 16px rgba(10, 31, 68, 0.1);
-    font-family: "JetBrains Mono", monospace; font-size: 0.56em;
-    margin-top: 1.2em;
+    font-family: "JetBrains Mono", monospace; font-size: 0.5em;
+    margin-top: 1.1em;
   }
   .ds-picker .ds-lead { color: var(--os-muted); font-size: 0.85em; }
   .ds-picker .ds-tag {
@@ -487,10 +498,19 @@
           <div class="flow-node">
             <div class="fn-name">OpenSearch</div>
             <div class="fn-sub">spans &amp; logs &middot; ppl</div>
+            <div class="fn-feats">
+              log patterns &middot; log storage &middot; <b>RED metrics</b><br>
+              default dashboards &middot; APM views &amp; workflows
+            </div>
           </div>
           <div class="flow-node prom">
             <div class="fn-name">Prometheus</div>
             <div class="fn-sub">time series &middot; promql</div>
+            <div class="fn-feats">
+              metrics explorer &middot; <b>PromQL builder</b><br>
+              unified dashboards view<br>
+              <b>multi-cluster datasources</b>
+            </div>
           </div>
         </div>
       </div>
@@ -513,8 +533,13 @@
         <span class="ds-tag">OpenSearch &middot; logs &amp; traces</span>
         <span class="ds-tag prom">Prometheus &middot; prod-us-east-1</span>
         <span class="ds-tag prom">Prometheus &middot; prod-eu-west-1</span>
+        <span class="ds-tag prom">Prometheus &middot; prod-ap-south-1</span>
       </div>
-      <div class="flow" style="margin-top:1.3em;">
+      <div class="flow even" style="margin-top:1.3em;">
+        <div class="flow-node prom hero">
+          <div class="fn-name">Multi&#8209;cluster</div>
+          <div class="fn-sub">many workspaces, one pane</div>
+        </div>
         <div class="flow-node prom">
           <div class="fn-name">Native PromQL</div>
           <div class="fn-sub">queried in place</div>
