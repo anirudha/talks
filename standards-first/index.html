@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Standards First · OpenSearch · OpenTelemetry + Prometheus</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.18/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css">
+
+<style>
+  :root {
+    --os-navy: #0a1f44;
+    --os-navy-soft: #2a3d6b;
+    --os-blue: #2f7ec5;
+    --os-blue-deep: #1b5a96;
+    --os-amber: #e8a838;
+    --os-bg-top: #b9d2e8;
+    --os-bg-mid: #e6dccf;
+    --os-bg-bottom: #f1d2a8;
+    --os-card: rgba(255, 255, 255, 0.88);
+    --os-card-line: rgba(10, 31, 68, 0.12);
+    --os-text: #1f2d4d;
+    --os-muted: #5a6885;
+    --prom-orange: #e6522c;
+    --otel-violet: #7a5bd6;
+    --crit: #c23b4b;
+    --good: #1f8a62;
+  }
+
+  .reveal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+    color: var(--os-text);
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 50%, var(--os-bg-bottom) 100%);
+  }
+  .reveal-viewport {
+    background: linear-gradient(180deg, var(--os-bg-top) 0%, var(--os-bg-mid) 50%, var(--os-bg-bottom) 100%) !important;
+  }
+
+  .reveal h1, .reveal h2 {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: -0.025em;
+    color: var(--os-navy);
+    margin-bottom: 0.25em;
+  }
+  .reveal h1 { font-size: 2.6em; line-height: 1.02; }
+  .reveal h2 { font-size: 2em; line-height: 1.05; }
+  .reveal h2 em, .reveal h1 em { color: var(--prom-orange); font-style: normal; }
+  .reveal strong { color: var(--os-navy); font-weight: 800; }
+
+  .reveal section { text-align: center; }
+
+  /* Small all-caps label above a headline */
+  .eyebrow {
+    color: var(--os-blue-deep);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.26em; text-transform: uppercase;
+    margin-bottom: 0.7em;
+  }
+  /* max-width keeps a long eyebrow clear of the fixed watermark at top-right */
+  .eyebrow { max-width: 78%; margin-left: auto; margin-right: auto; }
+
+  /* One-line deck under a headline. Never more than a line and a half. */
+  .deck-line {
+    color: var(--os-muted); font-size: 0.8em; font-weight: 500;
+    max-width: 70%; margin: 0 auto; line-height: 1.4;
+  }
+  .deck-line strong { color: var(--os-navy); }
+
+  /* Cover */
+  /* higher specificity than reveal.css's `.reveal section img` margin rule */
+  .reveal section img.cover-logo { width: 230px; margin: 0 auto 1.1em auto; display: block; }
+  .cover h1 { font-size: 3.1em; margin-bottom: 0.2em; }
+  .cover .tagline {
+    color: var(--os-blue-deep); font-size: 0.95em; font-weight: 600;
+    margin-bottom: 1.5em; letter-spacing: -0.01em;
+  }
+  .cover .meta-line {
+    color: var(--prom-orange);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.46em; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-top: 1.4em; font-weight: 800;
+  }
+
+  .speaker-row {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 2.4em; margin-top: 0.4em;
+  }
+  .speaker { text-align: center; max-width: 26ch; }
+  .speaker .sp-name { color: var(--os-navy); font-size: 0.8em; font-weight: 800; line-height: 1.2; }
+  .speaker .sp-role { color: var(--os-blue-deep); font-size: 0.5em; line-height: 1.45; margin-top: 0.25em; }
+
+  /* Layer stack: the spine of the talk, one standard per row */
+  .layers {
+    display: flex; flex-direction: column; gap: 0.3em;
+    max-width: 860px; margin: 0.9em auto 0 auto;
+  }
+  .layer-row {
+    display: grid; grid-template-columns: 118px 1fr;
+    align-items: center; gap: 1em;
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-left: 4px solid var(--os-blue);
+    border-radius: 0 10px 10px 0;
+    padding: 0.42em 1.1em;
+    box-shadow: 0 2px 10px rgba(10, 31, 68, 0.06);
+  }
+  .layer-row .ly-name {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.48em; font-weight: 800;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--os-muted); text-align: right;
+  }
+  .layer-row .ly-std {
+    color: var(--os-navy); font-size: 0.62em; font-weight: 800; white-space: nowrap;
+    text-align: left; letter-spacing: -0.01em;
+  }
+  .layer-row.violet { border-left-color: var(--otel-violet); }
+  .layer-row.violet .ly-std { color: var(--otel-violet); }
+  .layer-row.prom { border-left-color: var(--prom-orange); }
+  .layer-row.prom .ly-std { color: var(--prom-orange); }
+  .layer-row.green { border-left-color: var(--good); }
+  .layer-row.green .ly-std { color: var(--good); }
+
+  /* Horizontal flow of boxes */
+  .flow {
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 0.5em; margin: 1.2em auto 0 auto; max-width: 1120px;
+  }
+  .flow-node {
+    flex: 1 1 0; min-width: 0;
+    background: var(--os-card);
+    border: 1px solid var(--os-card-line);
+    border-top: 3px solid var(--os-blue);
+    border-radius: 10px;
+    padding: 0.9em 0.7em;
+    box-shadow: 0 3px 14px rgba(10, 31, 68, 0.08);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .flow-node .fn-name { color: var(--os-navy); font-size: 0.72em; font-weight: 800; line-height: 1.2; }
+  .flow-node .fn-sub {
+    color: var(--os-muted); font-family: "JetBrains Mono", monospace;
+    font-size: 0.42em; letter-spacing: 0.08em; text-transform: uppercase;
+    margin-top: 0.35em;
+  }
+  .flow-node.violet { border-top-color: var(--otel-violet); }
+  .flow-node.violet .fn-name { color: var(--otel-violet); }
+  .flow-node.prom { border-top-color: var(--prom-orange); }
+  .flow-node.prom .fn-name { color: var(--prom-orange); }
+  .flow-node.amber { border-top-color: var(--os-amber); }
+  .flow-node.hero { border-top-width: 5px; }
+  .flow-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--os-blue-deep); font-family: "JetBrains Mono", monospace;
+    font-size: 1.3em; font-weight: 800; flex: 0 0 30px;
+  }
+  .flow-stack { display: flex; flex-direction: column; gap: 0.5em; flex: 1 1 0; min-width: 0; }
+  .flow-stack .flow-node { flex: 1 1 auto; }
+
+  /* Small chips: shippers, frameworks, extras */
+  .chips {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 0.4em; margin: 0.9em auto 0 auto; max-width: 1000px;
+  }
+  .chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 700; letter-spacing: 0.04em;
+    padding: 0.42em 0.8em; border-radius: 100px;
+    background: var(--os-card); border: 1px solid var(--os-card-line);
+    color: var(--os-navy);
+    box-shadow: 0 2px 8px rgba(10, 31, 68, 0.05);
+  }
+  .chip.dim { color: var(--os-muted); background: rgba(255,255,255,0.55); }
+  .chip.violet { color: var(--otel-violet); border-color: rgba(122,91,214,0.35); background: rgba(122,91,214,0.09); }
+  .chip.prom { color: var(--prom-orange); border-color: rgba(230,82,44,0.35); background: rgba(230,82,44,0.09); }
+  .chip.green { color: var(--good); border-color: rgba(31,138,98,0.35); background: rgba(31,138,98,0.1); }
+  .funnel {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--os-blue-deep); font-size: 0.9em; font-weight: 800;
+    margin-top: 0.5em; line-height: 1;
+  }
+  .chip-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.42em; font-weight: 800;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--os-muted); margin-right: 0.3em;
+  }
+
+  /* Struck-out field names resolving to one semconv name */
+  .resolve {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 0.45em; margin: 1.1em auto 0 auto;
+    font-family: "JetBrains Mono", monospace; font-size: 0.52em; font-weight: 700;
+  }
+  .resolve .was {
+    color: var(--crit); background: rgba(194,59,75,0.07);
+    border: 1px solid rgba(194,59,75,0.22);
+    padding: 0.32em 0.65em; border-radius: 5px; text-decoration: line-through;
+  }
+  .resolve .arrow { color: var(--os-muted); font-weight: 800; padding: 0 0.2em; }
+  .resolve .now {
+    color: #fff; background: var(--good);
+    padding: 0.32em 0.75em; border-radius: 5px; font-weight: 800;
+    box-shadow: 0 3px 12px rgba(31,138,98,0.3);
+  }
+
+  /* Datasource picker mock */
+  .ds-picker {
+    display: inline-flex; align-items: center; gap: 0.55em;
+    background: var(--os-card); border: 1px solid var(--os-card-line);
+    border-radius: 10px; padding: 0.6em 1em;
+    box-shadow: 0 4px 16px rgba(10, 31, 68, 0.1);
+    font-family: "JetBrains Mono", monospace; font-size: 0.56em;
+    margin-top: 1.2em;
+  }
+  .ds-picker .ds-lead { color: var(--os-muted); font-size: 0.85em; }
+  .ds-picker .ds-tag {
+    display: inline-flex; align-items: center; gap: 0.3em;
+    background: rgba(47,126,197,0.14); border: 1px solid rgba(47,126,197,0.3);
+    border-radius: 5px; padding: 0.2em 0.6em; white-space: nowrap;
+    font-weight: 800; color: var(--os-blue-deep);
+  }
+  .ds-picker .ds-tag.prom {
+    background: rgba(230,82,44,0.12); border-color: rgba(230,82,44,0.3);
+    color: var(--prom-orange);
+  }
+
+  /* One big command line */
+  .one-liner {
+    background: #fff;
+    border: 1px solid var(--os-card-line);
+    border-left: 4px solid var(--os-amber);
+    border-radius: 10px;
+    padding: 0.8em 1.2em;
+    margin: 1.1em auto 0 auto; max-width: 92%;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6em; font-weight: 700;
+    color: var(--os-navy); text-align: left;
+    box-shadow: 0 6px 22px rgba(10, 31, 68, 0.12);
+    white-space: nowrap; overflow: hidden;
+  }
+  .one-liner .p { color: var(--good); margin-right: 0.6em; }
+  .one-liner .str { color: var(--prom-orange); }
+
+  /* Screenshot slide */
+  .shots {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.9em; margin: 1.1em auto 0 auto; width: 100%;
+  }
+  .shots img {
+    width: auto; height: auto; max-width: 86%;
+    border-radius: 10px; border: 1px solid var(--os-card-line);
+    box-shadow: 0 12px 36px rgba(10, 31, 68, 0.22); object-fit: contain;
+  }
+  .shots img.trace { max-height: 360px; }
+  .shots img.band { max-height: 130px; max-width: 80%; }
+
+  /* Source link under a diagram */
+  .src-notes {
+    margin: 0.9em auto 0 auto; max-width: 80%; text-align: left;
+    border-top: 1px solid var(--os-card-line); padding-top: 0.55em;
+  }
+  .src-link {
+    display: block; margin: 0.22em 0 0 0; padding-left: 7em; text-indent: -7em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.4em; letter-spacing: 0.03em; line-height: 1.5;
+    color: var(--os-blue-deep); text-decoration: none;
+  }
+  .src-link .sl-tag {
+    display: inline-block; min-width: 5.5em;
+    color: var(--otel-violet); font-weight: 800;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-right: 0.7em;
+  }
+
+  /* Three product shots on one slide, no captions */
+  .trio {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.45em; margin: 0.5em auto 0 auto; width: 96%;
+  }
+  .trio-row { display: flex; justify-content: center; gap: 0.6em; width: 100%; }
+  .trio img {
+    border-radius: 9px; border: 1px solid var(--os-card-line);
+    box-shadow: 0 12px 34px rgba(10, 31, 68, 0.24);
+    object-fit: contain; width: auto; height: auto;
+  }
+  .trio img.wide { max-width: 100%; max-height: 372px; }
+  .trio img.half { max-width: calc(50% - 0.25em); max-height: 292px; }
+  .trio img.stacked { max-width: 100%; max-height: 338px; }
+
+  /* Full-bleed product screenshot: headline, shot, one caption */
+  .full-shot {
+    margin: 0.8em auto 0 auto; width: 100%;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .full-shot img {
+    width: auto; height: auto; max-width: 92%; max-height: 570px;
+    border-radius: 10px; border: 1px solid var(--os-card-line);
+    box-shadow: 0 14px 40px rgba(10, 31, 68, 0.26); object-fit: contain;
+  }
+  .shot-caption {
+    margin-top: 0.7em;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.42em; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--os-blue-deep); font-weight: 700;
+  }
+  .demo-badge {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.46em; font-weight: 800;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.35em 0.9em; border-radius: 100px;
+    background: var(--prom-orange); color: #fff;
+    margin-bottom: 0.8em;
+  }
+
+  /* QR grid + booth */
+  .qr-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1em; margin: 0.9em auto 0 auto; max-width: 94%; }
+  .qr-cell img {
+    width: 100%; max-width: 152px; background: #fff;
+    padding: 10px; border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(10, 31, 68, 0.18);
+    display: block; margin: 0 auto 0.5em auto;
+  }
+  .qr-cell .qr-cap {
+    color: var(--os-navy);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.46em; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .booth {
+    margin: 1.1em auto 0 auto; max-width: 86%;
+    background: var(--prom-orange); color: #fff;
+    border-radius: 14px; padding: 0.7em 1.1em;
+    box-shadow: 0 10px 28px rgba(230, 82, 44, 0.35);
+  }
+  .booth .b-mark {
+    display: block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85); margin-bottom: 0.15em;
+  }
+  .booth .b-line {
+    font-size: 1.05em; font-weight: 800; line-height: 1.15;
+    letter-spacing: -0.01em; color: #fff;
+  }
+  .booth .b-sub {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.46em; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9); margin-top: 0.3em;
+  }
+
+  .footer {
+    position: fixed; bottom: 14px; left: 30px; right: 104px;
+    display: flex; justify-content: space-between;
+    color: var(--os-navy-soft);
+    font-size: 11px; font-family: "Inter", sans-serif;
+    letter-spacing: 0.06em;
+    pointer-events: none; opacity: 0.6; z-index: 30;
+  }
+  /* Observability Day lockup, shown only on the first and last slide */
+  .event-badge {
+    position: fixed; top: 20px; right: 28px;
+    width: 244px; z-index: 31; pointer-events: none;
+    display: none;
+  }
+  .event-badge img { width: 100%; height: auto; display: block; }
+  body.show-event .event-badge { display: block; }
+  /* OpenSearch mark steps aside so the two logos never overlap */
+  body.show-event .watermark { right: auto; left: 28px; }
+
+  .watermark {
+    position: fixed; top: 22px; right: 28px;
+    width: 124px; z-index: 30;
+    pointer-events: none; opacity: 0.8;
+  }
+  .watermark img { width: 100%; height: auto; display: block; }
+  body.hide-watermark .watermark { display: none; }
+  body.hide-watermark .footer { display: none; }
+
+  .reveal .progress { color: var(--os-blue-deep); }
+  .reveal .controls { color: var(--os-blue-deep) !important; }
+</style>
+</head>
+
+<body>
+<div class="event-badge" id="event-badge">
+  <img src="assets/logo-observability-day.png" alt="Observability Day North America">
+</div>
+<div class="watermark" id="watermark">
+  <img src="assets/opensearch-logo-official.svg" alt="OpenSearch">
+</div>
+<div class="footer">
+  <span>Standards First &middot; Observability Day</span>
+  <span>Dotan Horovits &middot; Anirudha Jadhav</span>
+</div>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============ 01 · COVER · title + speakers ============ -->
+    <section class="cover">
+      <img src="assets/opensearch-logo-official.svg" alt="OpenSearch" class="cover-logo">
+      <h1>Standards First</h1>
+      <div class="tagline">OpenTelemetry + Prometheus, at every layer.</div>
+      <div class="speaker-row">
+        <div class="speaker">
+          <div class="sp-name">Dotan Horovits</div>
+          <div class="sp-role">Sr. Open Source Advocate<br>CNCF &amp; OpenSearch Ambassador &middot; AWS</div>
+        </div>
+        <div class="speaker">
+          <div class="sp-name">Anirudha Jadhav</div>
+          <div class="sp-role">Sr. Software Engineering Manager<br>OpenSearch Project &middot; AWS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 · THE BET ============ -->
+    <section>
+      <div class="eyebrow">The bet</div>
+      <h2 style="font-size:1.7em;">We stopped building <em>adapters</em>.</h2>
+      <div class="deck-line" style="font-size:0.72em; max-width:60%;">One CNCF standard per layer.</div>
+      <div class="layers">
+        <div class="layer-row green">
+          <div class="ly-name">wire</div>
+          <div class="ly-std">gRPC + protobuf</div>
+        </div>
+        <div class="layer-row violet">
+          <div class="ly-name">ingest</div>
+          <div class="ly-std">OTLP &middot; one endpoint, three signals</div>
+        </div>
+        <div class="layer-row violet">
+          <div class="ly-name">schema</div>
+          <div class="ly-std">OTel semantic conventions</div>
+        </div>
+        <div class="layer-row violet">
+          <div class="ly-name">genai</div>
+          <div class="ly-std">GenAI normalizer, upstream in the Collector</div>
+        </div>
+        <div class="layer-row prom">
+          <div class="ly-name">metrics</div>
+          <div class="ly-std">Prometheus, as a datasource</div>
+        </div>
+        <div class="layer-row prom">
+          <div class="ly-name">query</div>
+          <div class="ly-std">PromQL, and PPL for text</div>
+        </div>
+        <div class="layer-row prom">
+          <div class="ly-name">alerts</div>
+          <div class="ly-std">Alertmanager, rendered not replaced</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 · INGESTION ============ -->
+    <section>
+      <div class="eyebrow">Ingestion</div>
+      <h2>Five front doors. <em>Now one.</em></h2>
+      <div class="chips">
+        <span class="chip-label">was</span>
+        <span class="chip dim">Fluent Bit</span>
+        <span class="chip dim">Fluentd</span>
+        <span class="chip dim">Filebeat</span>
+        <span class="chip dim">Collector</span>
+        <span class="chip dim">remote write</span>
+      </div>
+      <div class="flow">
+        <div class="flow-node violet">
+          <div class="fn-name">Apps &amp; agents</div>
+          <div class="fn-sub">otel sdk</div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node amber hero">
+          <div class="fn-name">One OTLP endpoint</div>
+          <div class="fn-sub">logs &middot; metrics &middot; traces</div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-stack">
+          <div class="flow-node">
+            <div class="fn-name">OpenSearch</div>
+            <div class="fn-sub">spans &amp; logs &middot; ppl</div>
+          </div>
+          <div class="flow-node prom">
+            <div class="fn-name">Prometheus</div>
+            <div class="fn-sub">time series &middot; promql</div>
+          </div>
+        </div>
+      </div>
+      <div class="resolve">
+        <span class="was">kubernetes.labels.app</span>
+        <span class="was">app_name</span>
+        <span class="was">service</span>
+        <span class="arrow">&rarr;</span>
+        <span class="now">service.name</span>
+      </div>
+    </section>
+
+    <!-- ============ 04 · PROMETHEUS ============ -->
+    <section>
+      <div class="eyebrow">Metrics</div>
+      <h2>Keep your <em>Prometheus</em>.</h2>
+      <div class="deck-line">A datasource, not a migration.</div>
+      <div class="ds-picker">
+        <span class="ds-lead">datasource:</span>
+        <span class="ds-tag">OpenSearch &middot; logs &amp; traces</span>
+        <span class="ds-tag prom">Prometheus &middot; prod-us-east-1</span>
+        <span class="ds-tag prom">Prometheus &middot; prod-eu-west-1</span>
+      </div>
+      <div class="flow" style="margin-top:1.3em;">
+        <div class="flow-node prom">
+          <div class="fn-name">Native PromQL</div>
+          <div class="fn-sub">queried in place</div>
+        </div>
+        <div class="flow-node prom">
+          <div class="fn-name">Recording rules</div>
+          <div class="fn-sub">derived &middot; from logs</div>
+        </div>
+        <div class="flow-node prom">
+          <div class="fn-name">Alertmanager</div>
+          <div class="fn-sub">read-only</div>
+        </div>
+        <div class="flow-node">
+          <div class="fn-name">One time picker</div>
+          <div class="fn-sub">shared variables</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 · IT CAME TOGETHER ============ -->
+    <section>
+      <h2 style="font-size:1.6em; margin-bottom:0.05em;">It all comes <em>together</em>.</h2>
+      <div class="trio">
+        <div class="trio-row">
+          <img class="wide" src="assets/shot-service-dashboard.png" alt="Service telemetry dashboard with request rate, instrumentation SDK mix, log volume and resource metrics">
+        </div>
+        <div class="trio-row">
+          <img class="half" src="assets/shot-topology-map.png" alt="Topology map of services with requests, latency and faults">
+          <img class="half" src="assets/shot-alerts-unified.png" alt="Unified alerts list across the OpenSearch cluster and the Prometheus datasource">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 · GENAI 1 · NORMALIZER ============ -->
+    <section>
+      <div class="eyebrow">GenAI telemetry</div>
+      <h2>Ten vocabularies. <em>One normalizer.</em></h2>
+      <div class="chips">
+        <span class="chip violet">Strands</span>
+        <span class="chip violet">LangGraph</span>
+        <span class="chip violet">CrewAI</span>
+        <span class="chip violet">OpenAI Agents</span>
+        <span class="chip violet">Bedrock</span>
+        <span class="chip violet">LlamaIndex</span>
+        <span class="chip prom">DeepEval</span>
+        <span class="chip prom">RAGAS</span>
+        <span class="chip prom">MLflow</span>
+        <span class="chip prom">pytest</span>
+      </div>
+      <div class="funnel">&darr;</div>
+      <div class="flow" style="margin-top:0.5em;">
+        <div class="flow-node amber hero">
+          <div class="fn-name">GenAI normalizer</div>
+          <div class="fn-sub">contributed upstream &middot; otel collector</div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node violet">
+          <div class="fn-name"><code style="font-family:'JetBrains Mono',monospace;">gen_ai.*</code> spans</div>
+          <div class="fn-sub">one schema</div>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node">
+          <div class="fn-name">Traces, tools, tokens, scores</div>
+          <div class="fn-sub">same views, any framework</div>
+        </div>
+      </div>
+      <div class="deck-line" style="margin-top:1.1em;">
+        Normalization belongs in the pipeline, <strong>not in the store</strong>.
+      </div>
+      <div class="src-notes">
+        <a class="src-link" href="https://explorer.opentelemetry.io/collector/components/contrib/genainormalizerprocessor" target="_blank" rel="noopener"><span class="sl-tag">processor</span>explorer.opentelemetry.io/collector/components/contrib/genainormalizerprocessor</a>
+        <a class="src-link" href="https://observability.opensearch.org/docs/send-data/ai-agents/integrations/" target="_blank" rel="noopener"><span class="sl-tag">sdk</span>pip install "opensearch-genai-observability-sdk-py[all]" &middot; observability.opensearch.org/docs/send-data/ai-agents/integrations/</a>
+      </div>
+    </section>
+
+    <!-- ============ 07 · AGENT TRACES ============ -->
+    <section>
+      <h2 style="font-size:1.55em; margin-bottom:0.02em;">Every hop. Every <em>token</em>.</h2>
+      <div class="trio" style="gap:0.3em; margin-top:0.35em;">
+        <div class="trio-row">
+          <img class="stacked" src="assets/shot-agent-traces-list.png" alt="Agent Traces list with total traces, spans, tokens and latency percentiles, and gen_ai faceted fields">
+        </div>
+        <div class="trio-row">
+          <img class="stacked" src="assets/shot-agent-trace-tree.png" alt="Agent trace tree and trace map for one request, from root agent span down to the tool and MCP calls">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 08 · LEARN MORE ============ -->
+    <section class="closing">
+      <div class="eyebrow">Learn more</div>
+      <h2 style="font-size:1.8em;">Run it. Then come <em>build with us</em>.</h2>
+      <div class="qr-grid">
+        <div class="qr-cell">
+          <img src="assets/qr-playground.png" alt="QR code to the live playground">
+          <div class="qr-cap">playground</div>
+        </div>
+        <div class="qr-cell">
+          <img src="assets/qr-stack-docs.png" alt="QR code to the documentation">
+          <div class="qr-cap">docs</div>
+        </div>
+        <div class="qr-cell">
+          <img src="assets/qr-genai-integrations.png" alt="QR code to the GenAI integrations guide">
+          <div class="qr-cap">genai sdk</div>
+        </div>
+        <div class="qr-cell">
+          <img src="assets/qr-stack-platform.png" alt="QR code to the OpenSearch Observability Stack page">
+          <div class="qr-cap">the stack</div>
+        </div>
+        <div class="qr-cell">
+          <img src="assets/qr-slack-tag.png" alt="QR code to the OpenSearch Slack">
+          <div class="qr-cap">community</div>
+        </div>
+      </div>
+      <div class="booth">
+        <div class="b-mark">meet us</div>
+        <div class="b-line">The OpenSearch booth, KubeCon expo hall.</div>
+        <div class="b-sub">bring a promql query &middot; an agent that misbehaves &middot; a pull request</div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    controls: true,
+    progress: true,
+    slideNumber: 'c/t',
+    history: true,
+    transition: 'fade',
+    transitionSpeed: 'default',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 860,
+    margin: 0.05,
+    minScale: 0.5,
+    maxScale: 2.5,
+  });
+
+  function updateWatermark() {
+    var current = Reveal.getCurrentSlide();
+    if (!current) return;
+    var hide = current.classList.contains('cover');
+    document.body.classList.toggle('hide-watermark', hide);
+    document.body.classList.toggle('show-event', hide || current.classList.contains('closing'));
+  }
+  Reveal.on('ready', updateWatermark);
+  Reveal.on('slidechanged', updateWatermark);
+</script>
+</body>
+</html>
