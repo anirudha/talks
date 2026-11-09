@@ -370,8 +370,19 @@
     gap: 2.4em; align-items: center;
   }
   .reveal section.closing {
-    display: flex !important; flex-direction: column; justify-content: center;
-    height: 100%;
+    display: flex !important; flex-direction: column; justify-content: flex-start;
+    height: 100%; padding-top: 0.6em !important;
+  }
+  .thanks {
+    margin-top: 1.3em; text-align: center;
+  }
+  .thanks .t-line {
+    font-size: 1.75em; font-weight: 800; color: var(--os-navy);
+    letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .thanks .t-names {
+    margin-top: 0.4em; color: var(--os-blue-deep);
+    font-size: 0.78em; font-weight: 700; letter-spacing: 0.02em;
   }
   .qr-solo { margin: 0 auto; }
   .qr-solo img {
@@ -696,6 +707,10 @@
           <img src="assets/qr-stack-platform.png" alt="QR code to the OpenSearch Observability Stack">
           <div class="qr-url">opensearch.org/platform/<br>observability-stack</div>
         </div>
+      </div>
+      <div class="thanks">
+        <div class="t-line">Thank you</div>
+        <div class="t-names">Dotan Horovits &nbsp;&middot;&nbsp; Anirudha Jadhav</div>
       </div>
     </section>
 
