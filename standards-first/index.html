@@ -310,19 +310,25 @@
   }
 
   /* Three product shots on one slide, no captions */
+  /* image-only slides: no headline, shots sized to the whole frame */
+  .reveal section.full-bleed {
+    padding: 0 !important; height: 100%;
+    display: flex !important; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
   .trio {
     display: flex; flex-direction: column; align-items: center;
-    gap: 0.45em; margin: 0.5em auto 0 auto; width: 96%;
+    justify-content: center; gap: 8px; margin: 0 auto; width: 100%;
   }
-  .trio-row { display: flex; justify-content: center; gap: 0.6em; width: 100%; }
+  .trio-row { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; }
   .trio img {
     border-radius: 9px; border: 1px solid var(--os-card-line);
     box-shadow: 0 12px 34px rgba(10, 31, 68, 0.24);
     object-fit: contain; width: auto; height: auto;
   }
-  .trio img.wide { max-width: 100%; max-height: 372px; }
-  .trio img.half { max-width: calc(50% - 0.25em); max-height: 292px; }
-  .trio img.stacked { max-width: 100%; max-height: 338px; }
+  .trio img.wide { max-width: 100%; max-height: 462px; }
+  .trio img.half { max-width: calc(50% - 4px); max-height: 318px; }
+  .trio img.stacked { max-width: 100%; max-height: 395px; }
 
   /* Full-bleed product screenshot: headline, shot, one caption */
   .full-shot {
@@ -582,8 +588,7 @@
     </section>
 
     <!-- ============ 05 · IT CAME TOGETHER ============ -->
-    <section>
-      <h2 style="font-size:1.25em; margin-bottom:0;">It all comes <em>together</em>.</h2>
+    <section class="full-bleed">
       <div class="trio">
         <div class="trio-row">
           <img class="wide" src="assets/shot-service-dashboard.png" alt="Service telemetry dashboard with request rate, instrumentation SDK mix, log volume and resource metrics">
@@ -638,8 +643,7 @@
     </section>
 
     <!-- ============ 07 · AGENT TRACES ============ -->
-    <section>
-      <h2 style="font-size:1.25em; margin-bottom:0;">Every hop. Every <em>token</em>.</h2>
+    <section class="full-bleed">
       <div class="trio">
         <div class="trio-row">
           <img class="stacked" src="assets/shot-agent-traces-list.png" alt="Agent Traces list with total traces, spans, tokens and latency percentiles, and gen_ai faceted fields">
@@ -661,7 +665,6 @@
       <div class="booth">
         <div class="b-mark">meet us</div>
         <div class="b-line">The OpenSearch booth, KubeCon expo hall.</div>
-        <div class="b-sub">bring a promql query &middot; an agent that misbehaves &middot; a pull request</div>
       </div>
     </section>
 
@@ -681,7 +684,7 @@
     backgroundTransition: 'fade',
     width: 1280,
     height: 860,
-    margin: 0.05,
+    margin: 0.03,
     minScale: 0.5,
     maxScale: 2.5,
   });
