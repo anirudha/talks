@@ -162,6 +162,13 @@
     font-size: 1.3em; font-weight: 800; flex: 0 0 30px;
   }
   .flow.even { align-items: stretch; }
+  /* equal tiles: titles get two lines of room so every sub-label lines up */
+  .flow.even .flow-node { justify-content: flex-start; }
+  .flow.even .fn-name {
+    font-size: 0.6em; min-height: 2.4em;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .flow.even .fn-sub { margin-top: 0; }
   .flow-stack { display: flex; flex-direction: column; gap: 0.4em; flex: 1.4 1 0; min-width: 0; }
   /* what each store actually gives you, inside the node */
   /* one capability per line, so the node reads as a list and not a paragraph */
@@ -576,7 +583,7 @@
 
     <!-- ============ 05 · IT CAME TOGETHER ============ -->
     <section>
-      <h2 style="font-size:1.6em; margin-bottom:0.05em;">It all comes <em>together</em>.</h2>
+      <h2 style="font-size:1.25em; margin-bottom:0;">It all comes <em>together</em>.</h2>
       <div class="trio">
         <div class="trio-row">
           <img class="wide" src="assets/shot-service-dashboard.png" alt="Service telemetry dashboard with request rate, instrumentation SDK mix, log volume and resource metrics">
@@ -591,7 +598,7 @@
     <!-- ============ 06 · GENAI 1 · NORMALIZER ============ -->
     <section>
       <div class="eyebrow">GenAI telemetry</div>
-      <h2>Ten vocabularies. <em>One normalizer.</em></h2>
+      <h2>Many standards. <em>One normalizer.</em></h2>
       <div class="chips">
         <span class="chip violet">Strands</span>
         <span class="chip violet">LangGraph</span>
@@ -625,15 +632,15 @@
         Normalization belongs in the pipeline, <strong>not in the store</strong>.
       </div>
       <div class="src-notes">
-        <a class="src-link" href="https://explorer.opentelemetry.io/collector/components/contrib/genainormalizerprocessor" target="_blank" rel="noopener"><span class="sl-tag">processor</span>explorer.opentelemetry.io/collector/components/contrib/genainormalizerprocessor</a>
-        <a class="src-link" href="https://observability.opensearch.org/docs/send-data/ai-agents/integrations/" target="_blank" rel="noopener"><span class="sl-tag">sdk</span>pip install "opensearch-genai-observability-sdk-py[all]" &middot; observability.opensearch.org/docs/send-data/ai-agents/integrations/</a>
+        <a class="src-link" href="https://explorer.opentelemetry.io/collector/components/contrib/genainormalizerprocessor" target="_blank" rel="noopener"><span class="sl-tag">normalizer</span>explorer.opentelemetry.io/collector/components/contrib/genainormalizerprocessor</a>
+        <a class="src-link" href="https://observability.opensearch.org/docs/send-data/ai-agents/integrations/" target="_blank" rel="noopener"><span class="sl-tag">ai agents</span>observability.opensearch.org/docs/send-data/ai-agents/integrations/</a>
       </div>
     </section>
 
     <!-- ============ 07 · AGENT TRACES ============ -->
     <section>
-      <h2 style="font-size:1.55em; margin-bottom:0.02em;">Every hop. Every <em>token</em>.</h2>
-      <div class="trio" style="gap:0.3em; margin-top:0.35em;">
+      <h2 style="font-size:1.25em; margin-bottom:0;">Every hop. Every <em>token</em>.</h2>
+      <div class="trio">
         <div class="trio-row">
           <img class="stacked" src="assets/shot-agent-traces-list.png" alt="Agent Traces list with total traces, spans, tokens and latency percentiles, and gen_ai faceted fields">
         </div>
