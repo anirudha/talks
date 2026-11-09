@@ -27,21 +27,14 @@ Live demo goes wherever you want it; slides 5 and 7 double as the fallback if th
 
 Running long: compress slide 2 to the first three rows. Protect 3, 4, 5 and 7.
 
-## QR codes
+## The one QR code
 
-Generated for this deck, each encoding exactly:
+`assets/qr-stack-platform.png` encodes https://opensearch.org/platform/observability-stack/ and
+nothing else is on the slide. The other links live in the slide-6 footer: the upstream
+genainormalizerprocessor page and the GenAI SDK integrations docs.
 
-| Asset | URL |
-|---|---|
-| `qr-playground.png` | https://observability.playground.opensearch.org |
-| `qr-stack-docs.png` | https://observability.opensearch.org/docs/ |
-| `qr-genai-integrations.png` | https://observability.opensearch.org/docs/send-data/ai-agents/integrations/ |
-| `qr-stack-platform.png` | https://opensearch.org/platform/observability-stack/ |
-| `qr-slack-tag.png` | https://opensearch.org/slack |
-| `qr-eval-integrations.png` | eval-library integrations page (spare, not on a slide) |
-| `qr-deck.png` | this deck (spare, for the booth) |
-
-Slide 8 ends on an orange booth band: "The OpenSearch booth, KubeCon expo hall." No booth number in it. Add one if you have it.
+Slide 8 ends on an orange booth band: "The OpenSearch booth, KubeCon expo hall." No booth number
+in it. Add one if you have it.
 
 ## Live demo checklist
 

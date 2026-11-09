@@ -333,18 +333,18 @@
   }
 
   /* QR grid + booth */
-  .qr-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1em; margin: 0.9em auto 0 auto; max-width: 94%; }
-  .qr-cell img {
-    width: 100%; max-width: 152px; background: #fff;
-    padding: 10px; border-radius: 12px;
-    box-shadow: 0 8px 26px rgba(10, 31, 68, 0.18);
+  .qr-solo { margin: 1em auto 0 auto; }
+  .qr-solo img {
+    width: 258px; background: #fff;
+    padding: 13px; border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(10, 31, 68, 0.22);
     display: block; margin: 0 auto 0.5em auto;
   }
-  .qr-cell .qr-cap {
-    color: var(--os-navy);
+  .qr-solo .qr-url {
+    color: var(--os-blue-deep);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.46em; font-weight: 800;
-    letter-spacing: 0.14em; text-transform: uppercase;
+    font-size: 0.5em; font-weight: 800;
+    letter-spacing: 0.08em;
   }
   .booth {
     margin: 1.1em auto 0 auto; max-width: 86%;
@@ -632,27 +632,9 @@
     <section class="closing">
       <div class="eyebrow">Learn more</div>
       <h2 style="font-size:1.8em;">Run it. Then come <em>build with us</em>.</h2>
-      <div class="qr-grid">
-        <div class="qr-cell">
-          <img src="assets/qr-playground.png" alt="QR code to the live playground">
-          <div class="qr-cap">playground</div>
-        </div>
-        <div class="qr-cell">
-          <img src="assets/qr-stack-docs.png" alt="QR code to the documentation">
-          <div class="qr-cap">docs</div>
-        </div>
-        <div class="qr-cell">
-          <img src="assets/qr-genai-integrations.png" alt="QR code to the GenAI integrations guide">
-          <div class="qr-cap">genai sdk</div>
-        </div>
-        <div class="qr-cell">
-          <img src="assets/qr-stack-platform.png" alt="QR code to the OpenSearch Observability Stack page">
-          <div class="qr-cap">the stack</div>
-        </div>
-        <div class="qr-cell">
-          <img src="assets/qr-slack-tag.png" alt="QR code to the OpenSearch Slack">
-          <div class="qr-cap">community</div>
-        </div>
+      <div class="qr-solo">
+        <img src="assets/qr-stack-platform.png" alt="QR code to the OpenSearch Observability Stack">
+        <div class="qr-url">opensearch.org/platform/observability-stack</div>
       </div>
       <div class="booth">
         <div class="b-mark">meet us</div>
