@@ -318,17 +318,17 @@
   }
   .trio {
     display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 8px; margin: 0 auto; width: 100%;
+    justify-content: center; gap: 3px; margin: 0 auto; width: 100%;
   }
-  .trio-row { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; }
+  .trio-row { display: flex; justify-content: center; align-items: center; gap: 4px; width: 100%; }
   .trio img {
     border-radius: 9px; border: 1px solid var(--os-card-line);
     box-shadow: 0 12px 34px rgba(10, 31, 68, 0.24);
     object-fit: contain; width: auto; height: auto;
   }
-  .trio img.wide { max-width: 100%; max-height: 462px; }
-  .trio img.half { max-width: calc(50% - 4px); max-height: 318px; }
-  .trio img.stacked { max-width: 100%; max-height: 395px; }
+  .trio img.wide { max-width: 100%; max-height: 470px; }
+  .trio img.half { max-width: calc(50% - 2px); max-height: 324px; }
+  .trio img.stacked { max-width: 100%; max-height: 400px; }
 
   /* Full-bleed product screenshot: headline, shot, one caption */
   .full-shot {
@@ -357,9 +357,13 @@
   }
 
   /* QR grid + booth */
-  .qr-solo { margin: 1em auto 0 auto; }
+  .close-grid {
+    display: grid; grid-template-columns: 1.3fr 0.85fr;
+    gap: 2.2em; align-items: center; margin-top: 1.1em;
+  }
+  .qr-solo { margin: 0 auto; }
   .qr-solo img {
-    width: 258px; background: #fff;
+    width: 270px; background: #fff;
     padding: 13px; border-radius: 14px;
     box-shadow: 0 10px 30px rgba(10, 31, 68, 0.22);
     display: block; margin: 0 auto 0.5em auto;
@@ -371,21 +375,25 @@
     letter-spacing: 0.08em;
   }
   .booth {
-    margin: 1.1em auto 0 auto; max-width: 86%;
-    background: var(--prom-orange); color: #fff;
-    border-radius: 14px; padding: 0.7em 1.1em;
-    box-shadow: 0 10px 28px rgba(230, 82, 44, 0.35);
+    background: var(--prom-orange); color: #fff; text-align: left;
+    border-radius: 18px; padding: 1.1em 1.3em;
+    box-shadow: 0 12px 32px rgba(230, 82, 44, 0.38);
   }
   .booth .b-mark {
     display: block;
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.5em; font-weight: 800;
-    letter-spacing: 0.3em; text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.85); margin-bottom: 0.15em;
+    font-size: 0.62em; font-weight: 800;
+    letter-spacing: 0.26em; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9); margin-bottom: 0.3em;
   }
   .booth .b-line {
-    font-size: 1.05em; font-weight: 800; line-height: 1.15;
-    letter-spacing: -0.01em; color: #fff;
+    font-size: 1.5em; font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.02em; color: #fff;
+  }
+  .booth .b-booth {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72em; font-weight: 800; color: #fff;
+    margin-top: 0.35em; letter-spacing: 0.04em;
   }
   .booth .b-sub {
     font-family: "JetBrains Mono", monospace;
@@ -657,14 +665,17 @@
     <!-- ============ 08 · LEARN MORE ============ -->
     <section class="closing">
       <div class="eyebrow">Learn more</div>
-      <h2 style="font-size:1.8em;">Run it. Then come <em>build with us</em>.</h2>
-      <div class="qr-solo">
-        <img src="assets/qr-stack-platform.png" alt="QR code to the OpenSearch Observability Stack">
-        <div class="qr-url">opensearch.org/platform/observability-stack</div>
-      </div>
-      <div class="booth">
-        <div class="b-mark">meet us</div>
-        <div class="b-line">The OpenSearch booth, KubeCon expo hall.</div>
+      <h2 style="font-size:1.85em;">Run it! <em>Come build with us.</em></h2>
+      <div class="close-grid">
+        <div class="booth">
+          <div class="b-mark">find us</div>
+          <div class="b-line">OpenSearch booth</div>
+          <div class="b-booth">KubeCon expo hall &middot; #180</div>
+        </div>
+        <div class="qr-solo">
+          <img src="assets/qr-stack-platform.png" alt="QR code to the OpenSearch Observability Stack">
+          <div class="qr-url">opensearch.org/platform/<br>observability-stack</div>
+        </div>
       </div>
     </section>
 
